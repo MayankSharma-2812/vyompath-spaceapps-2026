@@ -1168,22 +1168,73 @@ function Dashboard() {
             style={{
               padding: '12px 18px',
               borderRadius: '8px',
-              background: 'rgba(245, 158, 11, 0.08)',
-              border: '1px solid rgba(245, 158, 11, 0.3)',
-              color: '#fbbf24',
+              background: '#fffbeb',
+              border: '1px solid #fde68a',
+              borderLeft: '5px solid #d97706',
+              boxShadow: '0 1px 3px rgba(180, 83, 9, 0.08)',
               display: 'flex',
               alignItems: 'center',
-              gap: '14px',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '12px',
             }}
           >
-            <div style={{ flexShrink: 0, fontSize: '20px' }}>⚠️</div>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: '13px', letterSpacing: '0.04em', textTransform: 'uppercase', color: '#f59e0b' }}>
-                DEMONSTRATION MODE — SYNTHETIC TERRAIN DATA
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div
+                style={{
+                  flexShrink: 0,
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  background: '#fef3c7',
+                  border: '1px solid #fcd34d',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '16px',
+                }}
+              >
+                ⚠️
               </div>
-              <p style={{ margin: '3px 0 0 0', fontSize: '12px', lineHeight: '1.4', color: '#cbd5e1' }}>
-                Elevation and slope values shown are generated synthetic examples. They are not measurements from real Martian terrain and must not be used for mission planning.
-              </p>
+              <div>
+                <div
+                  style={{
+                    fontWeight: 750,
+                    fontSize: '12.5px',
+                    letterSpacing: '0.04em',
+                    textTransform: 'uppercase',
+                    color: '#92400e',
+                  }}
+                >
+                  DEMONSTRATION MODE — SYNTHETIC TERRAIN DATA
+                </div>
+                <p
+                  style={{
+                    margin: '3px 0 0 0',
+                    fontSize: '12px',
+                    lineHeight: '1.45',
+                    color: '#78350f',
+                    fontWeight: 500,
+                  }}
+                >
+                  Elevation and slope values shown are generated synthetic examples. They are not measurements from real Martian terrain and must not be used for mission planning.
+                </p>
+              </div>
+            </div>
+            <div
+              style={{
+                fontSize: '11px',
+                fontWeight: 700,
+                color: '#92400e',
+                background: '#fef3c7',
+                padding: '4px 10px',
+                borderRadius: '12px',
+                border: '1px solid #fcd34d',
+                letterSpacing: '0.02em',
+                textTransform: 'uppercase',
+              }}
+            >
+              Synthetic Fallback
             </div>
           </aside>
         ) : (
@@ -1192,11 +1243,12 @@ function Dashboard() {
             role="status"
             aria-label="Real DTM active notice"
             style={{
-              padding: '10px 18px',
+              padding: '12px 18px',
               borderRadius: '8px',
-              background: 'rgba(16, 185, 129, 0.08)',
-              border: '1px solid rgba(16, 185, 129, 0.3)',
-              color: '#34d399',
+              background: '#ecfdf5',
+              border: '1px solid #a7f3d0',
+              borderLeft: '5px solid #10b981',
+              boxShadow: '0 1px 3px rgba(16, 185, 129, 0.08)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -1204,19 +1256,63 @@ function Dashboard() {
               gap: '12px',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{ flexShrink: 0, fontSize: '16px' }}>🛰️</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div
+                style={{
+                  flexShrink: 0,
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  background: '#d1fae5',
+                  border: '1px solid #6ee7b7',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '16px',
+                }}
+              >
+                🛰️
+              </div>
               <div>
-                <span style={{ fontWeight: 700, fontSize: '12px', letterSpacing: '0.04em', textTransform: 'uppercase', color: '#10b981' }}>
-                  REAL HiRISE DTM ANALYSIS
-                </span>
-                <span style={{ marginLeft: '8px', fontSize: '12px', color: '#94a3b8' }}>
-                  Jezero Crater 1.0 m/px Stereo Elevation Engine Active
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                  <span
+                    style={{
+                      fontWeight: 750,
+                      fontSize: '12.5px',
+                      letterSpacing: '0.04em',
+                      textTransform: 'uppercase',
+                      color: '#065f46',
+                    }}
+                  >
+                    REAL HiRISE DTM ANALYSIS
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '12px',
+                      color: '#047857',
+                      fontWeight: 500,
+                    }}
+                  >
+                    Jezero Crater 1.0 m/px Stereo Elevation Engine Active
+                  </span>
+                </div>
               </div>
             </div>
             {analysis && (
-              <div style={{ fontSize: '11px', color: '#cbd5e1', display: 'flex', gap: '12px', fontFamily: 'monospace' }}>
+              <div
+                style={{
+                  fontSize: '11px',
+                  color: '#065f46',
+                  display: 'flex',
+                  gap: '14px',
+                  fontFamily: 'monospace',
+                  fontWeight: 600,
+                  background: '#d1fae5',
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  border: '1px solid #a7f3d0',
+                }}
+              >
                 <span>DTM: {analysis.dtm_source}</span>
                 {analysis.dtm_posting_m && <span>Posting: {analysis.dtm_posting_m.toFixed(2)} m/px</span>}
                 <span>Coverage: {analysis.coverage_status.toUpperCase()}</span>
