@@ -1,0 +1,61 @@
+{
+  "document_title": "Golden Reference Fixtures for VyomPath Science POI Corridor Buffering",
+  "dataset_version": "vyompath-demo-bundle-v1.4",
+  "mars_radius_m": 3396190.0,
+  "corridor_tests": [
+    {
+      "test_id": "demo_route_sol_corridor_100m_10m",
+      "description": "100m search corridor around Sol 386/387 transit traverse (56 points, 10m spacing)",
+      "buffer_distance_m": 100.0,
+      "route_fixture_path": "tests/fixtures/validation/demo_route_sol_corridor_100m_10m.json",
+      "expected_pois": [
+        {
+          "id": "POI-M20-SOL-386",
+          "name": "Perseverance position, sol 386",
+          "cross_track_m": 11.20,
+          "along_route_m": 169.28
+        },
+        {
+          "id": "POI-M20-SOL-387",
+          "name": "Perseverance position, sol 387",
+          "cross_track_m": 63.38,
+          "along_route_m": 398.65
+        }
+      ]
+    },
+    {
+      "test_id": "demo_route_sol_corridor_302m_boundary_250m",
+      "description": "250m buffer boundary test on 302m route: Sol 386 is exactly on the 250m boundary, Sol 387 is outside (302m)",
+      "buffer_distance_m": 250.0,
+      "route_fixture_path": "tests/fixtures/validation/demo_route_sol_corridor_302m_10m.json",
+      "expected_pois": [
+        {
+          "id": "POI-M20-SOL-386",
+          "name": "Perseverance position, sol 386",
+          "cross_track_m": 250.00,
+          "along_route_m": 206.92
+        }
+      ]
+    },
+    {
+      "test_id": "demo_route_sol_corridor_302m_full_350m",
+      "description": "350m buffer corridor capturing both Sol 386 and Sol 387",
+      "buffer_distance_m": 350.0,
+      "route_fixture_path": "tests/fixtures/validation/demo_route_sol_corridor_302m_10m.json",
+      "expected_pois": [
+        {
+          "id": "POI-M20-SOL-386",
+          "name": "Perseverance position, sol 386",
+          "cross_track_m": 250.00,
+          "along_route_m": 206.92
+        },
+        {
+          "id": "POI-M20-SOL-387",
+          "name": "Perseverance position, sol 387",
+          "cross_track_m": 302.18,
+          "along_route_m": 436.45
+        }
+      ]
+    }
+  ]
+}

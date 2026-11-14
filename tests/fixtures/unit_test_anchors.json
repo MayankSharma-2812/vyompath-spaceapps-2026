@@ -1,0 +1,71 @@
+{
+  "document_title": "VyomPath Phase 5 Unit-Test Anchors & Geodetic Coordinate Mapping",
+  "gdal_anchor_queries": [
+    {
+      "poi_id": "POI-M20-SOL-386",
+      "name": "Perseverance position, sol 386",
+      "sol": 386,
+      "query_coords": [
+        77.46313311,
+        18.4607914
+      ],
+      "command": "E:\\DATASETS\\gdal_env\\Library\\bin\\gdallocationinfo.exe -l_srs +proj=longlat +a=3394839.8133163 +b=3394839.8133163 +no_defs E:\\DATASETS\\_phase2\\jezero_aoi_v2.tif 77.46313311 18.4607914",
+      "returncode": 0,
+      "raw_stdout": "Report:\n  Location: (1360P,2157L)\n  Band 1:\n    Value: -2568.87329101562\n",
+      "raw_stderr": ""
+    },
+    {
+      "poi_id": "POI-M20-SOL-387",
+      "name": "Perseverance position, sol 387",
+      "sol": 387,
+      "query_coords": [
+        77.46157944,
+        18.46447597
+      ],
+      "command": "E:\\DATASETS\\gdal_env\\Library\\bin\\gdallocationinfo.exe -l_srs +proj=longlat +a=3394839.8133163 +b=3394839.8133163 +no_defs E:\\DATASETS\\_phase2\\jezero_aoi_v2.tif 77.46157944 18.46447597",
+      "returncode": 0,
+      "raw_stdout": "Report:\n  Location: (1272P,1940L)\n  Band 1:\n    Value: -2568.58251953125\n",
+      "raw_stderr": ""
+    }
+  ],
+  "offset_geodetic_analysis": {
+    "test_point": {
+      "id": "POI-M20-SOL-386",
+      "name": "Perseverance position, sol 386",
+      "coordinates": [
+        77.46313311,
+        18.4607914
+      ]
+    },
+    "raster_parameters": {
+      "file": "jezero_aoi_v2.tif",
+      "dx_m_per_pixel": 1.0096633268711,
+      "dy_m_per_pixel": 1.0096633268711,
+      "origin_x": -5200.7757967131365,
+      "origin_y": 1096000.6476152753
+    },
+    "exact_pyproj_projection": {
+      "x_proj_m": -3826.9392,
+      "y_proj_m": 1093822.794,
+      "col": 1360,
+      "row": 2157
+    },
+    "naive_wire_sphere_projection": {
+      "x_naive_m": -3828.4612,
+      "y_naive_m": 1094257.8263,
+      "col": 1359,
+      "row": 1726
+    },
+    "offset_metrics": {
+      "northing_offset_dy_m": 435.032,
+      "easting_offset_dx_m": -1.522,
+      "total_ground_offset_m": 435.035,
+      "column_shift_pixels": -1,
+      "row_shift_pixels": -431,
+      "total_pixel_shift": 431.0,
+      "formula_ratio_derivation": "dy_offset = y_proj * (R_wire - R_pds) / R_pds = 1093822.79 * 1350.1867 / 3394839.81 = 435.032 m",
+      "consequence_for_app": "Naive unprojection shifts the query coordinate North by ~432 pixels (436.44 m), completely missing local crater and scarp features and sampling wrong elevation pixels."
+    }
+  },
+  "reference_python_code": "import math\nimport rasterio\nimport pyproj\n\ndef lonlat_to_pixel(lon: float, lat: float, raster_path: str):\n    \"\"\"\n    Converts Mars 2000 planetocentric (lon, lat) degrees into exact pixel (col, row)\n    coordinates and samples elevation from a Mars projected raster (e.g. jezero_aoi_v2.tif).\n    \n    Handles the standard parallel (15 deg N) and central meridian (77.53 deg E) \n    Equirectangular projection on the PDS Mars local radius sphere (R = 3,394,839.8133 m).\n    \"\"\"\n    with rasterio.open(raster_path) as src:\n        # Source CRS: Wire format (Mars 2000 Sphere, R = 3,396,190.0 m)\n        crs_wire = pyproj.CRS.from_proj4(\"+proj=longlat +R=3396190 +no_defs\")\n        \n        # Target CRS: Raster native projected CRS\n        crs_raster = pyproj.CRS.from_wkt(src.crs.to_wkt())\n        \n        # Transformer: always_xy=True ensures (lon, lat) -> (easting, northing)\n        transformer = pyproj.Transformer.from_crs(crs_wire, crs_raster, always_xy=True)\n        x_proj, y_proj = transformer.transform(lon, lat)\n        \n        # Affine transform to pixel (col, row)\n        gt = src.transform\n        col = int(math.floor((x_proj - gt.c) / gt.a))\n        row = int(math.floor((y_proj - gt.f) / gt.e))\n        \n        # Bounds check & read elevation\n        if 0 <= col < src.width and 0 <= row < src.height:\n            # Direct window read for extreme efficiency\n            val = src.read(1, window=((row, row + 1), (col, col + 1)))[0, 0]\n            if val != src.nodata and val > -10000:\n                return {\n                    \"pixel\": (col, row),\n                    \"projected_coords_m\": (x_proj, y_proj),\n                    \"elevation_m\": float(val),\n                    \"status\": \"ok\"\n                }\n        return {\n            \"pixel\": (col, row),\n            \"projected_coords_m\": (x_proj, y_proj),\n            \"elevation_m\": None,\n            \"status\": \"dtm_nodata\"\n        }"
+}

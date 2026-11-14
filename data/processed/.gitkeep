@@ -1,0 +1,2 @@
+# Empty placeholder to preserve data/processed/ directory structure.
+# Processed raster tiles and cached terrain matrices are excluded via .gitignore.

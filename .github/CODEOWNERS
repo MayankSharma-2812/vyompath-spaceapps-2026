@@ -1,0 +1,9 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# VyomPath Code Owners
+# ─────────────────────────────────────────────────────────────────────────────
+# Every file in this repository requires review and approval from Mayank Sharma
+# (NAKSHATRA X Backend & Cloud Systems Lead / Repository Maintainer).
+# No code can be merged without maintainer review.
+# ─────────────────────────────────────────────────────────────────────────────
+
+* @MayankSharma-2812

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# VyomPath Pre-Commit Hook — Prevent Decision File Commits
+# To enable this hook locally, run:
+#   git config core.hooksPath .githooks
+
+echo "Running VyomPath pre-commit privacy check..."
+
+STAGED_DECISION_FILES=$(git diff --cached --name-only | grep -iE '.*decision.*\.md$' || true)
+
+if [ -n "$STAGED_DECISION_FILES" ]; then
+  echo "❌ PRE-COMMIT ERROR: Attempting to commit private decision files!"
+  echo "------------------------------------------------------------"
+  echo "Found staged files:"
+  echo "$STAGED_DECISION_FILES"
+  echo "------------------------------------------------------------"
+  echo "POLICY: Decision logs are local-only and must NEVER be committed to Git."
+  echo "Please unstage them with 'git restore --staged <file>'."
+  exit 1
+fi
+
+echo "✓ Privacy check passed: no decision files staged."
+exit 0

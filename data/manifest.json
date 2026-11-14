@@ -1,0 +1,388 @@
+{
+  "manifest_version": "2.4.0",
+  "last_updated": "2026-10-23",
+  "project": "VyomPath - Mars Route Exploration Platform",
+  "team": "NAKSHATRA X (NASA Space Apps Jaipur 2026)",
+  "data_lead": "Shyam Sharma",
+  "coordinate_contracts": {
+    "wire_format": "Mars 2000 Planetocentric Degrees [longitude, latitude], East-positive [-180, 180)",
+    "sphere_model": "IAU 2000 Mars Sphere (radius R = 3,396,190.0 m)",
+    "dtm_native_ellipsoid": "PDS Mars Local Radius Sphere (radius R = 3,394,839.81331634 m)",
+    "dtm_central_meridian": 77.53,
+    "standard_parallel_lat_ts": 15.0,
+    "exact_wmts_srs": "urn:ogc:def:crs:EPSG::104905"
+  },
+  "datasets": {
+    "primary_demo_dtm": {
+      "id": "jezero_aoi_v2",
+      "file": "E:\\DATASETS\\_phase2\\jezero_aoi_v2.tif",
+      "source_product": "HiRISE Stereo DTM DTEEC_023524_1985_023379_1985_U01",
+      "role": "PRIMARY DEMO AOI (100% HiRISE Pure)",
+      "data_type": "Float32",
+      "dimensions_pixels": [
+        9014,
+        10896
+      ],
+      "posting_m": 1.00966,
+      "size_mb": 125.85,
+      "size_mib": 120.02,
+      "geographic_extent_lonlat": [
+        77.43914205471984,
+        18.31188633049717,
+        77.59814920747243,
+        18.49753679099069
+      ],
+      "valid_fraction": 0.6316387898967408,
+      "nodata_value": -3.4028226550889045e+38,
+      "central_meridian_deg": 77.53,
+      "standard_parallel_deg": 15.0
+    },
+    "offline_jezero_basemap_tiles": {
+      "id": "tiles_jezero_basemap",
+      "directory": "tiles/jezero-aoi-v2-1/basemap",
+      "role": "Jezero basemap",
+      "format": "image/png (RGBA)",
+      "tile_scheme": "XYZ Equirectangular Martian projection (R=3,396,190.0 m, origin at (-pi*R, 0.5*pi*R), 256x256 px, span = (pi*R)/2^z)",
+      "zoom_range": [
+        12,
+        15
+      ],
+      "tile_count": 930,
+      "bytes": 14741097,
+      "mib": 14.0582
+    },
+    "offline_jezero_hillshade_tiles": {
+      "id": "tiles_jezero_hillshade",
+      "directory": "tiles/jezero-aoi-v2-1/hillshade",
+      "role": "Jezero hillshade",
+      "format": "image/png (LA)",
+      "tile_scheme": "XYZ Equirectangular Martian projection (R=3,396,190.0 m, origin at (-pi*R, 0.5*pi*R), 256x256 px, span = (pi*R)/2^z)",
+      "zoom_range": [
+        12,
+        15
+      ],
+      "tile_count": 930,
+      "bytes": 35628509,
+      "mib": 33.978
+    },
+    "offline_syrtis_basemap_tiles": {
+      "id": "tiles_syrtis_basemap",
+      "directory": "tiles/syrtis-1/basemap",
+      "role": "Syrtis basemap",
+      "format": "image/png (RGBA)",
+      "tile_scheme": "XYZ Equirectangular Martian projection (R=3,396,190.0 m, origin at (-pi*R, 0.5*pi*R), 256x256 px, span = (pi*R)/2^z)",
+      "zoom_range": [
+        12,
+        14
+      ],
+      "tile_count": 260,
+      "bytes": 4051006,
+      "mib": 3.8633
+    },
+    "offline_syrtis_hillshade_tiles": {
+      "id": "tiles_syrtis_hillshade",
+      "directory": "tiles/syrtis-1/hillshade",
+      "role": "Syrtis hillshade",
+      "format": "image/png (LA)",
+      "tile_scheme": "XYZ Equirectangular Martian projection (R=3,396,190.0 m, origin at (-pi*R, 0.5*pi*R), 256x256 px, span = (pi*R)/2^z)",
+      "zoom_range": [
+        12,
+        14
+      ],
+      "tile_count": 260,
+      "bytes": 9632801,
+      "mib": 9.1866
+    }
+  },
+  "science_points_of_interest": {
+    "strictly_sourced_pois_file": "poi_strictly_sourced.json",
+    "poi_count": 5,
+    "source_dataset": "NASA MMGIS Mars 2020 Waypoints Layer (M20_waypoints.json)",
+    "source_url": "https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json",
+    "fetch_timestamp": null,
+    "terms_of_use": null,
+    "points": [
+      {
+        "id": "POI-M20-SOL-013",
+        "name": "Perseverance position, sol 13",
+        "name_provenance": "application_derived",
+        "sol": 13,
+        "site": 3,
+        "drive": 0,
+        "lon": 77.45088572,
+        "lat": 18.44462715,
+        "elev_geoid_m": -2569.91,
+        "dist_total_m": 0.0,
+        "source": "NASA MMGIS Mars 2020 Waypoints Layer",
+        "source_url": "https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json",
+        "source_note": "Site increment, no motion.",
+        "display_annotation": "Perseverance Site 3 increment record (dist_total_m = 0.0, drive = 0).",
+        "display_annotation_provenance": "project_authored_description",
+        "record_type": "waypoint_record",
+        "record_type_provenance": "application_derived_neutral_type (MMGIS source telemetry does not define record_type)",
+        "terms_of_use": null,
+        "source_policy_reference": null,
+        "source_policy_status": "unverified",
+        "fetch_timestamp": null,
+        "fetch_timestamp_status": "unknown",
+        "timestamp_provenance": {
+          "classification": "unknown",
+          "basis": "No independent HTTP response telemetry (server Date header, access log, or curl trace) was preserved during historical retrieval.",
+          "legacy_raw_value": "2026-10-23T15:47:34Z",
+          "inferred_utc_value": "2026-10-23T10:17:34Z"
+        },
+        "filesystem_metadata": {
+          "source_file": "E:\\DATASETS\\_phase4\\M20_waypoints.json",
+          "st_ctime_raw": 1792750653.51,
+          "st_ctime_utc": "2026-10-23T10:17:33.510000Z",
+          "st_ctime_ist": "2026-10-23 15:47:33.510000 IST",
+          "st_mtime_raw": 1792750656.0,
+          "st_mtime_utc": "2026-10-23T10:17:36.000000Z",
+          "precision": "microsecond (ctime) / second (mtime)"
+        },
+        "source_payload": {
+          "url": "https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json",
+          "sha256": "5A27BA1647F98FA374A7CFA7AC90616900A40C33010C73516E0A6F454790EE9F",
+          "size_bytes": 601446
+        },
+        "terms_of_use_status": "unverified",
+        "policy_provenance": {
+          "classification": "unverified",
+          "basis": "No dataset license terms or explicit open data grants were embedded in the raw MMGIS JSON response. Upstream NASA Open Data Policy claims remain unverified for this specific extract.",
+          "historical_unverified_claim": "NASA Open Data Policy (Public Domain / USGS PDS Release)",
+          "notice": "Historical claim recorded from legacy metadata; not verified upstream legal guidance or an established dataset license grant."
+        },
+        "note": "Perseverance Site 3 increment record (dist_total_m = 0.0, drive = 0).",
+        "note_provenance": "legacy_backward_compatibility_alias (mirrors display_annotation)"
+      },
+      {
+        "id": "POI-M20-SOL-023",
+        "name": "Perseverance position, sol 23",
+        "name_provenance": "application_derived",
+        "sol": 23,
+        "site": 3,
+        "drive": 792,
+        "lon": 77.45177711,
+        "lat": 18.44520229,
+        "elev_geoid_m": -2568.969,
+        "dist_total_m": 98.971,
+        "source": "NASA MMGIS Mars 2020 Waypoints Layer",
+        "source_url": "https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json",
+        "source_note": "End-of-drive localization",
+        "display_annotation": "End-of-drive localization (cumulative odometer 98.971 m, drive = 792).",
+        "display_annotation_provenance": "project_authored_description",
+        "record_type": "waypoint_record",
+        "record_type_provenance": "application_derived_neutral_type (MMGIS source telemetry does not define record_type)",
+        "terms_of_use": null,
+        "source_policy_reference": null,
+        "source_policy_status": "unverified",
+        "fetch_timestamp": null,
+        "fetch_timestamp_status": "unknown",
+        "timestamp_provenance": {
+          "classification": "unknown",
+          "basis": "No independent HTTP response telemetry (server Date header, access log, or curl trace) was preserved during historical retrieval.",
+          "legacy_raw_value": "2026-10-23T15:47:34Z",
+          "inferred_utc_value": "2026-10-23T10:17:34Z"
+        },
+        "filesystem_metadata": {
+          "source_file": "E:\\DATASETS\\_phase4\\M20_waypoints.json",
+          "st_ctime_raw": 1792750653.51,
+          "st_ctime_utc": "2026-10-23T10:17:33.510000Z",
+          "st_ctime_ist": "2026-10-23 15:47:33.510000 IST",
+          "st_mtime_raw": 1792750656.0,
+          "st_mtime_utc": "2026-10-23T10:17:36.000000Z",
+          "precision": "microsecond (ctime) / second (mtime)"
+        },
+        "source_payload": {
+          "url": "https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json",
+          "sha256": "5A27BA1647F98FA374A7CFA7AC90616900A40C33010C73516E0A6F454790EE9F",
+          "size_bytes": 601446
+        },
+        "terms_of_use_status": "unverified",
+        "policy_provenance": {
+          "classification": "unverified",
+          "basis": "No dataset license terms or explicit open data grants were embedded in the raw MMGIS JSON response. Upstream NASA Open Data Policy claims remain unverified for this specific extract.",
+          "historical_unverified_claim": "NASA Open Data Policy (Public Domain / USGS PDS Release)",
+          "notice": "Historical claim recorded from legacy metadata; not verified upstream legal guidance or an established dataset license grant."
+        },
+        "note": "End-of-drive localization (cumulative odometer 98.971 m, drive = 792).",
+        "note_provenance": "legacy_backward_compatibility_alias (mirrors display_annotation)"
+      },
+      {
+        "id": "POI-M20-SOL-034",
+        "name": "Perseverance position, sol 34",
+        "name_provenance": "application_derived",
+        "sol": 34,
+        "site": 3,
+        "drive": 1392,
+        "lon": 77.45102155,
+        "lat": 18.44486273,
+        "elev_geoid_m": -2569.9942,
+        "dist_total_m": 186.422,
+        "source": "NASA MMGIS Mars 2020 Waypoints Layer",
+        "source_url": "https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json",
+        "source_note": "End-of-drive localization",
+        "display_annotation": "End-of-drive localization (cumulative odometer 186.422 m, drive = 1392).",
+        "display_annotation_provenance": "project_authored_description",
+        "record_type": "waypoint_record",
+        "record_type_provenance": "application_derived_neutral_type (MMGIS source telemetry does not define record_type)",
+        "terms_of_use": null,
+        "source_policy_reference": null,
+        "source_policy_status": "unverified",
+        "fetch_timestamp": null,
+        "fetch_timestamp_status": "unknown",
+        "timestamp_provenance": {
+          "classification": "unknown",
+          "basis": "No independent HTTP response telemetry (server Date header, access log, or curl trace) was preserved during historical retrieval.",
+          "legacy_raw_value": "2026-10-23T15:47:34Z",
+          "inferred_utc_value": "2026-10-23T10:17:34Z"
+        },
+        "filesystem_metadata": {
+          "source_file": "E:\\DATASETS\\_phase4\\M20_waypoints.json",
+          "st_ctime_raw": 1792750653.51,
+          "st_ctime_utc": "2026-10-23T10:17:33.510000Z",
+          "st_ctime_ist": "2026-10-23 15:47:33.510000 IST",
+          "st_mtime_raw": 1792750656.0,
+          "st_mtime_utc": "2026-10-23T10:17:36.000000Z",
+          "precision": "microsecond (ctime) / second (mtime)"
+        },
+        "source_payload": {
+          "url": "https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json",
+          "sha256": "5A27BA1647F98FA374A7CFA7AC90616900A40C33010C73516E0A6F454790EE9F",
+          "size_bytes": 601446
+        },
+        "terms_of_use_status": "unverified",
+        "policy_provenance": {
+          "classification": "unverified",
+          "basis": "No dataset license terms or explicit open data grants were embedded in the raw MMGIS JSON response. Upstream NASA Open Data Policy claims remain unverified for this specific extract.",
+          "historical_unverified_claim": "NASA Open Data Policy (Public Domain / USGS PDS Release)",
+          "notice": "Historical claim recorded from legacy metadata; not verified upstream legal guidance or an established dataset license grant."
+        },
+        "note": "End-of-drive localization (cumulative odometer 186.422 m, drive = 1392).",
+        "note_provenance": "legacy_backward_compatibility_alias (mirrors display_annotation)"
+      },
+      {
+        "id": "POI-M20-SOL-386",
+        "name": "Perseverance position, sol 386",
+        "name_provenance": "application_derived",
+        "sol": 386,
+        "site": 14,
+        "drive": 1176,
+        "lon": 77.46313311,
+        "lat": 18.4607914,
+        "elev_geoid_m": -2567.888428,
+        "dist_total_m": 6220.802,
+        "source": "NASA MMGIS Mars 2020 Waypoints Layer",
+        "source_url": "https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json",
+        "source_note": "End-of-drive localization",
+        "display_annotation": "End-of-drive localization inside valid HiRISE stereo coverage (cumulative odometer 6220.802 m).",
+        "display_annotation_provenance": "project_authored_description",
+        "record_type": "waypoint_record",
+        "record_type_provenance": "application_derived_neutral_type (MMGIS source telemetry does not define record_type)",
+        "terms_of_use": null,
+        "source_policy_reference": null,
+        "source_policy_status": "unverified",
+        "fetch_timestamp": null,
+        "fetch_timestamp_status": "unknown",
+        "timestamp_provenance": {
+          "classification": "unknown",
+          "basis": "No independent HTTP response telemetry (server Date header, access log, or curl trace) was preserved during historical retrieval.",
+          "legacy_raw_value": "2026-10-23T15:47:34Z",
+          "inferred_utc_value": "2026-10-23T10:17:34Z"
+        },
+        "filesystem_metadata": {
+          "source_file": "E:\\DATASETS\\_phase4\\M20_waypoints.json",
+          "st_ctime_raw": 1792750653.51,
+          "st_ctime_utc": "2026-10-23T10:17:33.510000Z",
+          "st_ctime_ist": "2026-10-23 15:47:33.510000 IST",
+          "st_mtime_raw": 1792750656.0,
+          "st_mtime_utc": "2026-10-23T10:17:36.000000Z",
+          "precision": "microsecond (ctime) / second (mtime)"
+        },
+        "source_payload": {
+          "url": "https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json",
+          "sha256": "5A27BA1647F98FA374A7CFA7AC90616900A40C33010C73516E0A6F454790EE9F",
+          "size_bytes": 601446
+        },
+        "terms_of_use_status": "unverified",
+        "policy_provenance": {
+          "classification": "unverified",
+          "basis": "No dataset license terms or explicit open data grants were embedded in the raw MMGIS JSON response. Upstream NASA Open Data Policy claims remain unverified for this specific extract.",
+          "historical_unverified_claim": "NASA Open Data Policy (Public Domain / USGS PDS Release)",
+          "notice": "Historical claim recorded from legacy metadata; not verified upstream legal guidance or an established dataset license grant."
+        },
+        "note": "End-of-drive localization inside valid HiRISE stereo coverage (cumulative odometer 6220.802 m).",
+        "note_provenance": "legacy_backward_compatibility_alias (mirrors display_annotation)"
+      },
+      {
+        "id": "POI-M20-SOL-387",
+        "name": "Perseverance position, sol 387",
+        "name_provenance": "application_derived",
+        "sol": 387,
+        "site": 15,
+        "drive": 0,
+        "lon": 77.46157944,
+        "lat": 18.46447597,
+        "elev_geoid_m": -2567.741211,
+        "dist_total_m": 6480.44,
+        "source": "NASA MMGIS Mars 2020 Waypoints Layer",
+        "source_url": "https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json",
+        "source_note": "End-of-drive localization",
+        "display_annotation": "End-of-drive localization (cumulative odometer 6480.440 m).",
+        "display_annotation_provenance": "project_authored_description",
+        "record_type": "waypoint_record",
+        "record_type_provenance": "application_derived_neutral_type (MMGIS source telemetry does not define record_type)",
+        "terms_of_use": null,
+        "source_policy_reference": null,
+        "source_policy_status": "unverified",
+        "fetch_timestamp": null,
+        "fetch_timestamp_status": "unknown",
+        "timestamp_provenance": {
+          "classification": "unknown",
+          "basis": "No independent HTTP response telemetry (server Date header, access log, or curl trace) was preserved during historical retrieval.",
+          "legacy_raw_value": "2026-10-23T15:47:34Z",
+          "inferred_utc_value": "2026-10-23T10:17:34Z"
+        },
+        "filesystem_metadata": {
+          "source_file": "E:\\DATASETS\\_phase4\\M20_waypoints.json",
+          "st_ctime_raw": 1792750653.51,
+          "st_ctime_utc": "2026-10-23T10:17:33.510000Z",
+          "st_ctime_ist": "2026-10-23 15:47:33.510000 IST",
+          "st_mtime_raw": 1792750656.0,
+          "st_mtime_utc": "2026-10-23T10:17:36.000000Z",
+          "precision": "microsecond (ctime) / second (mtime)"
+        },
+        "source_payload": {
+          "url": "https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json",
+          "sha256": "5A27BA1647F98FA374A7CFA7AC90616900A40C33010C73516E0A6F454790EE9F",
+          "size_bytes": 601446
+        },
+        "terms_of_use_status": "unverified",
+        "policy_provenance": {
+          "classification": "unverified",
+          "basis": "No dataset license terms or explicit open data grants were embedded in the raw MMGIS JSON response. Upstream NASA Open Data Policy claims remain unverified for this specific extract.",
+          "historical_unverified_claim": "NASA Open Data Policy (Public Domain / USGS PDS Release)",
+          "notice": "Historical claim recorded from legacy metadata; not verified upstream legal guidance or an established dataset license grant."
+        },
+        "note": "End-of-drive localization (cumulative odometer 6480.440 m).",
+        "note_provenance": "legacy_backward_compatibility_alias (mirrors display_annotation)"
+      }
+    ],
+    "fetch_timestamp_status": "unknown",
+    "timestamp_provenance": {
+      "classification": "unknown",
+      "basis": "No independent HTTP response telemetry (server Date header, access log, or curl trace) was preserved during historical retrieval.",
+      "legacy_raw_value": "2026-10-23T15:47:34Z",
+      "inferred_utc_value": "2026-10-23T10:17:34Z"
+    },
+    "terms_of_use_status": "unverified",
+    "source_policy_reference": null,
+    "source_policy_status": "unverified",
+    "policy_provenance": {
+      "classification": "unverified",
+      "basis": "No dataset license terms or explicit open data grants were embedded in the raw MMGIS JSON response. Upstream NASA Open Data Policy claims remain unverified for this specific extract.",
+      "historical_unverified_claim": "NASA Open Data Policy / JPL Image Use Policy (Public domain, attribution to NASA/JPL-Caltech)",
+      "notice": "Historical claim recorded from legacy metadata; not verified upstream legal guidance or an established dataset license grant."
+    }
+  }
+}

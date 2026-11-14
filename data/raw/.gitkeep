@@ -1,0 +1,2 @@
+# Empty placeholder to preserve data/raw/ directory structure.
+# Large raw Martian datasets downloaded at runtime are excluded via .gitignore.

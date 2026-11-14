@@ -1,0 +1,12 @@
+# VyomPath — Martian Map Backend
+# Python >=3.12
+
+fastapi>=0.115,<1
+uvicorn[standard]>=0.30,<1
+pydantic>=2.7,<3
+pydantic-settings>=2.3,<3
+shapely>=2.0,<3
+httpx>=0.27,<1
+numpy>=1.26,<3
+pyproj>=3.6.0,<4
+rasterio>=1.3.0,<2

@@ -1,0 +1,46 @@
+# ──────────────────────────────────────────────────────
+# VyomPath .dockerignore
+# ──────────────────────────────────────────────────────
+
+# Git
+.git
+.gitignore
+
+# Python bytecode & caches
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+
+# Virtual environments
+.venv
+venv
+env
+
+# IDE / editor
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local-only files
+decision.md
+decisions.md
+DECISION.md
+DECISIONS.md
+*decision*.md
+*DECISION*.md
+
+# Docker (don't send Dockerfile into the build context)
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Frontend dependencies and compiled assets
+frontend/node_modules
+frontend/dist

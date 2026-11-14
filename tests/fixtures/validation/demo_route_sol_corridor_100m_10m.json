@@ -1,0 +1,845 @@
+{
+  "route_id": "demo_route_sol_corridor_100m_10m",
+  "route_type": "sol_corridor_100m",
+  "dem_path": "E:\\DATASETS\\_phase2\\jezero_aoi_v2.tif",
+  "source_raster_name": "jezero_aoi_v2.tif",
+  "sample_spacing_m": 10.0,
+  "total_distance_m": 540.1,
+  "status": "ok",
+  "true_max_cross_track_m": 63.38,
+  "note": "100m corridor (max cross-track 63.38m)",
+  "formulas": {
+    "haversine": "d = 2*R*atan2(sqrt(a), sqrt(1-a)), R=3396190 m",
+    "raw_gain_loss": "gain = sum(max(0, dz)), loss = sum(abs(min(0, dz)))",
+    "smoothed_gain_loss": "z_smooth[i] = (z[i-1] + z[i] + z[i+1])/3 with edge reflection",
+    "along_track_grade_50m": "grade = |z(s+50) - z(s)| / 50.0 * 100%, slope = atan(|z(s+50) - z(s)| / 50.0)",
+    "horn_5m_resampled": "Horn 8-neighbor gradient computed on 3x3 grid at 5.0 m spacing",
+    "plane_fit_50m": "Least-squares planar regression on 5x5 grid (50 m diameter)"
+  },
+  "elevation_metrics": {
+    "gain_loss_status": "ok",
+    "total_gain_raw_m": 18.048,
+    "total_loss_raw_m": 11.063,
+    "total_gain_smoothed_m": 11.165,
+    "total_loss_smoothed_m": 4.611,
+    "max_along_track_slope_50m_window_deg": 6.1,
+    "max_along_track_grade_50m_window_pct": 10.68
+  },
+  "nearby_pois": [
+    {
+      "id": "POI-M20-SOL-386",
+      "name": "Perseverance position, sol 386",
+      "sol": 386,
+      "coordinates": [
+        77.46313311,
+        18.4607914
+      ],
+      "elevation_geoid_m": -2567.888428,
+      "source": "NASA MMGIS Mars 2020 Waypoints Layer",
+      "along_route_m": 169.28,
+      "cross_track_m": -11.2,
+      "cross_track_abs_m": 11.2
+    },
+    {
+      "id": "POI-M20-SOL-387",
+      "name": "Perseverance position, sol 387",
+      "sol": 387,
+      "coordinates": [
+        77.46157944,
+        18.46447597
+      ],
+      "elevation_geoid_m": -2567.741211,
+      "source": "NASA MMGIS Mars 2020 Waypoints Layer",
+      "along_route_m": 398.65,
+      "cross_track_m": -63.38,
+      "cross_track_abs_m": 63.38
+    }
+  ],
+  "sample_points_count": 56,
+  "sample_points": [
+    {
+      "sample_index": 0,
+      "cumulative_distance_m": 0.0,
+      "coordinates": [
+        77.4638,
+        18.458
+      ],
+      "elevation_m": -2571.6079,
+      "status": "ok",
+      "horn_slope_5m_deg": 1.485,
+      "horn_aspect_5m_deg": 63.7,
+      "plane_fit_50m_slope_deg": 9.873,
+      "plane_fit_50m_aspect_deg": 52.0
+    },
+    {
+      "sample_index": 1,
+      "cumulative_distance_m": 10.0,
+      "coordinates": [
+        77.4637722,
+        18.4581666
+      ],
+      "elevation_m": -2570.3154,
+      "status": "ok",
+      "horn_slope_5m_deg": 1.402,
+      "horn_aspect_5m_deg": 8.92,
+      "plane_fit_50m_slope_deg": 9.399,
+      "plane_fit_50m_aspect_deg": 61.86
+    },
+    {
+      "sample_index": 2,
+      "cumulative_distance_m": 20.0,
+      "coordinates": [
+        77.4637445,
+        18.4583333
+      ],
+      "elevation_m": -2568.4756,
+      "status": "ok",
+      "horn_slope_5m_deg": 1.167,
+      "horn_aspect_5m_deg": 53.28,
+      "plane_fit_50m_slope_deg": 7.765,
+      "plane_fit_50m_aspect_deg": 72.79
+    },
+    {
+      "sample_index": 3,
+      "cumulative_distance_m": 30.0,
+      "coordinates": [
+        77.4637167,
+        18.4584999
+      ],
+      "elevation_m": -2566.7676,
+      "status": "ok",
+      "horn_slope_5m_deg": 1.747,
+      "horn_aspect_5m_deg": 69.92,
+      "plane_fit_50m_slope_deg": 4.337,
+      "plane_fit_50m_aspect_deg": 83.54
+    },
+    {
+      "sample_index": 4,
+      "cumulative_distance_m": 40.0,
+      "coordinates": [
+        77.4636889,
+        18.4586665
+      ],
+      "elevation_m": -2565.9783,
+      "status": "ok",
+      "horn_slope_5m_deg": 1.163,
+      "horn_aspect_5m_deg": 162.0,
+      "plane_fit_50m_slope_deg": 2.007,
+      "plane_fit_50m_aspect_deg": 125.5
+    },
+    {
+      "sample_index": 5,
+      "cumulative_distance_m": 50.0,
+      "coordinates": [
+        77.4636611,
+        18.4588332
+      ],
+      "elevation_m": -2566.8198,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.777,
+      "horn_aspect_5m_deg": 129.85,
+      "plane_fit_50m_slope_deg": 2.354,
+      "plane_fit_50m_aspect_deg": 203.87
+    },
+    {
+      "sample_index": 6,
+      "cumulative_distance_m": 60.0,
+      "coordinates": [
+        77.4636334,
+        18.4589998
+      ],
+      "elevation_m": -2567.939,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.887,
+      "horn_aspect_5m_deg": 168.21,
+      "plane_fit_50m_slope_deg": 3.431,
+      "plane_fit_50m_aspect_deg": 224.16
+    },
+    {
+      "sample_index": 7,
+      "cumulative_distance_m": 70.0,
+      "coordinates": [
+        77.4636056,
+        18.4591665
+      ],
+      "elevation_m": -2567.7595,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.466,
+      "horn_aspect_5m_deg": 344.69,
+      "plane_fit_50m_slope_deg": 3.078,
+      "plane_fit_50m_aspect_deg": 222.03
+    },
+    {
+      "sample_index": 8,
+      "cumulative_distance_m": 80.0,
+      "coordinates": [
+        77.4635778,
+        18.4593331
+      ],
+      "elevation_m": -2568.6011,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.7,
+      "horn_aspect_5m_deg": 356.79,
+      "plane_fit_50m_slope_deg": 1.919,
+      "plane_fit_50m_aspect_deg": 221.08
+    },
+    {
+      "sample_index": 9,
+      "cumulative_distance_m": 90.0,
+      "coordinates": [
+        77.46355,
+        18.4594997
+      ],
+      "elevation_m": -2568.2124,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.407,
+      "horn_aspect_5m_deg": 58.5,
+      "plane_fit_50m_slope_deg": 1.31,
+      "plane_fit_50m_aspect_deg": 220.19
+    },
+    {
+      "sample_index": 10,
+      "cumulative_distance_m": 100.0,
+      "coordinates": [
+        77.4635223,
+        18.4596664
+      ],
+      "elevation_m": -2568.7637,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.96,
+      "horn_aspect_5m_deg": 107.19,
+      "plane_fit_50m_slope_deg": 0.883,
+      "plane_fit_50m_aspect_deg": 227.46
+    },
+    {
+      "sample_index": 11,
+      "cumulative_distance_m": 110.0,
+      "coordinates": [
+        77.4634945,
+        18.459833
+      ],
+      "elevation_m": -2568.2451,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.396,
+      "horn_aspect_5m_deg": 235.3,
+      "plane_fit_50m_slope_deg": 0.82,
+      "plane_fit_50m_aspect_deg": 259.66
+    },
+    {
+      "sample_index": 12,
+      "cumulative_distance_m": 120.0,
+      "coordinates": [
+        77.4634667,
+        18.4599996
+      ],
+      "elevation_m": -2568.8325,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.6,
+      "horn_aspect_5m_deg": 176.46,
+      "plane_fit_50m_slope_deg": 0.401,
+      "plane_fit_50m_aspect_deg": 261.74
+    },
+    {
+      "sample_index": 13,
+      "cumulative_distance_m": 130.0,
+      "coordinates": [
+        77.463439,
+        18.4601663
+      ],
+      "elevation_m": -2568.8042,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.538,
+      "horn_aspect_5m_deg": 201.97,
+      "plane_fit_50m_slope_deg": 0.554,
+      "plane_fit_50m_aspect_deg": 280.38
+    },
+    {
+      "sample_index": 14,
+      "cumulative_distance_m": 140.0,
+      "coordinates": [
+        77.4634112,
+        18.4603329
+      ],
+      "elevation_m": -2568.887,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.295,
+      "horn_aspect_5m_deg": 39.13,
+      "plane_fit_50m_slope_deg": 0.679,
+      "plane_fit_50m_aspect_deg": 292.86
+    },
+    {
+      "sample_index": 15,
+      "cumulative_distance_m": 150.0,
+      "coordinates": [
+        77.4633834,
+        18.4604995
+      ],
+      "elevation_m": -2568.9363,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.413,
+      "horn_aspect_5m_deg": 92.14,
+      "plane_fit_50m_slope_deg": 0.68,
+      "plane_fit_50m_aspect_deg": 315.64
+    },
+    {
+      "sample_index": 16,
+      "cumulative_distance_m": 160.0,
+      "coordinates": [
+        77.4633556,
+        18.4606662
+      ],
+      "elevation_m": -2569.0083,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.746,
+      "horn_aspect_5m_deg": 17.74,
+      "plane_fit_50m_slope_deg": 0.383,
+      "plane_fit_50m_aspect_deg": 351.1
+    },
+    {
+      "sample_index": 17,
+      "cumulative_distance_m": 170.0,
+      "coordinates": [
+        77.4633279,
+        18.4608328
+      ],
+      "elevation_m": -2569.1411,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.352,
+      "horn_aspect_5m_deg": 139.35,
+      "plane_fit_50m_slope_deg": 0.142,
+      "plane_fit_50m_aspect_deg": 42.61
+    },
+    {
+      "sample_index": 18,
+      "cumulative_distance_m": 180.0,
+      "coordinates": [
+        77.4633001,
+        18.4609995
+      ],
+      "elevation_m": -2569.0562,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.238,
+      "horn_aspect_5m_deg": 179.49,
+      "plane_fit_50m_slope_deg": 0.454,
+      "plane_fit_50m_aspect_deg": 58.35
+    },
+    {
+      "sample_index": 19,
+      "cumulative_distance_m": 190.0,
+      "coordinates": [
+        77.4632723,
+        18.4611661
+      ],
+      "elevation_m": -2568.3762,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.364,
+      "horn_aspect_5m_deg": 263.05,
+      "plane_fit_50m_slope_deg": 0.549,
+      "plane_fit_50m_aspect_deg": 38.09
+    },
+    {
+      "sample_index": 20,
+      "cumulative_distance_m": 200.0,
+      "coordinates": [
+        77.4632445,
+        18.4613327
+      ],
+      "elevation_m": -2568.7732,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.42,
+      "horn_aspect_5m_deg": 255.34,
+      "plane_fit_50m_slope_deg": 0.305,
+      "plane_fit_50m_aspect_deg": 53.13
+    },
+    {
+      "sample_index": 21,
+      "cumulative_distance_m": 210.0,
+      "coordinates": [
+        77.4632168,
+        18.4614994
+      ],
+      "elevation_m": -2569.0269,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.579,
+      "horn_aspect_5m_deg": 210.71,
+      "plane_fit_50m_slope_deg": 0.266,
+      "plane_fit_50m_aspect_deg": 11.62
+    },
+    {
+      "sample_index": 22,
+      "cumulative_distance_m": 220.0,
+      "coordinates": [
+        77.463189,
+        18.461666
+      ],
+      "elevation_m": -2568.6533,
+      "status": "ok",
+      "horn_slope_5m_deg": 1.08,
+      "horn_aspect_5m_deg": 333.5,
+      "plane_fit_50m_slope_deg": 0.296,
+      "plane_fit_50m_aspect_deg": 353.95
+    },
+    {
+      "sample_index": 23,
+      "cumulative_distance_m": 230.0,
+      "coordinates": [
+        77.4631612,
+        18.4618326
+      ],
+      "elevation_m": -2569.0908,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.149,
+      "horn_aspect_5m_deg": 115.6,
+      "plane_fit_50m_slope_deg": 0.378,
+      "plane_fit_50m_aspect_deg": 310.74
+    },
+    {
+      "sample_index": 24,
+      "cumulative_distance_m": 240.0,
+      "coordinates": [
+        77.4631335,
+        18.4619993
+      ],
+      "elevation_m": -2569.1028,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.312,
+      "horn_aspect_5m_deg": 81.87,
+      "plane_fit_50m_slope_deg": 0.195,
+      "plane_fit_50m_aspect_deg": 310.56
+    },
+    {
+      "sample_index": 25,
+      "cumulative_distance_m": 250.0,
+      "coordinates": [
+        77.4631057,
+        18.4621659
+      ],
+      "elevation_m": -2568.7231,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.514,
+      "horn_aspect_5m_deg": 212.89,
+      "plane_fit_50m_slope_deg": 0.377,
+      "plane_fit_50m_aspect_deg": 92.49
+    },
+    {
+      "sample_index": 26,
+      "cumulative_distance_m": 260.0,
+      "coordinates": [
+        77.4630779,
+        18.4623326
+      ],
+      "elevation_m": -2568.9011,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.707,
+      "horn_aspect_5m_deg": 88.53,
+      "plane_fit_50m_slope_deg": 0.349,
+      "plane_fit_50m_aspect_deg": 111.82
+    },
+    {
+      "sample_index": 27,
+      "cumulative_distance_m": 270.0,
+      "coordinates": [
+        77.4630501,
+        18.4624992
+      ],
+      "elevation_m": -2568.2188,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.655,
+      "horn_aspect_5m_deg": 117.6,
+      "plane_fit_50m_slope_deg": 0.357,
+      "plane_fit_50m_aspect_deg": 115.48
+    },
+    {
+      "sample_index": 28,
+      "cumulative_distance_m": 280.0,
+      "coordinates": [
+        77.4630224,
+        18.4626658
+      ],
+      "elevation_m": -2568.429,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.431,
+      "horn_aspect_5m_deg": 37.15,
+      "plane_fit_50m_slope_deg": 0.146,
+      "plane_fit_50m_aspect_deg": 156.0
+    },
+    {
+      "sample_index": 29,
+      "cumulative_distance_m": 290.0,
+      "coordinates": [
+        77.4629946,
+        18.4628325
+      ],
+      "elevation_m": -2568.5925,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.18,
+      "horn_aspect_5m_deg": 22.38,
+      "plane_fit_50m_slope_deg": 0.461,
+      "plane_fit_50m_aspect_deg": 254.63
+    },
+    {
+      "sample_index": 30,
+      "cumulative_distance_m": 300.0,
+      "coordinates": [
+        77.4629668,
+        18.4629991
+      ],
+      "elevation_m": -2568.7659,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.444,
+      "horn_aspect_5m_deg": 24.75,
+      "plane_fit_50m_slope_deg": 0.562,
+      "plane_fit_50m_aspect_deg": 257.93
+    },
+    {
+      "sample_index": 31,
+      "cumulative_distance_m": 310.0,
+      "coordinates": [
+        77.462939,
+        18.4631657
+      ],
+      "elevation_m": -2568.5886,
+      "status": "ok",
+      "horn_slope_5m_deg": 1.034,
+      "horn_aspect_5m_deg": 201.46,
+      "plane_fit_50m_slope_deg": 0.202,
+      "plane_fit_50m_aspect_deg": 255.01
+    },
+    {
+      "sample_index": 32,
+      "cumulative_distance_m": 320.0,
+      "coordinates": [
+        77.4629113,
+        18.4633324
+      ],
+      "elevation_m": -2568.3523,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.773,
+      "horn_aspect_5m_deg": 233.39,
+      "plane_fit_50m_slope_deg": 0.315,
+      "plane_fit_50m_aspect_deg": 291.07
+    },
+    {
+      "sample_index": 33,
+      "cumulative_distance_m": 330.0,
+      "coordinates": [
+        77.4628835,
+        18.463499
+      ],
+      "elevation_m": -2568.9556,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.655,
+      "horn_aspect_5m_deg": 16.95,
+      "plane_fit_50m_slope_deg": 0.175,
+      "plane_fit_50m_aspect_deg": 359.95
+    },
+    {
+      "sample_index": 34,
+      "cumulative_distance_m": 340.0,
+      "coordinates": [
+        77.4628557,
+        18.4636656
+      ],
+      "elevation_m": -2568.8218,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.683,
+      "horn_aspect_5m_deg": 269.35,
+      "plane_fit_50m_slope_deg": 0.161,
+      "plane_fit_50m_aspect_deg": 50.8
+    },
+    {
+      "sample_index": 35,
+      "cumulative_distance_m": 350.0,
+      "coordinates": [
+        77.462828,
+        18.4638323
+      ],
+      "elevation_m": -2568.3452,
+      "status": "ok",
+      "horn_slope_5m_deg": 1.211,
+      "horn_aspect_5m_deg": 14.24,
+      "plane_fit_50m_slope_deg": 0.132,
+      "plane_fit_50m_aspect_deg": 348.21
+    },
+    {
+      "sample_index": 36,
+      "cumulative_distance_m": 360.0,
+      "coordinates": [
+        77.4628002,
+        18.4639989
+      ],
+      "elevation_m": -2568.4851,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.402,
+      "horn_aspect_5m_deg": 173.7,
+      "plane_fit_50m_slope_deg": 0.291,
+      "plane_fit_50m_aspect_deg": 32.97
+    },
+    {
+      "sample_index": 37,
+      "cumulative_distance_m": 370.0,
+      "coordinates": [
+        77.4627724,
+        18.4641656
+      ],
+      "elevation_m": -2568.6382,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.13,
+      "horn_aspect_5m_deg": 210.28,
+      "plane_fit_50m_slope_deg": 0.682,
+      "plane_fit_50m_aspect_deg": 62.73
+    },
+    {
+      "sample_index": 38,
+      "cumulative_distance_m": 380.0,
+      "coordinates": [
+        77.4627446,
+        18.4643322
+      ],
+      "elevation_m": -2568.6255,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.838,
+      "horn_aspect_5m_deg": 203.25,
+      "plane_fit_50m_slope_deg": 0.582,
+      "plane_fit_50m_aspect_deg": 49.44
+    },
+    {
+      "sample_index": 39,
+      "cumulative_distance_m": 390.0,
+      "coordinates": [
+        77.4627169,
+        18.4644988
+      ],
+      "elevation_m": -2568.5483,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.532,
+      "horn_aspect_5m_deg": 93.24,
+      "plane_fit_50m_slope_deg": 0.585,
+      "plane_fit_50m_aspect_deg": 35.46
+    },
+    {
+      "sample_index": 40,
+      "cumulative_distance_m": 400.0,
+      "coordinates": [
+        77.4626891,
+        18.4646655
+      ],
+      "elevation_m": -2568.2842,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.047,
+      "horn_aspect_5m_deg": 142.79,
+      "plane_fit_50m_slope_deg": 0.662,
+      "plane_fit_50m_aspect_deg": 50.46
+    },
+    {
+      "sample_index": 41,
+      "cumulative_distance_m": 410.0,
+      "coordinates": [
+        77.4626613,
+        18.4648321
+      ],
+      "elevation_m": -2567.8955,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.077,
+      "horn_aspect_5m_deg": 14.8,
+      "plane_fit_50m_slope_deg": 0.843,
+      "plane_fit_50m_aspect_deg": 58.18
+    },
+    {
+      "sample_index": 42,
+      "cumulative_distance_m": 420.0,
+      "coordinates": [
+        77.4626335,
+        18.4649987
+      ],
+      "elevation_m": -2568.3926,
+      "status": "ok",
+      "horn_slope_5m_deg": 1.417,
+      "horn_aspect_5m_deg": 61.56,
+      "plane_fit_50m_slope_deg": 1.096,
+      "plane_fit_50m_aspect_deg": 66.25
+    },
+    {
+      "sample_index": 43,
+      "cumulative_distance_m": 430.0,
+      "coordinates": [
+        77.4626058,
+        18.4651654
+      ],
+      "elevation_m": -2568.0623,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.462,
+      "horn_aspect_5m_deg": 272.95,
+      "plane_fit_50m_slope_deg": 1.234,
+      "plane_fit_50m_aspect_deg": 71.3
+    },
+    {
+      "sample_index": 44,
+      "cumulative_distance_m": 440.0,
+      "coordinates": [
+        77.462578,
+        18.465332
+      ],
+      "elevation_m": -2567.3191,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.215,
+      "horn_aspect_5m_deg": 88.13,
+      "plane_fit_50m_slope_deg": 1.532,
+      "plane_fit_50m_aspect_deg": 81.97
+    },
+    {
+      "sample_index": 45,
+      "cumulative_distance_m": 450.0,
+      "coordinates": [
+        77.4625502,
+        18.4654986
+      ],
+      "elevation_m": -2567.3604,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.386,
+      "horn_aspect_5m_deg": 224.63,
+      "plane_fit_50m_slope_deg": 1.34,
+      "plane_fit_50m_aspect_deg": 76.08
+    },
+    {
+      "sample_index": 46,
+      "cumulative_distance_m": 460.0,
+      "coordinates": [
+        77.4625225,
+        18.4656653
+      ],
+      "elevation_m": -2566.4387,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.673,
+      "horn_aspect_5m_deg": 58.21,
+      "plane_fit_50m_slope_deg": 1.146,
+      "plane_fit_50m_aspect_deg": 66.0
+    },
+    {
+      "sample_index": 47,
+      "cumulative_distance_m": 470.0,
+      "coordinates": [
+        77.4624947,
+        18.4658319
+      ],
+      "elevation_m": -2566.8428,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.579,
+      "horn_aspect_5m_deg": 295.45,
+      "plane_fit_50m_slope_deg": 1.246,
+      "plane_fit_50m_aspect_deg": 66.73
+    },
+    {
+      "sample_index": 48,
+      "cumulative_distance_m": 480.0,
+      "coordinates": [
+        77.4624669,
+        18.4659986
+      ],
+      "elevation_m": -2567.4749,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.348,
+      "horn_aspect_5m_deg": 114.97,
+      "plane_fit_50m_slope_deg": 1.812,
+      "plane_fit_50m_aspect_deg": 66.76
+    },
+    {
+      "sample_index": 49,
+      "cumulative_distance_m": 490.0,
+      "coordinates": [
+        77.4624391,
+        18.4661652
+      ],
+      "elevation_m": -2566.7371,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.807,
+      "horn_aspect_5m_deg": 21.88,
+      "plane_fit_50m_slope_deg": 2.686,
+      "plane_fit_50m_aspect_deg": 65.92
+    },
+    {
+      "sample_index": 50,
+      "cumulative_distance_m": 500.0,
+      "coordinates": [
+        77.4624114,
+        18.4663318
+      ],
+      "elevation_m": -2565.644,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.198,
+      "horn_aspect_5m_deg": 55.64,
+      "plane_fit_50m_slope_deg": 4.652,
+      "plane_fit_50m_aspect_deg": 66.09
+    },
+    {
+      "sample_index": 51,
+      "cumulative_distance_m": 510.0,
+      "coordinates": [
+        77.4623836,
+        18.4664985
+      ],
+      "elevation_m": -2565.5503,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.608,
+      "horn_aspect_5m_deg": 43.04,
+      "plane_fit_50m_slope_deg": 4.651,
+      "plane_fit_50m_aspect_deg": 66.49
+    },
+    {
+      "sample_index": 52,
+      "cumulative_distance_m": 520.0,
+      "coordinates": [
+        77.4623558,
+        18.4666651
+      ],
+      "elevation_m": -2563.9023,
+      "status": "ok",
+      "horn_slope_5m_deg": 1.164,
+      "horn_aspect_5m_deg": 67.27,
+      "plane_fit_50m_slope_deg": 2.277,
+      "plane_fit_50m_aspect_deg": 53.31
+    },
+    {
+      "sample_index": 53,
+      "cumulative_distance_m": 530.0,
+      "coordinates": [
+        77.462328,
+        18.4668317
+      ],
+      "elevation_m": -2562.1333,
+      "status": "ok",
+      "horn_slope_5m_deg": 0.526,
+      "horn_aspect_5m_deg": 271.6,
+      "plane_fit_50m_slope_deg": 1.742,
+      "plane_fit_50m_aspect_deg": 302.06
+    },
+    {
+      "sample_index": 54,
+      "cumulative_distance_m": 540.0,
+      "coordinates": [
+        77.4623003,
+        18.4669984
+      ],
+      "elevation_m": -2564.6226,
+      "status": "ok",
+      "horn_slope_5m_deg": 1.105,
+      "horn_aspect_5m_deg": 266.66,
+      "plane_fit_50m_slope_deg": 4.61,
+      "plane_fit_50m_aspect_deg": 276.87
+    },
+    {
+      "sample_index": 55,
+      "cumulative_distance_m": 540.1,
+      "coordinates": [
+        77.4623,
+        18.467
+      ],
+      "elevation_m": -2564.6226,
+      "status": "ok",
+      "horn_slope_5m_deg": 1.105,
+      "horn_aspect_5m_deg": 266.66,
+      "plane_fit_50m_slope_deg": 4.61,
+      "plane_fit_50m_aspect_deg": 276.87
+    }
+  ]
+}

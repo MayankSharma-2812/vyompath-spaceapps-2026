@@ -1,0 +1,103 @@
+# ──────────────────────────────────────────────────────
+# VyomPath .gitignore
+# ──────────────────────────────────────────────────────
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Local notes / personal reference (not committed)
+decision.md
+decisions.md
+DECISION.md
+DECISIONS.md
+*decision*.md
+*DECISION*.md
+dheer_decisions.md
+vyompath_antigravity_handoff.txt
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Testing & coverage
+.pytest_cache/
+frontend/test-results/
+frontend/playwright-report/
+htmlcov/
+.coverage
+coverage.xml
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Docker overrides
+docker-compose.override.yml
+
+# Node & Frontend build output
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+.eslintcache
+
+# Raw data, processed datasets, and DTM rasters
+# (Large datasets retrieved via future scripts/fetch_data.py)
+tiles/
+data/tiles/
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/downloads/
+data/cache/
+*.IMG
+*.img
+*.jp2
+*.h5
+*.hdf5
+*.nc
+*.grd
+*.tar.gz
+*.zip
+*.tmp
+*.temp
+
+# Large raster DTM patterns (prevent accidental commits)
+data/dtm/*.IMG
+data/dtm/*_raw.tif
+data/dtm/DTEE*.tif
+
+# Preserve version-controlled configuration, manifests, and test fixtures
+!data/layers.json
+!data/science_points.json
+!backend/data/science_points.json
+!data/dtm/README.md
+!data/dtm/acquire_dtm.py
+!data/dtm/syrtis_major_sample_dtm.tif
