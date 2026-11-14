@@ -304,12 +304,14 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
   }, [routeA, routeB, drawnCoordinates]);
 
   return (
-    <div className={`relative w-full h-full min-h-[550px] bg-slate-950 overflow-hidden select-none font-sans text-slate-100 ${className}`}>
+    <div
+      className={`mars-map-canvas relative w-full h-full min-h-[365px] bg-slate-950 overflow-hidden select-none font-sans text-slate-100 ${className}`}
+      data-testid="mars-map-canvas"
+    >
       {/* Map Viewport Container */}
       <div
         ref={mapElementRef}
         className={`w-full h-full ${isDrawingMode ? 'cursor-crosshair' : 'cursor-default'}`}
-        data-testid="mars-map-canvas"
       />
 
       {/* Top Floating Controls: Basemap & Layer Switchers */}
