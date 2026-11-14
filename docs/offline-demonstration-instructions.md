@@ -64,22 +64,17 @@ Ready for offline judging evaluation!
 
 ---
 
-### Method 2: Native Windows 11 (PowerShell)
+### Method 2: Native Windows 11 (PowerShell — One Command)
 
-On the Windows presentation laptop without bash:
+On the Windows presentation laptop, launch both backend and frontend with a single command:
 
-**Terminal 1 (Backend API):**
 ```powershell
-cd C:\path\to\vyompath-spaceapps-2026
-$env:PORT="8000"
-$env:CORS_ORIGINS="http://localhost:4173,http://127.0.0.1:4173,http://localhost:5173"
-python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
+.\scripts\run_offline.ps1
 ```
 
-**Terminal 2 (Frontend Preview):**
+*Custom Port Overrides (if default ports 8000 or 4173 are busy):*
 ```powershell
-cd C:\path\to\vyompath-spaceapps-2026\frontend
-npm run preview -- --host 127.0.0.1 --port 4173
+.\scripts\run_offline.ps1 -BackendPort 8871 -FrontendPort 4871
 ```
 
 ---
@@ -88,30 +83,41 @@ npm run preview -- --host 127.0.0.1 --port 4173
 
 Open browser at: **`http://localhost:4173`** (or in an incognito window).
 
-### Step 1: Confirm Air-Gapped Status
+### Step 1: Confirm Air-Gapped Status & Operational Mode
 1. Show the presentation laptop’s system tray showing **Airplane Mode ON** or Wi-Fi disconnected.
 2. Open Browser Developer Tools (`F12`), navigate to the **Network** tab.
 3. Show that all tile requests and API calls resolve to `127.0.0.1` / `localhost` with zero external calls to `nasa.gov` or external CDNs.
+4. Note the top toolbar status badge: **`LIVE TERRAIN ENGINE`** (green) when `VYOMPATH_DEM_PATH` is mounted, or **`DEVELOPMENT / MOCK BACKEND`** (neutral) in fallback mode.
 
 ### Step 2: Regional Tile Navigation
 1. Zoom into Jezero Crater across zoom levels 12, 13, 14, and 15.
-2. Toggle between **Basemap** and **Hillshade** visual layers.
-3. Highlight that tiles load instantly ($<3\text{ ms}$ loopback latency).
+2. Toggle between **MOLA Color Shaded Relief**, **CTX Visible Mosaic**, and **Viking MDIM 2.1** basemaps.
+3. Highlight that regional ortho tiles load locally with sub-millisecond loopback latency.
 
-### Step 3: Draw a Candidate Traverse
+### Step 3: Draw a Candidate Traverse (Route A)
 1. Click the **Draw Route** tool on the map canvas.
 2. Click points along the crater floor (e.g. from Perseverance Sol 386 toward Sol 387).
 3. Finish the traverse (double-click).
 
 ### Step 4: Inspect Scientific Analysis Dashboard
-1. Observe the **Elevation Profile Chart** rendering elevation in metres.
+1. Observe the **Elevation Profile Chart** rendering real Float32 elevations in metres without null-coercion artifacts.
 2. Observe the **KPI Cards**: Minimum Elevation, Maximum Elevation, Cumulative Gain, Cumulative Loss, and Maximum Slope.
-3. Inspect the **Nearby Science POIs** panel showing discovered Perseverance rover waypoints with cross-track offset distances.
-4. Point out the **Authoritative Boundary Indicator** (`COMPLETE` status when inside the 63.16% valid HiRISE swath).
+3. Point out the **Authoritative Boundary Indicator** (`COMPLETE` status when inside the 63.16% valid HiRISE swath, or `PARTIAL GAP` / `OUT OF BOUNDS` when crossing margins).
 
-### Step 5: Boundary Gap Demonstration (Edge of Swath)
-1. Draw a traverse that exits the western boundary of the HiRISE swath.
-2. Observe the dashboard gracefully transition to **`PARTIAL GAP`** or **`OUT OF BOUNDS`** without crashing.
+### Step 5: Route A vs Route B Comparative Analysis
+1. With Route A loaded, click a corridor preset (e.g. `Jezero Floor Baseline`) or draw a second traverse to populate **Route B**.
+2. Inspect the **Route Comparison Panel** displaying side-by-side KPI cards:
+   - Distance Delta ($\Delta\text{m}$)
+   - Elevation Gain Delta ($\Delta\text{m}$)
+   - Elevation Loss Delta ($\Delta\text{m}$)
+   - Max Slope Delta ($\Delta^\circ$)
+3. Click **Clear Route B** to reset comparison without clearing Route A.
+
+### Step 6: Visual Proof Reference
+Visual screenshots captured during automated E2E tests are available in:
+- `frontend/src/features/dashboard/__screenshots__/01_dashboard_live_dtm_overview.png`
+- `frontend/src/features/dashboard/__screenshots__/02_route_comparison_deltas.png`
+- `frontend/src/features/dashboard/__screenshots__/03_dashboard_mobile_view.png`
 
 ---
 

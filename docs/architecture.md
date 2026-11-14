@@ -134,12 +134,19 @@ Vehicle stability depends on the baseline scale over which terrain changes. Vyom
 
 ---
 
-## 6. Science POI Corridor Buffering
+## 6. Science POI Corridor Buffering & Rights-Compliant Baseline
 
-Operational science targets (derived from Mars 2020 Perseverance rover telemetry) are registered in `data/science_points.json`.
-- When a user defines a traverse, the backend buffers the line geometry by a configurable Euclidean radius (default: $250.0\text{ m}$).
-- Waypoints within the corridor are returned with cross-track offset distance and along-track stationing.
-- **Geographic Reality:** Only **Sol 386** and **Sol 387** lie within the active HiRISE stereo footprint; Sols 13, 23, and 34 lie $\sim 0.6\text{ km}$ west outside coverage. Zero catalogued natural geological formations exist in this stereo swath.
+### 6.1 Corridor Buffering Architecture
+The corridor buffering engine (`backend/app/services/science.py`) evaluates candidate targets within a configurable Euclidean radius (default: $250.0\text{ m}$) of a user-drawn traverse:
+- Evaluates along-route and cross-track perpendicular offsets using analytical vector segment projection (`coords.cross_along_m`).
+- Sorts results ascending by along-track stationing for intuitive chronological exploration.
+
+### 6.2 Rights-Compliant Baseline & Synthetic Test Architecture
+- **Production Baseline (Issue #11 / PR #37 & PR #39):** Raw operational telemetry scraped from the upstream NASA MMGIS feed was quarantined and excluded from active shipping catalogues (`data/science_points.json` is strictly `[]`) pending product-level licensing confirmation.
+- **Automated Regression Architecture:** 100% automated test coverage is maintained using dedicated synthetic verification fixtures:
+  - `tests/fixtures/synthetic_science_points.json`: 2 benchmark points (`SYNTH-POI-001`, `SYNTH-POI-002`) with valid coordinates and citation fields.
+  - `tests/fixtures/golden_pois.json`: Ground-truth cross-track and along-route reference metrics for 100m, 250m, and 350m corridor buffer test cases.
+- **Geographic Reality:** Historical rover positions evaluate accurately against the canonical footprint: Sols 386 and 387 lie within valid HiRISE stereo coverage, while Sols 13, 23, and 34 lie $\sim 0.6\text{ km}$ west outside coverage. Zero catalogued natural geological formations exist in this stereo swath.
 
 ---
 
