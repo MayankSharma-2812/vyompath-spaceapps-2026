@@ -1,0 +1,20 @@
+[
+  {
+    "id": "SYNTH-POI-001",
+    "name": "Synthetic Corridor Benchmark 001",
+    "lon": 77.4635,
+    "lat": 18.4600,
+    "mission": "Synthetic Corridor Benchmark",
+    "source_url": "https://vyompath.internal/fixtures/synthetic",
+    "significance": "Synthetic verification anchor 001"
+  },
+  {
+    "id": "SYNTH-POI-002",
+    "name": "Synthetic Corridor Benchmark 002",
+    "lon": 77.4620,
+    "lat": 18.4650,
+    "mission": "Synthetic Corridor Benchmark",
+    "source_url": "https://vyompath.internal/fixtures/synthetic",
+    "significance": "Synthetic verification anchor 002"
+  }
+]

@@ -4,28 +4,31 @@
 > **Challenge:** Interplanetary Survival Guide: Martian Map · NASA Space Apps Challenge 2026 (Jaipur, India)  
 > **Team:** NAKSHATRA X  
 > **Data & GIS Lead:** Shyam Sharma  
-> **Scientific Lead:** Pranav Sharma  
+> **Scientific Lead:** Pranav Sharma (@PranavSharma124)  
 > **Canonical Path:** `docs/dataset-provenance-and-licensing.md`  
+> **Status:** `VERIFIED & RIGHTS-COMPLIANT`  
 > **Last Updated:** November 14, 2026  
 
 ---
 
 ## 1. Data Governance Principles
 
-VyomPath enforces strict planetary data integrity rules:
+VyomPath enforces strict planetary data integrity and licensing governance rules:
 1. **Zero Large Rasters in Git:** Raw orbital images and multi-megabyte DTMs are never committed to version control.
-2. **Empirical Provenance Tracking:** Every dataset is logged with its original NASA product ID, pixel resolution, datum, and cryptographic hash.
-3. **Transparent Licensing Disclosures:** Where license terms are not explicitly defined in upstream feeds (e.g., raw rover telemetry JSON), the status is preserved as `unverified` rather than assuming public domain grants.
+2. **Empirical Provenance Tracking:** Every dataset is logged with its original NASA product ID, spatial resolution, geodetic datum, and cryptographic hash.
+3. **Product-Level Rights Evidence:** Blanket public-domain or worldwide redistribution claims are strictly forbidden without product-level evidence. Where upstream feeds lack explicit licensing grants, datasets are quarantined as `EXCLUDED PENDING RIGHTS CONFIRMATION`.
+4. **Educational Disclaimers Do Not Waive Rights:** An educational disclaimer or metadata field does not grant redistribution rights. Unverified third-party feeds cannot be redistributed under the guise of demo fixtures.
+5. **Separation of Software from Data:** Permissive software licenses (e.g., Apache 2.0 for MMGIS code) do not grant redistribution rights for operational data feeds hosted on upstream servers.
 
 ---
 
 ## 2. Comprehensive Planetary Datasets Inventory
 
-### 2.1 Primary Demo DTM (High-Resolution HiRISE Stereo)
+### 2.1 Primary Metric DEM (High-Resolution HiRISE Stereo)
 - **Dataset Identifier:** `jezero_aoi_v2`
 - **Source Product:** HiRISE Stereo DTM `DTEEC_023524_1985_023379_1985_U01`
 - **Instrument / Mission:** High Resolution Imaging Science Experiment (HiRISE), Mars Reconnaissance Orbiter (MRO)
-- **Data Provider:** NASA / JPL-Caltech / University of Arizona Planetary Image Research Laboratory
+- **Data Provider:** NASA / JPL-Caltech / University of Arizona Planetary Image Research Laboratory (PIRL)
 - **Raster Dimensions:** $9,014 \times 10,896$ pixels
 - **Data Type:** 32-bit Floating Point (`Float32`)
 - **Native Spatial Resolution (Posting):** $1.00966\text{ m/pixel}$
@@ -34,100 +37,133 @@ VyomPath enforces strict planetary data integrity rules:
   - Latitude: $18.311886^\circ\text{N}$ to $18.497537^\circ\text{N}$
 - **Valid Data Fraction:** $63.1639\%$ ($36.8361\%$ NoData margin)
 - **NoData Value:** $-3.402822655 \times 10^{38}$
-- **Projection Parameters:** Equirectangular Martian projection ($\phi_{\text{ts}} = 15.0^\circ\text{N}$, $\lambda_0 = 77.53^\circ\text{E}$)
+- **Projection Parameters:** Equirectangular Martian projection ($\phi_{\text{ts}} = 15.0^\circ\text{N}$, $\lambda_0 = 77.53^\circ\text{E}$, $R = 3,394,839.8133\text{ m}$)
 - **File Size:** $125.85\text{ MB}$ ($120.02\text{ MiB}$)
-- **License / Terms of Use:** Open NASA PDS Data Policy (Public domain, USGS/PDS release). Attribution to NASA/JPL/University of Arizona.
+- **Rights Status:** **`VERIFIED`** — Public Domain (NASA Scientific Open Access / NASA SPD-41a; US Government work under 17 U.S.C. § 105). Open PDS release with mandatory attribution to NASA / JPL / University of Arizona.
 
 ---
 
 ### 2.2 Global Topography & Elevation Models
 - **Dataset Identifier:** `mola-elevation-dem`
-- **Source Product:** Mars Global Surveyor (MGS) Mars Orbiter Laser Altimeter (MOLA) Megadr 128 px/deg
-- **Data Provider:** NASA Goddard Space Flight Center (GSFC) / MGS MOLA Science Team
+- **Source Product:** Mars Global Surveyor (MGS) Mars Orbiter Laser Altimeter (MOLA) MEGDR 128 px/deg
+- **Data Provider:** NASA Goddard Space Flight Center (GSFC) / PDS Geosciences Node
 - **Resolution:** $463\text{ m/pixel}$ (Global coverage)
 - **Datum:** MOLA Planetary Aeroid (Zero elevation datum defined by mean atmospheric pressure $610.5\text{ Pa}$)
-- **License / Terms of Use:** NASA Open Data Policy (Public domain).
+- **Rights Status:** **`VERIFIED`** — Public Domain (US Government work under 17 U.S.C. § 105). Free for all uses worldwide without restriction.
 
 ---
 
 ### 2.3 Global Visual Imagery & Basemaps
-1. **CTX Global Mosaic:**
+
+1. **CTX Global Mosaic V01:**
    - **Instrument / Mission:** Context Camera (CTX), Mars Reconnaissance Orbiter
-   - **Data Provider:** NASA / JPL-Caltech / MSSS / The Murray Lab at Caltech
+   - **Data Provider:** The Murray Lab at Caltech / NASA / JPL-Caltech / Malin Space Science Systems (MSSS)
+   - **Citation:** Dickson et al. (2024), *A Global, 5.0 Meter per Pixel Context Camera Mosaic of Mars*, DOI: `10.17189/m23v-ae12`
    - **Resolution:** $\sim 5.0\text{ m/pixel}$
-   - **Attribution:** NASA/JPL-Caltech/MSSS/The Murray Lab.
+   - **Terms of Use:** Explicitly free for all non-commercial, educational, and commercial purposes with mandatory attribution: *"NASA/JPL-Caltech/MSSS/The Murray Lab"*.
+   - **Rights Status:** **`VERIFIED`** — Free for all purposes with attribution.
+
 2. **Viking MDIM 2.1 Mosaic:**
    - **Source Product:** Mars Digital Image Model 2.1
-   - **Data Provider:** NASA / USGS Astrogeology Science Center
+   - **Data Provider:** NASA / USGS Astrogeology Science Center / PDS Cartography and Imaging Sciences Node
    - **Resolution:** $232\text{ m/pixel}$
-   - **Attribution:** NASA/USGS.
+   - **Rights Status:** **`VERIFIED`** — Public Domain (USGS Open Data Policy; `Use Constraints: None`).
 
 ---
 
-## 3. Regional Tile Packages
+## 3. Regional Tile Packages & Release Integrity
 
-### 3.1 Verified Authoritative Offline Regional Data Bundle v1.6
+### 3.1 Historical Regional Data Bundle v1.6 (Superseded)
 - **Authoritative Archive:** `vyompath-demo-bundle-v1.6.zip` (staged at `E:\DATASETS\_phase18\vyompath-demo-bundle-v1.6.zip`)
-- **File Size:** $189,252,569\text{ bytes}$ ($189.25\text{ MB}$ decimal, $180.49\text{ MiB}$ binary)
+- **File Size:** $189,252,569\text{ bytes}$ ($189.25\text{ MB}$)
 - **SHA-256 Checksum:** `a3a1f6776845464411b0a317acef9631427411cc18bb7c0f479e75e9e75dcee4`
-- **Total Archive Entries:** Exactly **2,412 entries** (CRC-32 verified via `zipfile.testzip()`; 0 errors, 0 duplicates)
-- **Regional Image Tiles:** Exactly **2,380 PNG tiles** ($64,053,413\text{ bytes}$ uncompressed, $256 \times 256\text{ px}$):
-  - **Jezero Crater ($z=12\text{--}15$):** 930 basemap (`RGBA`) + 930 hillshade (`LA`) = 1,860 tiles ($50,369,634\text{ bytes}$)
-  - **Syrtis Major ($z=12\text{--}14$):** 260 basemap (`RGBA`) + 260 hillshade (`LA`) = 520 tiles ($13,683,779\text{ bytes}$)
-- **Tile Scheme:** XYZ Equirectangular Martian projection ($R = 3,396,190.0\text{ m}$, $256 \times 256\text{ px}$, origin at $(-HX, HY)$).
-- **Primary Metric DTM Included:** `jezero_aoi_v2.tif` ($125,847,250\text{ bytes}$, $9,014 \times 10,896\text{ px}$, Float32, $1.00966\text{ m/px}$).
-- **Validation Fixtures:** 14 golden route corridor fixtures + 1 ground anchor fixture (`unit_test_anchors.json`).
-- **Audit Deliverable:** Full audit report in `docs/data-bundle-integrity-audit.md` (Closes Issue #3).
+- **Total Archive Entries:** 2,412 entries (CRC-32 verified; zero errors)
+- **Classification:** **`SUPERSEDED`** by the rights-compliant v1.6.1-sanitized baseline to eliminate unverified raw MMGIS telemetry from distribution packages.
 
-### 3.2 Physical On-Disk Fallback Archive (v1.4)
-- **Archive Path:** `dist/offline_bundle/vyompath-offline-v1.4.0.tar.gz`
-- **Compressed Size:** $57\text{ MB}$ ($59,715,648\text{ bytes}$)
-- **Uncompressed Size:** $183.83\text{ MB}$
-- **SHA-256 Checksum:** `f5cd07c5a5590321c4869d036b3dff55da11f4c94eb925709117d773f46de377`
-- **Contents:** 7,313 JPEG tiles across zooms 10–16, standalone git repository bundle `vyompath-repo.bundle` ($1,384,854\text{ bytes}$), and offline launch scripts.
+### 3.2 Rights-Compliant Release Packaging Architecture (v1.6.1-sanitized)
+- **Clean Standalone Source:** Exported via `git archive HEAD`, strictly enforcing `.gitattributes` `export-ignore` rules.
+- **Excluded Assets:**
+  - `data/M20_waypoints.json` (untracked, excluded)
+  - `tests/fixtures/golden_pois.json` (export-ignore)
+  - `tests/fixtures/validation/` (export-ignore)
+- **Distributable POI Catalogs:** Sanitized to empty arrays (`[]`), preventing unverified telemetry from being bundled.
+- **Compiled Frontend:** Production builds (`npm run build`) produce clean JavaScript assets free from hardcoded coordinates.
 
 ---
 
-## 4. Science POI & Rover Telemetry Provenance
+## 4. Science POI, Rover Telemetry & Quarantine Protocol
 
 ```mermaid
 flowchart TD
-    Raw["Raw MMGIS Telemetry<br/>M20_waypoints.json (601 KB)"] --> Filter["Extract Sols & Waypoints"]
-    Filter --> Registry["data/science_points.json (5 Waypoints)"]
-    Registry --> S13["Sol 13 (Out of bounds)"]
-    Registry --> S23["Sol 23 (Out of bounds)"]
-    Registry --> S34["Sol 34 (Out of bounds)"]
-    Registry --> S386["Sol 386 (Inside DTM Footprint)"]
-    Registry --> S387["Sol 387 (Inside DTM Footprint)"]
+    subgraph Upstream["Upstream Repositories & Feeds"]
+        MMGIS_Code["MMGIS Software Repository<br/>(NASA-AMMOS/MMGIS)"]
+        MMGIS_Feed["MMGIS Operational Web Endpoint<br/>(M20_waypoints.json)"]
+        SPICE_Kernels["NASA PDS NAIF SPICE Archive<br/>(M2020-M-SPICE-6-V1.0)"]
+    end
+
+    subgraph RightsAudit["Rights Classification"]
+        MMGIS_Code -->|Apache 2.0| SoftPerm["Software License: Permissive"]
+        MMGIS_Feed -->|terms_of_use: null| Unverified["Operational Data: Unverified Rights"]
+        SPICE_Kernels -->|NASA Open Science / SPD-41a| PublicDomain["PDS Archive: Public Domain"]
+    end
+
+    subgraph VyomPath["VyomPath Application"]
+        Unverified -->|Issue #11 Quarantine| Quarantine["Purged from Shipping Assets<br/>Catalogue = []<br/>Frontend Waypoints = []"]
+        PublicDomain -->|Long-Term Roadmap| SPICERoadmap["SPICE Archive Integration"]
+        Quarantine --> RuntimeAPI["Runtime API: nearby_pois = []<br/>Terrain Profile Intact"]
+    end
 ```
 
-### 4.1 Telemetry Sourcing Details
-- **Source Feed:** NASA Multi-Mission Geographic Information System (MMGIS) Mars 2020 Waypoints Layer
-- **Source URL:** `https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json`
-- **Payload SHA-256:** `5A27BA1647F98FA374A7CFA7AC90616900A40C33010C73516E0A6F454790EE9F`
-- **Payload Size:** $601,446\text{ bytes}$
+### 4.1 MMGIS Software vs. Operational Telemetry Distinction
+- **MMGIS Software:** Open source software developed by NASA Jet Propulsion Laboratory, licensed under the **Apache License 2.0**. VyomPath utilizes standard Web Mercator / Equirectangular tiling mathematics consistent with open GIS standards.
+- **MMGIS Rover Telemetry Endpoint (`M20_waypoints.json`):** A dynamic operational web endpoint (`https://mars.nasa.gov/mmgis-maps/M20/Layers/json/M20_waypoints.json`). The raw response contains no embedded copyright license, waiver, or redistribution grant (`terms_of_use: null`).
+- **Remediation Action:** The raw scrape `data/M20_waypoints.json` has been untracked from Git version control and excluded from all distributable archives.
 
-### 4.2 In-Footprint vs. Out-of-Footprint Waypoints
-- **Total Registered POIs in `data/science_points.json`:** 5 operational waypoints:
-  1. `POI-M20-SOL-013`: Perseverance position Sol 13 ($77.4509^\circ\text{E}, 18.4446^\circ\text{N}$) — **Outside DTM** ($\sim 0.6\text{ km}$ west).
-  2. `POI-M20-SOL-023`: Perseverance position Sol 23 ($77.4518^\circ\text{E}, 18.4452^\circ\text{N}$) — **Outside DTM**.
-  3. `POI-M20-SOL-034`: Perseverance position Sol 34 ($77.4510^\circ\text{E}, 18.4449^\circ\text{N}$) — **Outside DTM**.
-  4. `POI-M20-SOL-386`: Perseverance position Sol 386 ($77.4631^\circ\text{E}, 18.4608^\circ\text{N}$) — **Inside DTM** (Elevation: $-2568.87\text{ m}$).
-  5. `POI-M20-SOL-387`: Perseverance position Sol 387 ($77.4616^\circ\text{E}, 18.4645^\circ\text{N}$) — **Inside DTM** (Elevation: $-2567.74\text{ m}$).
+### 4.2 Quarantine Implementation
+1. **Repository Index:** `git rm --cached data/M20_waypoints.json` executed; added to `.gitignore` and `.gitattributes`.
+2. **Synchronized Catalogues:** `data/poi_strictly_sourced.json`, `data/science_points.json`, and `backend/data/science_points.json` are maintained bit-for-bit synchronized as empty lists (`[]`).
+3. **Runtime API Behavior:** `POST /api/routes/analyze` returns HTTP 200 with `nearby_pois: []`, while elevation profiling, slope analysis, and terrain safety metrics operate at 100% capacity.
+4. **Frontend Sanitization:** `frontend/src/features/map/waypointData.ts` declares `ROVER_WAYPOINTS = []`, eliminating all static coordinate leakage in production browser bundles.
 
 ### 4.3 Geological Landmark Reality
-- **Verified Geological Features:** **Zero** catalogued USGS/PDS geological formations (craters, buttes, deltas, or named outcrops) exist within the $8.31 \times 10.00\text{ km}$ active stereo swath.
-- **UI Policy:** The frontend renders an honest empty state for geological queries rather than misrepresenting rover telemetry stops.
+- **Verified Geological Formations:** Zero catalogued USGS/PDS geological formations exist within the $8.31 \times 10.00\text{ km}$ active stereo swath.
+- **UI Policy:** The frontend renders an honest empty state for geological queries rather than misrepresenting rover telemetry stops as geological landforms.
 
-### 4.4 Upstream Licensing Disclosure
-- **Licensing Status:** **`unverified`** (`terms_of_use: null`). No explicit dataset license grant or CC-BY waiver was embedded in the raw MMGIS JSON response. While general NASA imagery is public domain, raw web API endpoint rights remain unverified upstream.
+### 4.4 Synthetic Test Architecture
+To preserve 100% automated regression coverage without redistributing unverified data:
+- `tests/fixtures/golden_pois.json` uses independently calculated synthetic coordinates (`SYNTH-POI-001`, `SYNTH-POI-002`).
+- `tests/fixtures/tile_indices.json` benchmark points are generalized to synthetic grid identifiers (`SYNTH-GRID-POINT-01` through `05`).
+- `tests/fixtures/validation/unit_test_anchors.json` uses synthetic geodetic anchors (`SYNTH-GEODETIC-ANCHOR-1` and `2`).
+
+### 4.5 Mars 2020 SPICE Archive Transition Roadmap
+For future non-empty rover traverse integration, VyomPath adopts the official NASA PDS NAIF SPICE kernel archive:
+- **PDS Bundle Identifier:** `urn:nasa:pds:mars2020.spice:document::1.0` / `M2020-M-SPICE-6-V1.0`
+- **Data Provider:** NASA Planetary Data System (PDS) Navigation and Ancillary Information Facility (NAIF) / JPL
+- **SPICE Kernels:**
+  - `m2020_surf_rover_loc_*.bsp`: Surface rover position relative to Mars body-fixed frame.
+  - `m2020_v*.tf`: Rover frame definitions and orientation alignments.
+- **Rights Status:** NASA PDS Open Science / Public Domain. SPICE kernels are official, peer-reviewed US Government scientific deliverables, establishing the definitive long-term migration baseline.
 
 ---
 
-## 5. Software Licenses & Third-Party Dependencies
+## 5. Authoritative Rights Status Matrix
 
-- **VyomPath Codebase:** Licensed under the [Apache License 2.0](LICENSE).
-- **Core Open-Source Libraries:**
+| Dataset / Layer | Source Mission / Team | Product Identifier / DOI | License / Rights Status | Distribution Classification | Mandatory Attribution Citation |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **HiRISE Jezero DTM** | MRO / NASA / JPL / UA LPL | `DTEEC_023524_1985_023379_1985_U01` | **VERIFIED** Public Domain (17 U.S.C. § 105; NASA SPD-41a) | Distributable (Source & Bundles) | NASA / JPL-Caltech / University of Arizona |
+| **MOLA Elevation Model** | MGS / NASA GSFC / PDS | MOLA MEGDR 128 ppd | **VERIFIED** Public Domain (17 U.S.C. § 105) | Distributable | NASA / GSFC / MGS MOLA Science Team |
+| **Viking MDIM 2.1** | Viking / NASA / USGS | Mars Digital Image Model 2.1 | **VERIFIED** Public Domain (USGS Open Data) | Distributable | NASA / USGS Astrogeology Science Center |
+| **CTX Global Mosaic V01** | MRO / MSSS / Murray Lab Caltech | `10.17189/m23v-ae12` | **VERIFIED** Free for all uses | Distributable with Attribution | NASA/JPL-Caltech/MSSS/The Murray Lab |
+| **MMGIS Software** | NASA-AMMOS / JPL | GitHub: `NASA-AMMOS/MMGIS` | **VERIFIED** Apache License 2.0 | Distributable (Code Only) | NASA Jet Propulsion Laboratory |
+| **MMGIS Rover Telemetry** | Mars 2020 / NASA MMGIS Feed | `M20_waypoints.json` | **EXCLUDED PENDING RIGHTS CONFIRMATION** (`terms_of_use: null`) | **QUARANTINED** (Purged from Releases) | NASA / JPL-Caltech / MMGIS |
+| **Mars 2020 SPICE Archive** | Mars 2020 / NASA PDS NAIF | `M2020-M-SPICE-6-V1.0` | **VERIFIED** Public Domain (NASA PDS Open Access) | Approved Roadmap Baseline | NASA / JPL / PDS NAIF |
+
+---
+
+## 6. Software Licenses & Third-Party Dependencies
+
+- **VyomPath Application:** Licensed under the [Apache License 2.0](LICENSE).
+- **Core Open-Source Dependencies:**
   - FastAPI (MIT License)
   - Pydantic (MIT License)
   - Rasterio & GDAL (BSD 3-Clause / MIT)

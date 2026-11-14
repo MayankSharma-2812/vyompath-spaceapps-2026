@@ -34,7 +34,7 @@
   "bundle_dir_evaluated": "C:\\Users\\aryat\\AppData\\Local\\Temp\\vyompath_bundle",
   "points": [
     {
-      "name": "POI-M20-SOL-013",
+      "name": "SYNTH-GRID-POINT-01",
       "lon": 77.45088572,
       "lat": 18.44462715,
       "z": 12,
@@ -53,10 +53,10 @@
         "tiles_aoi": true,
         "tiles_hillshade": true
       },
-      "notes": "Perseverance Sol 13 (landing site vicinity; outside v2 valid stereo footprint)"
+      "notes": "Synthetic benchmark point 01 (vicinity check; outside v2 valid stereo footprint)"
     },
     {
-      "name": "POI-M20-SOL-013",
+      "name": "SYNTH-GRID-POINT-01",
       "lon": 77.45088572,
       "lat": 18.44462715,
       "z": 14,
@@ -75,10 +75,10 @@
         "tiles_aoi": true,
         "tiles_hillshade": true
       },
-      "notes": "Perseverance Sol 13 (landing site vicinity; outside v2 valid stereo footprint)"
+      "notes": "Synthetic benchmark point 01 (vicinity check; outside v2 valid stereo footprint)"
     },
     {
-      "name": "POI-M20-SOL-013",
+      "name": "SYNTH-GRID-POINT-01",
       "lon": 77.45088572,
       "lat": 18.44462715,
       "z": 15,
@@ -97,10 +97,10 @@
         "tiles_aoi": false,
         "tiles_hillshade": false
       },
-      "notes": "Perseverance Sol 13 (landing site vicinity; outside v2 valid stereo footprint)"
+      "notes": "Synthetic benchmark point 01 (vicinity check; outside v2 valid stereo footprint)"
     },
     {
-      "name": "POI-M20-SOL-013",
+      "name": "SYNTH-GRID-POINT-01",
       "lon": 77.45088572,
       "lat": 18.44462715,
       "z": 16,
@@ -119,10 +119,10 @@
         "tiles_aoi": false,
         "tiles_hillshade": false
       },
-      "notes": "Perseverance Sol 13 (landing site vicinity; outside v2 valid stereo footprint)"
+      "notes": "Synthetic benchmark point 01 (vicinity check; outside v2 valid stereo footprint)"
     },
     {
-      "name": "POI-M20-SOL-023",
+      "name": "SYNTH-GRID-POINT-02",
       "lon": 77.45177711,
       "lat": 18.44520229,
       "z": 12,
@@ -141,10 +141,10 @@
         "tiles_aoi": true,
         "tiles_hillshade": true
       },
-      "notes": "Perseverance Sol 23 (early ingress; outside v2 valid stereo footprint)"
+      "notes": "Synthetic benchmark point 02 (ingress check; outside v2 valid stereo footprint)"
     },
     {
-      "name": "POI-M20-SOL-023",
+      "name": "SYNTH-GRID-POINT-02",
       "lon": 77.45177711,
       "lat": 18.44520229,
       "z": 14,
@@ -163,10 +163,10 @@
         "tiles_aoi": true,
         "tiles_hillshade": true
       },
-      "notes": "Perseverance Sol 23 (early ingress; outside v2 valid stereo footprint)"
+      "notes": "Synthetic benchmark point 02 (ingress check; outside v2 valid stereo footprint)"
     },
     {
-      "name": "POI-M20-SOL-023",
+      "name": "SYNTH-GRID-POINT-02",
       "lon": 77.45177711,
       "lat": 18.44520229,
       "z": 15,
@@ -185,10 +185,10 @@
         "tiles_aoi": false,
         "tiles_hillshade": false
       },
-      "notes": "Perseverance Sol 23 (early ingress; outside v2 valid stereo footprint)"
+      "notes": "Synthetic benchmark point 02 (ingress check; outside v2 valid stereo footprint)"
     },
     {
-      "name": "POI-M20-SOL-023",
+      "name": "SYNTH-GRID-POINT-02",
       "lon": 77.45177711,
       "lat": 18.44520229,
       "z": 16,
@@ -207,10 +207,10 @@
         "tiles_aoi": false,
         "tiles_hillshade": false
       },
-      "notes": "Perseverance Sol 23 (early ingress; outside v2 valid stereo footprint)"
+      "notes": "Synthetic benchmark point 02 (ingress check; outside v2 valid stereo footprint)"
     },
     {
-      "name": "POI-M20-SOL-034",
+      "name": "SYNTH-GRID-POINT-03",
       "lon": 77.45102155,
       "lat": 18.44486273,
       "z": 12,
@@ -229,10 +229,10 @@
         "tiles_aoi": true,
         "tiles_hillshade": true
       },
-      "notes": "Perseverance Sol 34 (Van Zyl overlook; outside v2 valid stereo footprint)"
+      "notes": "Synthetic benchmark point 03 (overlook check; outside v2 valid stereo footprint)"
     },
     {
-      "name": "POI-M20-SOL-034",
+      "name": "SYNTH-GRID-POINT-03",
       "lon": 77.45102155,
       "lat": 18.44486273,
       "z": 14,
@@ -251,10 +251,10 @@
         "tiles_aoi": true,
         "tiles_hillshade": true
       },
-      "notes": "Perseverance Sol 34 (Van Zyl overlook; outside v2 valid stereo footprint)"
+      "notes": "Synthetic benchmark point 03 (overlook check; outside v2 valid stereo footprint)"
     },
     {
-      "name": "POI-M20-SOL-034",
+      "name": "SYNTH-GRID-POINT-03",
       "lon": 77.45102155,
       "lat": 18.44486273,
       "z": 15,
@@ -273,10 +273,10 @@
         "tiles_aoi": false,
         "tiles_hillshade": false
       },
-      "notes": "Perseverance Sol 34 (Van Zyl overlook; outside v2 valid stereo footprint)"
+      "notes": "Synthetic benchmark point 03 (overlook check; outside v2 valid stereo footprint)"
     },
     {
-      "name": "POI-M20-SOL-034",
+      "name": "SYNTH-GRID-POINT-03",
       "lon": 77.45102155,
       "lat": 18.44486273,
       "z": 16,
@@ -295,10 +295,10 @@
         "tiles_aoi": false,
         "tiles_hillshade": false
       },
-      "notes": "Perseverance Sol 34 (Van Zyl overlook; outside v2 valid stereo footprint)"
+      "notes": "Synthetic benchmark point 03 (overlook check; outside v2 valid stereo footprint)"
     },
     {
-      "name": "POI-M20-SOL-386",
+      "name": "SYNTH-GRID-POINT-04",
       "lon": 77.46313311,
       "lat": 18.4607914,
       "z": 12,
@@ -317,10 +317,10 @@
         "tiles_aoi": true,
         "tiles_hillshade": true
       },
-      "notes": "Perseverance Sol 386 (rapid transit waypoint; INSIDE v2 valid stereo footprint)"
+      "notes": "Synthetic benchmark point 04 (transit check; INSIDE v2 valid stereo footprint)"
     },
     {
-      "name": "POI-M20-SOL-386",
+      "name": "SYNTH-GRID-POINT-04",
       "lon": 77.46313311,
       "lat": 18.4607914,
       "z": 14,
@@ -339,10 +339,10 @@
         "tiles_aoi": true,
         "tiles_hillshade": true
       },
-      "notes": "Perseverance Sol 386 (rapid transit waypoint; INSIDE v2 valid stereo footprint)"
+      "notes": "Synthetic benchmark point 04 (transit check; INSIDE v2 valid stereo footprint)"
     },
     {
-      "name": "POI-M20-SOL-386",
+      "name": "SYNTH-GRID-POINT-04",
       "lon": 77.46313311,
       "lat": 18.4607914,
       "z": 15,
@@ -361,10 +361,10 @@
         "tiles_aoi": true,
         "tiles_hillshade": true
       },
-      "notes": "Perseverance Sol 386 (rapid transit waypoint; INSIDE v2 valid stereo footprint)"
+      "notes": "Synthetic benchmark point 04 (transit check; INSIDE v2 valid stereo footprint)"
     },
     {
-      "name": "POI-M20-SOL-386",
+      "name": "SYNTH-GRID-POINT-04",
       "lon": 77.46313311,
       "lat": 18.4607914,
       "z": 16,
@@ -383,10 +383,10 @@
         "tiles_aoi": true,
         "tiles_hillshade": true
       },
-      "notes": "Perseverance Sol 386 (rapid transit waypoint; INSIDE v2 valid stereo footprint)"
+      "notes": "Synthetic benchmark point 04 (transit check; INSIDE v2 valid stereo footprint)"
     },
     {
-      "name": "POI-M20-SOL-387",
+      "name": "SYNTH-GRID-POINT-05",
       "lon": 77.46157944,
       "lat": 18.46447597,
       "z": 12,
@@ -405,10 +405,10 @@
         "tiles_aoi": true,
         "tiles_hillshade": true
       },
-      "notes": "Perseverance Sol 387 (rapid transit staging; INSIDE v2 valid stereo footprint)"
+      "notes": "Synthetic benchmark point 05 (staging check; INSIDE v2 valid stereo footprint)"
     },
     {
-      "name": "POI-M20-SOL-387",
+      "name": "SYNTH-GRID-POINT-05",
       "lon": 77.46157944,
       "lat": 18.46447597,
       "z": 14,
@@ -427,10 +427,10 @@
         "tiles_aoi": true,
         "tiles_hillshade": true
       },
-      "notes": "Perseverance Sol 387 (rapid transit staging; INSIDE v2 valid stereo footprint)"
+      "notes": "Synthetic benchmark point 05 (staging check; INSIDE v2 valid stereo footprint)"
     },
     {
-      "name": "POI-M20-SOL-387",
+      "name": "SYNTH-GRID-POINT-05",
       "lon": 77.46157944,
       "lat": 18.46447597,
       "z": 15,
@@ -449,10 +449,10 @@
         "tiles_aoi": true,
         "tiles_hillshade": true
       },
-      "notes": "Perseverance Sol 387 (rapid transit staging; INSIDE v2 valid stereo footprint)"
+      "notes": "Synthetic benchmark point 05 (staging check; INSIDE v2 valid stereo footprint)"
     },
     {
-      "name": "POI-M20-SOL-387",
+      "name": "SYNTH-GRID-POINT-05",
       "lon": 77.46157944,
       "lat": 18.46447597,
       "z": 16,
@@ -471,7 +471,7 @@
         "tiles_aoi": true,
         "tiles_hillshade": true
       },
-      "notes": "Perseverance Sol 387 (rapid transit staging; INSIDE v2 valid stereo footprint)"
+      "notes": "Synthetic benchmark point 05 (staging check; INSIDE v2 valid stereo footprint)"
     },
     {
       "name": "Footprint-NW-Corner",

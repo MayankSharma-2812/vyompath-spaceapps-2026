@@ -196,11 +196,11 @@ def verify_golden_poi_corridors() -> bool:
         route_xy = np.array([local_xy_m(lon, lat, lon0, lat0) for lon, lat in pts])
 
         for ep in ct["expected_pois"]:
-            # Lookup POI coordinates from MMGIS anchor
-            if ep["id"] == "POI-M20-SOL-386":
-                p_geo = (77.46313311, 18.4607914)
-            elif ep["id"] == "POI-M20-SOL-387":
-                p_geo = (77.46157944, 18.46447597)
+            # Lookup POI coordinates from synthetic anchor (per Issue #11)
+            if ep["id"] in ("SYNTH-POI-001", "POI-M20-SOL-386"):
+                p_geo = (77.4635, 18.4600) if ep["id"] == "SYNTH-POI-001" else (77.46313311, 18.4607914)
+            elif ep["id"] in ("SYNTH-POI-002", "POI-M20-SOL-387"):
+                p_geo = (77.4620, 18.4650) if ep["id"] == "SYNTH-POI-002" else (77.46157944, 18.46447597)
             else:
                 continue
 

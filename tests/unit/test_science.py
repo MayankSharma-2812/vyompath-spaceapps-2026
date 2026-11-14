@@ -28,7 +28,9 @@ from backend.app.services.coords import (
     local_xy_m,
 )
 from backend.app.services.science import (
+    _CATALOGUE_CANDIDATE_PATHS,
     _MARS_RADIUS_M,
+    _REPO_ROOT,
     _load_catalogue,
     _m_per_deg_lat,
     nearby_pois,
@@ -165,14 +167,10 @@ class TestLoadCatalogue:
         assert _load_catalogue(path) == []
 
     def test_real_catalogue_loads(self):
-        """The actual shipped catalogue should load 5 strictly sourced MMGIS POIs."""
+        """The actual shipped catalogue should load an empty list (quarantined per Issue #11)."""
         data = _load_catalogue()
         assert isinstance(data, list)
-        assert len(data) == 5
-        ids = {p["id"] for p in data}
-        assert "POI-M20-SOL-386" in ids
-        assert "POI-M20-SOL-387" in ids
-        assert "POI-M20-SOL-013" in ids
+        assert len(data) == 0
 
     def test_catalogue_schema_support_both_formats(self, tmp_path: Path):
         """Service should load both dict-with-points schema and flat list schema."""
@@ -352,8 +350,8 @@ class TestNearbyPoints:
         res2 = nearby_points(route, buffer_distance_m=250.0, catalogue_path=cat)
         assert res1 == res2
 
-    def test_bundle_sol_corridor_100m(self):
-        """Bundle demo route sol corridor 100m should find Sol 386 and Sol 387."""
+    def test_synthetic_corridor_100m(self):
+        """Synthetic corridor 100m should find SYNTH-POI-001 and SYNTH-POI-002."""
         fixture_path = (
             Path(__file__).resolve().parent.parent
             / "fixtures"
@@ -369,24 +367,29 @@ class TestNearbyPoints:
             Coordinate(lon=pt["coordinates"][0], lat=pt["coordinates"][1])
             for pt in data["sample_points"]
         ]
-        results = nearby_pois(route, buffer_distance_m=100.0)
+        synth_cat = (
+            Path(__file__).resolve().parent.parent
+            / "fixtures"
+            / "synthetic_science_points.json"
+        )
+        results = nearby_pois(route, buffer_distance_m=100.0, catalogue_path=synth_cat)
 
         assert len(results) == 2
-        p386 = next(r for r in results if r.id == "POI-M20-SOL-386")
-        p387 = next(r for r in results if r.id == "POI-M20-SOL-387")
+        p1 = next(r for r in results if r.id == "SYNTH-POI-001")
+        p2 = next(r for r in results if r.id == "SYNTH-POI-002")
 
-        # Analytical values from bundle: 11.2m cross-track, 169.28m along-route
-        assert p386.cross_track_m == pytest.approx(11.20, abs=0.5)
-        assert p386.along_route_m == pytest.approx(169.28, abs=0.5)
+        # Analytical values from golden_pois.json
+        assert p1.cross_track_m == pytest.approx(1.85, abs=0.5)
+        assert p1.along_route_m == pytest.approx(119.73, abs=0.5)
 
-        # Analytical values from bundle: 63.38m cross-track, 398.65m along-route
-        assert p387.cross_track_m == pytest.approx(63.38, abs=0.5)
-        assert p387.along_route_m == pytest.approx(398.65, abs=0.5)
+        assert p2.cross_track_m == pytest.approx(35.17, abs=0.5)
+        assert p2.along_route_m == pytest.approx(425.62, abs=0.5)
 
-    def test_bundle_sol_386_boundary_condition(self):
-        """Sol 386 sits at exactly 250.00 m cross-track on the 302 m route.
-        At buffer_distance_m=250.0, it MUST be included.
-        At buffer_distance_m=249.0, it MUST be excluded.
+    def test_synthetic_302m_boundary_condition(self):
+        """SYNTH-POI-001 sits at 236.95 m cross-track on the 302 m route.
+        At buffer_distance_m=250.0, it MUST be included (and SYNTH-POI-002 at 273.98 m excluded).
+        At buffer_distance_m=200.0, it MUST be excluded.
+        At buffer_distance_m=350.0, both MUST be included.
         """
         fixture_path = (
             Path(__file__).resolve().parent.parent
@@ -403,18 +406,23 @@ class TestNearbyPoints:
             Coordinate(lon=pt["coordinates"][0], lat=pt["coordinates"][1])
             for pt in data["sample_points"]
         ]
+        synth_cat = (
+            Path(__file__).resolve().parent.parent
+            / "fixtures"
+            / "synthetic_science_points.json"
+        )
 
-        # 250.0m buffer: Sol 386 is on boundary (included)
-        res_250 = nearby_pois(route, buffer_distance_m=250.0)
-        assert any(r.id == "POI-M20-SOL-386" for r in res_250)
-        assert not any(r.id == "POI-M20-SOL-387" for r in res_250)
+        # 250.0m buffer: SYNTH-POI-001 is included, SYNTH-POI-002 is outside
+        res_250 = nearby_pois(route, buffer_distance_m=250.0, catalogue_path=synth_cat)
+        assert any(r.id == "SYNTH-POI-001" for r in res_250)
+        assert not any(r.id == "SYNTH-POI-002" for r in res_250)
 
-        # 249.0m buffer: Sol 386 is excluded
-        res_249 = nearby_pois(route, buffer_distance_m=249.0)
-        assert not any(r.id == "POI-M20-SOL-386" for r in res_249)
+        # 200.0m buffer: SYNTH-POI-001 is excluded
+        res_200 = nearby_pois(route, buffer_distance_m=200.0, catalogue_path=synth_cat)
+        assert not any(r.id == "SYNTH-POI-001" for r in res_200)
 
-        # 350.0m buffer: both Sol 386 and Sol 387 included
-        res_350 = nearby_pois(route, buffer_distance_m=350.0)
+        # 350.0m buffer: both included
+        res_350 = nearby_pois(route, buffer_distance_m=350.0, catalogue_path=synth_cat)
         assert len(res_350) == 2
 
 
@@ -432,6 +440,11 @@ class TestGoldenPOIFixtures:
         assert fixtures_path.exists(), f"Missing fixtures file at {fixtures_path}"
 
         repo_root = Path(__file__).resolve().parents[2]
+        synth_cat = (
+            Path(__file__).resolve().parent.parent
+            / "fixtures"
+            / "synthetic_science_points.json"
+        )
 
         with open(fixtures_path, encoding="utf-8") as f:
             data = json.load(f)
@@ -450,7 +463,7 @@ class TestGoldenPOIFixtures:
             ]
 
             buffer_m = case["buffer_distance_m"]
-            results = nearby_pois(route, buffer_distance_m=buffer_m)
+            results = nearby_pois(route, buffer_distance_m=buffer_m, catalogue_path=synth_cat)
 
             expected_list = case["expected_pois"]
             assert len(results) == len(
@@ -465,5 +478,90 @@ class TestGoldenPOIFixtures:
                 assert actual.along_route_m == pytest.approx(
                     expected["along_route_m"], abs=1.0
                 ), f"Case '{case['test_id']}' POI {actual.id} along_route mismatch: {actual.along_route_m} vs {expected['along_route_m']}"
+
+
+# ---------------------------------------------------------------------------
+# Issue #11 Quarantine & Fallback Tests
+# ---------------------------------------------------------------------------
+
+class TestQuarantineAndFallback:
+    """Rigorous verification of unverified MMGIS quarantine and catalogue fallback resilience."""
+
+    def test_empty_production_catalogue(self):
+        """Primary catalogue data/poi_strictly_sourced.json is empty list."""
+        primary = _REPO_ROOT / "data" / "poi_strictly_sourced.json"
+        assert primary.exists()
+        with open(primary, encoding="utf-8") as f:
+            data = json.load(f)
+        assert data == []
+        assert _load_catalogue(primary) == []
+
+    def test_missing_primary_catalogue(self, tmp_path: Path):
+        """When primary catalogue is missing, service falls back safely."""
+        missing = tmp_path / "nonexistent.json"
+        assert _load_catalogue(missing) == []
+
+    def test_empty_fallback_catalogue(self):
+        """Fallback catalogues data/science_points.json and backend/data/science_points.json are empty."""
+        fb1 = _REPO_ROOT / "data" / "science_points.json"
+        fb2 = _REPO_ROOT / "backend" / "data" / "science_points.json"
+        assert fb1.exists()
+        assert fb2.exists()
+        with open(fb1, encoding="utf-8") as f:
+            assert json.load(f) == []
+        with open(fb2, encoding="utf-8") as f:
+            assert json.load(f) == []
+        assert _load_catalogue(fb1) == []
+        assert _load_catalogue(fb2) == []
+
+    def test_missing_fallback_catalogue(self, monkeypatch, tmp_path: Path):
+        """When all candidate catalogues are missing, service safely returns [] without crashing."""
+        monkeypatch.setattr(
+            "backend.app.services.science._CATALOGUE_CANDIDATE_PATHS",
+            [tmp_path / "missing1.json", tmp_path / "missing2.json"]
+        )
+        assert _load_catalogue() == []
+
+    def test_no_mmgis_records_in_catalogue(self):
+        """Zero unverified MMGIS records or identifiers exist across all candidate catalogue files."""
+        for p in _CATALOGUE_CANDIDATE_PATHS:
+            if p.exists():
+                text = p.read_text(encoding="utf-8")
+                assert "POI-M20-SOL" not in text
+                assert "M20_waypoints" not in text
+                assert "Perseverance" not in text
+
+    def test_api_route_analyze_empty_pois(self):
+        """POST /api/routes/analyze returns HTTP 200 with nearby_pois: [] and intact terrain elevation."""
+        from fastapi.testclient import TestClient
+        from backend.app.main import app
+
+        client = TestClient(app)
+        payload = {
+            "route_id": "quarantine-verify-route",
+            "coordinates": [
+                {"lon": 77.46, "lat": 18.46},
+                {"lon": 77.47, "lat": 18.46}
+            ],
+            "buffer_distance_m": 100.0
+        }
+        response = client.post("/api/routes/analyze", json=payload)
+        assert response.status_code == 200
+        data = response.json()
+        assert "nearby_pois" in data
+        assert data["nearby_pois"] == []
+        assert "elevation_profile" in data
+        assert len(data["elevation_profile"]) > 0
+
+    def test_frontend_waypoint_layer_empty(self):
+        """Frontend waypointData.ts declares ROVER_WAYPOINTS as empty array with no leaked coordinates."""
+        wp_path = _REPO_ROOT / "frontend" / "src" / "features" / "map" / "waypointData.ts"
+        assert wp_path.exists()
+        content = wp_path.read_text(encoding="utf-8")
+        assert "ROVER_WAYPOINTS: RoverWaypoint[] = [];" in content or "ROVER_WAYPOINTS: RoverWaypoint[] = []" in content
+        assert "POI-M20-SOL" not in content
+        assert "77.45088572" not in content
+        assert "18.44462715" not in content
+
 
 

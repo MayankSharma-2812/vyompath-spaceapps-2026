@@ -13,3 +13,10 @@
 *.md text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
+
+# Packaging exclusions for unverified third-party telemetry (Issue #11)
+data/M20_waypoints.json export-ignore
+tests/fixtures/golden_pois.json export-ignore
+tests/fixtures/validation/ export-ignore
+
+
