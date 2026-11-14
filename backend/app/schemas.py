@@ -12,7 +12,14 @@ from __future__ import annotations
 
 from typing import Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
+
+
+# ---------------------------------------------------------------------------
+# Constants
+# ---------------------------------------------------------------------------
+
+MAX_ROUTE_DISTANCE_M: float = 25_000.0
 
 
 # ---------------------------------------------------------------------------
@@ -65,6 +72,20 @@ class RouteAnalysisRequest(BaseModel):
         description="Lateral buffer in metres for nearby-POI search.",
     )
 
+    @model_validator(mode="after")
+    def validate_route_length(self) -> RouteAnalysisRequest:
+        """Reject routes exceeding the maximum permitted 25,000 metre cumulative length."""
+        from backend.app.services.coords import haversine_m
+        coords = self.coordinates
+        total_dist = 0.0
+        for i in range(len(coords) - 1):
+            total_dist += float(haversine_m(coords[i].lon, coords[i].lat, coords[i + 1].lon, coords[i + 1].lat))
+        if total_dist > MAX_ROUTE_DISTANCE_M + 1e-3:
+            raise ValueError(
+                f"Cumulative route distance ({total_dist:.1f} m) exceeds maximum permitted limit of 25,000.0 metres."
+            )
+        return self
+
 
 # ---------------------------------------------------------------------------
 # Route analysis response
@@ -78,9 +99,9 @@ class ElevationPoint(BaseModel):
         ge=0.0,
         description="Distance along route from the start, in metres.",
     )
-    elevation_m: float = Field(
-        ...,
-        description="Surface elevation at this distance, in metres.",
+    elevation_m: Optional[float] = Field(
+        default=None,
+        description="Surface elevation at this distance in metres, or null for uncovered segments.",
     )
 
 

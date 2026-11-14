@@ -245,6 +245,29 @@ To successfully connect terrain analysis to `POST /api/routes/analyze` in **Issu
 
 | Blocker ID | Description | Owner | Status | Target Resolution |
 |---|---|---|---|---|
-| **BLK-01** | Formal sign-off on Mars radius ($R = 3,396,190.0\text{ m}$) | Pranav Sharma | **PENDING** | [Issue #1](https://github.com/MayankSharma-2812/vyompath-spaceapps-2026/issues/1) (12:30 IST Checkpoint) |
-| **BLK-02** | Authoritative DTM file path configuration | Mayank Sharma | **READY** | Set `VYOMPATH_DEM_PATH` to external bundle path (e.g., `/path/to/vyompath-demo-bundle-v1.4/jezero_aoi_v2.tif`) |
-| **BLK-03** | 25 km route limit validation implementation | Mayank Sharma | **READY FOR DEV** | Scheduled in [Issue #7](https://github.com/MayankSharma-2812/vyompath-spaceapps-2026/issues/7) |
+| **BLK-01** | Formal sign-off on Mars radius ($R = 3,396,190.0\text{ m}$) | Pranav Sharma | **RESOLVED** | Merged in [PR #27](https://github.com/MayankSharma-2812/vyompath-spaceapps-2026/pull/27) ([Issue #1](https://github.com/MayankSharma-2812/vyompath-spaceapps-2026/issues/1)) |
+| **BLK-02** | Authoritative DTM file path configuration | Mayank Sharma | **RESOLVED** | Ingested via `VYOMPATH_DEM_PATH` in `terrain.sample_route_dtm()` |
+| **BLK-03** | 25 km route limit validation implementation | Mayank Sharma | **RESOLVED** | Enforced via Pydantic validator on `RouteAnalysisRequest` |
+
+---
+
+## 13. Implementation Resolution & Milestone Verification (Issue #7)
+
+- **Milestone Status:** **FULLY IMPLEMENTED & SCIENTIFICALLY VERIFIED**
+- **Changes Completed:**
+  1. **Canonical Geodesics:** Retired obsolete `_MARS_RADIUS_M = 3_389_500.0` in `backend/app/api/routes.py`. All geodetic distances strictly reference `MARS_RADIUS_M = 3_396_190.0` and `route_distance_m()` from `backend.app.services.terrain`.
+  2. **Server-Side Route Cap:** Added `@model_validator` on `RouteAnalysisRequest` enforcing the 25,000.0 m cumulative traverse maximum with HTTP 422 validation.
+  3. **Live DTM Raster Sampling:** Added `sample_route_dtm()` in `backend/app/services/terrain.py`:
+     - Reads external GeoTIFF path from `VYOMPATH_DEM_PATH`.
+     - Derives native projected CRS and instantiates `pyproj.Transformer.from_crs(crs_raster.geodetic_crs, crs_raster, always_xy=True)`.
+     - Computes bounding window around route waypoints and performs windowed Float32 reads.
+     - Executes strict 4-neighbor bilinear interpolation via `sample_point_bilinear()`.
+     - Fills micro-gaps ($\le 15.0\text{ m}$) via `process_elevation_gaps()`, determines coverage status (`complete`, `partial_gap`, `out_of_bounds`), and accumulates gain/loss.
+     - Evaluates along-track grades at 20 m, 50 m, and 100 m scales via `multi_scale_along_track_grades()`.
+     - Downsamples dense elevation curves using `lttb_downsample()` to cap wire payload at 500 samples.
+  4. **Truthful Mock Fallback:** When `VYOMPATH_DEM_PATH` is unset or unreadable, safely falls back to deterministic synthetic sine curves with explicit caveat disclosures.
+- **Verification Evidence:**
+  - With external HiRISE DTM mounted: **274 passed**, 0 failed, 0 skipped (14.41s).
+  - Without external DTM (CI baseline): **268 passed**, 6 skipped, 0 failed (9.93s).
+  - `scripts/verify_terrain_g3_g4.py`: All 6 tabletop pre-event engineering checks PASSED.
+  - Golden Sol 386 and Sol 387 elevation anchors: exact match within $\pm 0.05\text{ m}$ tolerance.

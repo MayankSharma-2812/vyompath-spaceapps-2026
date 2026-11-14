@@ -53,13 +53,14 @@ def test_layers_fallback_catalogue(client: TestClient) -> None:
 # 3. Route Analysis Tests
 # ---------------------------------------------------------------------------
 
-def test_route_analysis_valid_route(client: TestClient) -> None:
+def test_route_analysis_valid_route(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("VYOMPATH_DEM_PATH", raising=False)
     payload = {
         "route_id": "test-olympus-traverse",
         "coordinates": [
             {"lon": -134.0, "lat": 18.4},
-            {"lon": -133.5, "lat": 18.6},
-            {"lon": -133.0, "lat": 18.8},
+            {"lon": -133.9, "lat": 18.45},
+            {"lon": -133.8, "lat": 18.5},
         ],
         "buffer_distance_m": 500.0,
     }
@@ -68,7 +69,7 @@ def test_route_analysis_valid_route(client: TestClient) -> None:
     data = response.json()
 
     assert data["route_id"] == "test-olympus-traverse"
-    assert abs(data["total_distance_m"] - 60856.83) < 1.0
+    assert abs(data["total_distance_m"] - 12712.13) < 1.0
     assert len(data["elevation_profile"]) >= 2
     assert data["coverage_status"] == "complete"
     assert data["dtm_source"] == "synthetic/mock — no real DTM loaded"
@@ -79,6 +80,21 @@ def test_route_analysis_valid_route(client: TestClient) -> None:
     profile = data["elevation_profile"]
     assert profile[0]["distance_m"] == 0.0
     assert abs(profile[-1]["distance_m"] - data["total_distance_m"]) < 1.0
+
+
+def test_route_analysis_exceeds_25km_rejected(client: TestClient) -> None:
+    payload = {
+        "route_id": "test-olympus-too-long",
+        "coordinates": [
+            {"lon": -134.0, "lat": 18.4},
+            {"lon": -133.5, "lat": 18.6},
+            {"lon": -133.0, "lat": 18.8},
+        ],
+        "buffer_distance_m": 500.0,
+    }
+    response = client.post("/api/routes/analyze", json=payload)
+    assert response.status_code == 422
+    assert any("25,000" in err.get("msg", "") for err in response.json()["detail"])
 
 
 def test_route_analysis_determinism(client: TestClient) -> None:
