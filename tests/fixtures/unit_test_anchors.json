@@ -2,8 +2,8 @@
   "document_title": "VyomPath Phase 5 Unit-Test Anchors & Geodetic Coordinate Mapping",
   "gdal_anchor_queries": [
     {
-      "poi_id": "POI-M20-SOL-386",
-      "name": "Perseverance position, sol 386",
+      "poi_id": "SYNTH-GEODETIC-ANCHOR-1",
+      "name": "Synthetic geodetic anchor 1",
       "sol": 386,
       "query_coords": [
         77.46313311,
@@ -15,8 +15,8 @@
       "raw_stderr": ""
     },
     {
-      "poi_id": "POI-M20-SOL-387",
-      "name": "Perseverance position, sol 387",
+      "poi_id": "SYNTH-GEODETIC-ANCHOR-2",
+      "name": "Synthetic geodetic anchor 2",
       "sol": 387,
       "query_coords": [
         77.46157944,
@@ -30,8 +30,8 @@
   ],
   "offset_geodetic_analysis": {
     "test_point": {
-      "id": "POI-M20-SOL-386",
-      "name": "Perseverance position, sol 386",
+      "id": "SYNTH-GEODETIC-ANCHOR-1",
+      "name": "Synthetic geodetic anchor 1",
       "coordinates": [
         77.46313311,
         18.4607914

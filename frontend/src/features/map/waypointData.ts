@@ -1,10 +1,9 @@
 /**
- * waypointData.ts — Authoritative Rover Telemetry, Footprint Polygon & POI Metadata
+ * waypointData.ts — Footprint Polygon & POI Definitions
  *
  * Sourced directly from:
- * - data/footprints/jezero_dtm.geojson (98-vertex canonical stereo HiRISE DTM boundary)
- * - data/M20_waypoints.json (NASA MMGIS Mars 2020 telemetry)
- * - docs/backend-frontend-integration-contract.md § 6 (Science POI Provenance & Geographic Reality)
+ * - data/footprints/jezero_dtm.geojson (98-vertex display stereo HiRISE DTM boundary)
+ * - Third-party rover telemetry quarantined per Issue #11 pending verified rights.
  */
 
 import type { RoverWaypoint } from './types';
@@ -117,109 +116,11 @@ export const JEZERO_DTM_FOOTPRINT_COORDINATES: [number, number][] = [
 ];
 
 /**
- * Authoritative Mars 2020 Perseverance Rover Waypoints.
- * Verified coordinates from data/M20_waypoints.json and data/poi_strictly_sourced.json.
+ * Mars 2020 Perseverance Rover Waypoints.
+ * Quarantined per Issue #11 pending verified upstream redistribution rights.
+ * Default shipping state is an empty array to prevent distribution of unverified telemetry.
  */
-export const ROVER_WAYPOINTS: RoverWaypoint[] = [
-  // Sols 383-387: Verified inside the valid HiRISE stereo DTM strip
-  {
-    id: 'POI-M20-SOL-383',
-    name: 'Perseverance Position — Sol 383',
-    sol: 383,
-    site: 13,
-    drive: 1280,
-    lon: 77.46185940,
-    lat: 18.45367134,
-    elev_geoid_m: -2570.64,
-    inside_footprint: true,
-    note: 'Rapid transit waypoint (Site 13, Drive 1280). Inside HiRISE stereo DTM footprint.',
-  },
-  {
-    id: 'POI-M20-SOL-384',
-    name: 'Perseverance Position — Sol 384',
-    sol: 384,
-    site: 13,
-    drive: 2448,
-    lon: 77.46200525,
-    lat: 18.45706984,
-    elev_geoid_m: -2568.77,
-    inside_footprint: true,
-    note: 'Rapid transit staging (Site 13, Drive 2448). 13.56m from Sol 385.',
-  },
-  {
-    id: 'POI-M20-SOL-385',
-    name: 'Perseverance Position — Sol 385',
-    sol: 385,
-    site: 14,
-    drive: 0,
-    lon: 77.46193718,
-    lat: 18.45728929,
-    elev_geoid_m: -2568.82,
-    inside_footprint: true,
-    note: 'Site 14 arrival point (Site 14, Drive 0). 13.56m from Sol 384.',
-  },
-  {
-    id: 'POI-M20-SOL-386',
-    name: 'Perseverance Position — Sol 386',
-    sol: 386,
-    site: 14,
-    drive: 1176,
-    lon: 77.46313311,
-    lat: 18.46079140,
-    elev_geoid_m: -2567.89,
-    inside_footprint: true,
-    note: 'Rapid transit waypoint (Site 14, Drive 1176). Inside HiRISE stereo DTM footprint.',
-  },
-  {
-    id: 'POI-M20-SOL-387',
-    name: 'Perseverance Position — Sol 387',
-    sol: 387,
-    site: 15,
-    drive: 0,
-    lon: 77.46157944,
-    lat: 18.46447597,
-    elev_geoid_m: -2567.74,
-    inside_footprint: true,
-    note: 'Rapid transit staging (Site 15, Drive 0). Inside HiRISE stereo DTM footprint.',
-  },
-  // Early mission waypoints (Landing site vicinity; ~0.6km west outside stereo DTM)
-  {
-    id: 'POI-M20-SOL-013',
-    name: 'Perseverance Position — Sol 13',
-    sol: 13,
-    site: 3,
-    drive: 0,
-    lon: 77.45088572,
-    lat: 18.44462715,
-    elev_geoid_m: -2569.91,
-    inside_footprint: false,
-    note: 'Site 3 increment (Landing site vicinity; ~680m west of stereo DTM).',
-  },
-  {
-    id: 'POI-M20-SOL-023',
-    name: 'Perseverance Position — Sol 23',
-    sol: 23,
-    site: 3,
-    drive: 792,
-    lon: 77.45177711,
-    lat: 18.44520229,
-    elev_geoid_m: -2568.97,
-    inside_footprint: false,
-    note: 'Early ingress drive. Outside stereo DTM footprint.',
-  },
-  {
-    id: 'POI-M20-SOL-034',
-    name: 'Perseverance Position — Sol 34',
-    sol: 34,
-    site: 3,
-    drive: 0,
-    lon: 77.45102155,
-    lat: 18.44486273,
-    elev_geoid_m: -2569.45,
-    inside_footprint: false,
-    note: 'Van Zyl overlook waypoint. Outside stereo DTM footprint.',
-  },
-];
+export const ROVER_WAYPOINTS: RoverWaypoint[] = [];
 
 export const GEOLOGICAL_EMPTY_STATE_MESSAGE =
-  'Zero catalogued USGS/PDS geological formations lie within this 8.3 × 10 km micro-DTM. Displaying verified Mars 2020 operational traverse waypoints (Sols 383–387).';
+  'Zero catalogued USGS/PDS geological formations lie within this 8.3 × 10 km micro-DTM. Third-party rover waypoints are excluded pending verified redistribution rights.';

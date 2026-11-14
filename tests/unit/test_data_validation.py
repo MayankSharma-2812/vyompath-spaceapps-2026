@@ -155,12 +155,5 @@ class TestCitationAndLicensingSemantics:
         with open(repo_points, "r", encoding="utf-8") as f:
             pts = json.load(f)
 
-        assert len(pts) == 5
-        for p in pts:
-            assert p["terms_of_use"] is None
-            assert p["source_policy_reference"] is None
-            assert p["source_policy_status"] == "unverified"
-            assert p["terms_of_use_status"] == "unverified"
-            assert p["citation"]
-            assert p["source_url"].startswith("https://")
-            assert p["source_note"]
+        # Quarantined per Issue #11: shipping catalogue must be empty
+        assert len(pts) == 0

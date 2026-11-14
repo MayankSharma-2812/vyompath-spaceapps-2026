@@ -299,7 +299,7 @@
     },
     {
       "route_id": "J-handcheck",
-      "description": "6-point arithmetic-checkable route anchored to the published Sol-386 Perseverance waypoint (lon=77.46313311, lat=18.4607914). Elevation at anchor point independently verified by Shyam via gdallocationinfo: pixel (col=1360, row=2157), elev=-2568.873 m. The 431-pixel naive-vs-pyproj offset test MUST fail with any naive non-pyproj transform on this route. Source: unit_test_anchors.json anchor POI-M20-SOL-386.",
+      "description": "6-point arithmetic-checkable route anchored to synthetic geodetic anchor 1 (lon=77.46313311, lat=18.4607914). Elevation at anchor point independently verified by Shyam via gdallocationinfo: pixel (col=1360, row=2157), elev=-2568.873 m. The 431-pixel naive-vs-pyproj offset test MUST fail with any naive non-pyproj transform on this route. Source: unit_test_anchors.json anchor SYNTH-GEODETIC-ANCHOR-1.",
       "source_raster": "jezero_aoi_v2.tif",
       "source_fixture": "tests/fixtures/unit_test_anchors.json",
       "verification_method": "gdallocationinfo (Shyam Windows machine) + pyproj offset analysis in unit_test_anchors.json. See offset_metrics: northing_offset_dy_m=435.032, row_shift_pixels=-431.",

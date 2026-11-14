@@ -131,7 +131,7 @@ def resolve_citation(record: dict) -> str | None:
     return None
 
 
-def validate_science_points(path: Path = POINTS_FILE) -> list[str]:
+def validate_science_points(path: Path = POINTS_FILE, allow_empty: bool = True) -> list[str]:
     """Validate science points of interest JSON file."""
     errors = []
     if not path.is_file():
@@ -147,7 +147,7 @@ def validate_science_points(path: Path = POINTS_FILE) -> list[str]:
     except ValueError as exc:
         return [str(exc)]
 
-    if len(points) == 0:
+    if len(points) == 0 and not allow_empty:
         errors.append("Science catalogue 'points' list is empty.")
 
     base_required_keys = ["id", "name", "coordinates", "mission", "significance", "source_url"]

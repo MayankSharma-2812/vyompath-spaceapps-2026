@@ -101,3 +101,7 @@ data/dtm/DTEE*.tif
 !data/dtm/README.md
 !data/dtm/acquire_dtm.py
 !data/dtm/syrtis_major_sample_dtm.tif
+
+# Unverified upstream mission telemetry layers (quarantined per Issue #11)
+data/M20_waypoints.json
+
