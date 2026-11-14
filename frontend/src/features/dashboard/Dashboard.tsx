@@ -37,9 +37,12 @@ export type RouteAnalysisResponse = RouteAnalysisData;
 
 const API_BASE_URL =
   (import.meta.env.VITE_API_URL as string | undefined) ||
-  (typeof window !== 'undefined' && window.location.hostname === '127.0.0.1'
-    ? 'http://127.0.0.1:8000'
-    : 'http://localhost:8000');
+  (typeof window !== 'undefined' &&
+  (window.location.port === '' || window.location.port === '80' || window.location.port === '8080')
+    ? ''
+    : typeof window !== 'undefined' && window.location.hostname === '127.0.0.1'
+      ? 'http://127.0.0.1:8000'
+      : 'http://localhost:8000');
 
 const COMPARISON_METRICS = [
   { key: 'total_distance_m', title: 'Distance', unit: 'm' },
@@ -101,7 +104,22 @@ const navigationItems = [
   'Data Sources',
 ];
 
-function Sidebar() {
+const NAVIGATION_TARGETS: Record<string, string> = {
+  'Explore Map': 'map-section',
+  'Route Planner': 'map-section',
+  'Mission Layers': 'map-section',
+  'Scientific Sites': 'summary-section',
+  'Terrain Profile': 'terrain-section',
+  'Route Comparison': 'comparison-section',
+  'Data Sources': 'provenance-section',
+};
+
+interface SidebarProps {
+  activeItem: string;
+  onNavigate: (item: string) => void;
+}
+
+function Sidebar({ activeItem, onNavigate }: SidebarProps) {
   return (
     <aside className="sidebar">
       <a className="brand" href="#dashboard" aria-label="NAKSHATRA-VYOMPATH dashboard">
@@ -114,17 +132,29 @@ function Sidebar() {
       <div className="sidebar-label">WORKSPACE</div>
       <nav aria-label="Main navigation">
         <ul className="navigation-list">
-          {navigationItems.map((item, index) => (
-            <li key={item}>
-              <span
-                className={`navigation-item${index === 0 ? ' is-active' : ''}`}
-                aria-current={index === 0 ? 'page' : undefined}
-              >
-                <span className="navigation-marker" aria-hidden="true" />
-                {item}
-              </span>
-            </li>
-          ))}
+          {navigationItems.map((item) => {
+            const isActive = activeItem === item;
+            return (
+              <li key={item}>
+                <button
+                  type="button"
+                  onClick={() => onNavigate(item)}
+                  className={`navigation-item${isActive ? ' is-active' : ''}`}
+                  aria-current={isActive ? 'page' : undefined}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    width: '100%',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <span className="navigation-marker" aria-hidden="true" />
+                  {item}
+                </button>
+              </li>
+            );
+          })}
         </ul>
       </nav>
       <div className="sidebar-footer">
@@ -289,7 +319,7 @@ function MapContainer({
       : null;
 
   return (
-    <section className="panel map-panel" aria-labelledby="map-title">
+    <section className="panel map-panel" id="map-section" aria-labelledby="map-title">
       <div className="panel-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <span className="eyebrow">MAP WORKSPACE</span>
@@ -417,7 +447,7 @@ function RouteComparison({
         : 'No Route A drawn. Draw a route or select a corridor to analyze Route A.';
 
   return (
-    <section className="panel comparison-panel" aria-labelledby="comparison-title">
+    <section className="panel comparison-panel" id="comparison-section" aria-labelledby="comparison-title">
       <div className="panel-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <span className="eyebrow">ROUTE ANALYSIS</span>
@@ -579,7 +609,7 @@ function TerrainProfile({ analysis, isLoading, error }: TerrainProfileProps) {
             : 'LIVE DTM DATA';
 
   return (
-    <div className="terrain-analysis-stack">
+    <div className="terrain-analysis-stack" id="terrain-section">
       <section className="panel terrain-panel" aria-labelledby="terrain-title">
         <div className="panel-heading">
           <div>
@@ -613,12 +643,18 @@ function TerrainProfile({ analysis, isLoading, error }: TerrainProfileProps) {
   );
 }
 
-function RouteSummary({ analysis }: { analysis: RouteAnalysisResponse | null }) {
+function RouteSummary({
+  analysis,
+  onSelectPreset,
+}: {
+  analysis: RouteAnalysisResponse | null;
+  onSelectPreset?: (presetKey: string) => void;
+}) {
   const nearbyPois = analysis?.nearby_pois ?? [];
   const limitations = analysis?.limitations ?? [];
 
   return (
-    <section className="panel summary-panel" aria-labelledby="summary-title">
+    <section className="panel summary-panel" id="summary-section" aria-labelledby="summary-title">
       <div className="panel-heading">
         <div>
           <span className="eyebrow">MISSION ANALYSIS</span>
@@ -661,6 +697,14 @@ function RouteSummary({ analysis }: { analysis: RouteAnalysisResponse | null }) 
           <EmptyState
             title="No route metrics yet"
             description="Draw a route on the Mars map or choose a preset corridor to calculate terrain metrics."
+            action={
+              onSelectPreset
+                ? {
+                    label: 'Load Jezero Floor Corridor',
+                    onClick: () => onSelectPreset('jezeroFloor'),
+                  }
+                : undefined
+            }
           />
         )}
       </div>
@@ -702,7 +746,7 @@ function RouteSummary({ analysis }: { analysis: RouteAnalysisResponse | null }) 
       </div>
 
       {limitations.length > 0 && (
-        <div className="summary-section">
+        <div className="summary-section" id="provenance-section">
           <h3>Scientific limitations & data provenance</h3>
           <ul
             style={{
@@ -876,9 +920,23 @@ function Dashboard() {
     setRouteBAnalysis(null);
   }, []);
 
+  // Active navigation tracking and smooth scrolling
+  const [activeNav, setActiveNav] = useState<string>('Explore Map');
+
+  const handleNavigate = useCallback((item: string) => {
+    setActiveNav(item);
+    const targetId = NAVIGATION_TARGETS[item];
+    if (targetId) {
+      const el = document.getElementById(targetId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, []);
+
   return (
     <div className="dashboard-layout" id="dashboard">
-      <Sidebar />
+      <Sidebar activeItem={activeNav} onNavigate={handleNavigate} />
       <main className="dashboard-main">
         <TopToolbar
           backendMode={backendMode}
@@ -918,7 +976,10 @@ function Dashboard() {
               onSetAsRouteB={handleSetAsRouteB}
               onClearRouteB={handleClearRouteB}
             />
-            <RouteSummary analysis={analysis} />
+            <RouteSummary
+              analysis={analysis}
+              onSelectPreset={handleSelectPreset}
+            />
           </div>
         </div>
       </main>

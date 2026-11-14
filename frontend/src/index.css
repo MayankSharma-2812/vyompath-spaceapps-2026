@@ -120,6 +120,18 @@ input {
   border-left: 3px solid transparent;
   color: #e0e3e7;
   font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.navigation-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
+
+.navigation-item:focus-visible {
+  outline: 2px solid #d88a2d;
+  outline-offset: -2px;
 }
 
 .navigation-item.is-active {

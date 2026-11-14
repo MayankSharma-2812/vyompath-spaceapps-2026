@@ -534,8 +534,14 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                     : 'Coverage: Out of Stereo Bounds'}
                 </span>
               </div>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-950/70 border border-amber-500/40 text-amber-300">
-                DEVELOPMENT / MOCK DATA
+              <span
+                className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
+                  analysisResponse.is_mock
+                    ? 'bg-amber-950/70 border-amber-500/40 text-amber-300'
+                    : 'bg-emerald-950/70 border-emerald-500/40 text-emerald-300'
+                }`}
+              >
+                {analysisResponse.is_mock ? 'DEVELOPMENT / MOCK DATA' : 'LIVE HiRISE DTM'}
               </span>
             </div>
 

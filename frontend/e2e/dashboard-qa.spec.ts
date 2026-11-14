@@ -287,4 +287,24 @@ test.describe('Issue #14: Dashboard QA & Truth-in-Labeling Verification', () => 
     expect(content).toContain('Traversability outputs are advisory risk indicators');
   });
 
+  test('QA-11: Interactive sidebar navigation buttons update active state and navigate sections', async ({ page }) => {
+    await page.goto('/');
+
+    // 1. Initial state has 'Explore Map' active
+    const exploreBtn = page.getByRole('button', { name: 'Explore Map' });
+    await expect(exploreBtn).toHaveClass(/is-active/);
+
+    // 2. Click 'Terrain Profile' navigation button
+    const terrainBtn = page.getByRole('button', { name: 'Terrain Profile' });
+    await terrainBtn.click();
+    await expect(terrainBtn).toHaveClass(/is-active/);
+    await expect(page.locator('#terrain-section')).toBeVisible();
+
+    // 3. Click 'Route Comparison' navigation button
+    const comparisonBtn = page.getByRole('button', { name: 'Route Comparison' });
+    await comparisonBtn.click();
+    await expect(comparisonBtn).toHaveClass(/is-active/);
+    await expect(page.locator('#comparison-section')).toBeVisible();
+  });
+
 });
