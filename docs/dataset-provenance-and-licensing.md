@@ -66,12 +66,18 @@ VyomPath enforces strict planetary data integrity rules:
 
 ## 3. Regional Tile Packages
 
-### 3.1 Candidate v1.6 PNG Specification
-- **Total Tiles:** Exactly **2,380 PNG tiles** ($61.09\text{ MiB}$) across zooms 12–15:
-  - **Jezero Crater ($z=12\text{--}15$):** 930 basemap + 930 hillshade = 1,860 tiles ($48.04\text{ MiB}$)
-  - **Syrtis Major ($z=12\text{--}14$):** 260 basemap + 260 hillshade = 520 tiles (~$12\text{ MiB}$)
+### 3.1 Verified Authoritative Offline Regional Data Bundle v1.6
+- **Authoritative Archive:** `vyompath-demo-bundle-v1.6.zip` (staged at `E:\DATASETS\_phase18\vyompath-demo-bundle-v1.6.zip`)
+- **File Size:** $189,252,569\text{ bytes}$ ($189.25\text{ MB}$ decimal, $180.49\text{ MiB}$ binary)
+- **SHA-256 Checksum:** `a3a1f6776845464411b0a317acef9631427411cc18bb7c0f479e75e9e75dcee4`
+- **Total Archive Entries:** Exactly **2,412 entries** (CRC-32 verified via `zipfile.testzip()`; 0 errors, 0 duplicates)
+- **Regional Image Tiles:** Exactly **2,380 PNG tiles** ($64,053,413\text{ bytes}$ uncompressed, $256 \times 256\text{ px}$):
+  - **Jezero Crater ($z=12\text{--}15$):** 930 basemap (`RGBA`) + 930 hillshade (`LA`) = 1,860 tiles ($50,369,634\text{ bytes}$)
+  - **Syrtis Major ($z=12\text{--}14$):** 260 basemap (`RGBA`) + 260 hillshade (`LA`) = 520 tiles ($13,683,779\text{ bytes}$)
 - **Tile Scheme:** XYZ Equirectangular Martian projection ($R = 3,396,190.0\text{ m}$, $256 \times 256\text{ px}$, origin at $(-HX, HY)$).
-- **Generation Script:** `scripts/build_regional_tiles.py`.
+- **Primary Metric DTM Included:** `jezero_aoi_v2.tif` ($125,847,250\text{ bytes}$, $9,014 \times 10,896\text{ px}$, Float32, $1.00966\text{ m/px}$).
+- **Validation Fixtures:** 14 golden route corridor fixtures + 1 ground anchor fixture (`unit_test_anchors.json`).
+- **Audit Deliverable:** Full audit report in `docs/data-bundle-integrity-audit.md` (Closes Issue #3).
 
 ### 3.2 Physical On-Disk Fallback Archive (v1.4)
 - **Archive Path:** `dist/offline_bundle/vyompath-offline-v1.4.0.tar.gz`
