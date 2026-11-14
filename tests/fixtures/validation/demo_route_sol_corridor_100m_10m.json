@@ -27,29 +27,29 @@
   },
   "nearby_pois": [
     {
-      "id": "POI-M20-SOL-386",
-      "name": "Perseverance position, sol 386",
+      "id": "SYNTH-POI-001",
+      "name": "Synthetic Corridor Benchmark 001",
       "sol": 386,
       "coordinates": [
         77.46313311,
         18.4607914
       ],
       "elevation_geoid_m": -2567.888428,
-      "source": "NASA MMGIS Mars 2020 Waypoints Layer",
+      "source": "VyomPath Synthetic Corridor Fixture",
       "along_route_m": 169.28,
       "cross_track_m": -11.2,
       "cross_track_abs_m": 11.2
     },
     {
-      "id": "POI-M20-SOL-387",
-      "name": "Perseverance position, sol 387",
+      "id": "SYNTH-POI-002",
+      "name": "Synthetic Corridor Benchmark 002",
       "sol": 387,
       "coordinates": [
         77.46157944,
         18.46447597
       ],
       "elevation_geoid_m": -2567.741211,
-      "source": "NASA MMGIS Mars 2020 Waypoints Layer",
+      "source": "VyomPath Synthetic Corridor Fixture",
       "along_route_m": 398.65,
       "cross_track_m": -63.38,
       "cross_track_abs_m": 63.38

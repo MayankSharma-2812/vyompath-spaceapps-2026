@@ -18,5 +18,7 @@
 data/M20_waypoints.json export-ignore
 tests/fixtures/golden_pois.json export-ignore
 tests/fixtures/validation/ export-ignore
+tests/fixtures/demo_route_*.json export-ignore
+tests/fixtures/unit_test_anchors.json export-ignore
 
 

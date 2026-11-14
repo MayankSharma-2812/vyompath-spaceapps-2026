@@ -109,31 +109,31 @@ def get_test_points() -> list[dict]:
     """
     return [
         {
-            "name": "POI-M20-SOL-013",
+            "name": "SYNTH-GRID-POINT-01",
             "lon": 77.45088572,
             "lat": 18.44462715,
             "notes": "Perseverance Sol 13 (landing site vicinity; outside v2 valid stereo footprint)"
         },
         {
-            "name": "POI-M20-SOL-023",
+            "name": "SYNTH-GRID-POINT-02",
             "lon": 77.45177711,
             "lat": 18.44520229,
             "notes": "Perseverance Sol 23 (early ingress; outside v2 valid stereo footprint)"
         },
         {
-            "name": "POI-M20-SOL-034",
+            "name": "SYNTH-GRID-POINT-03",
             "lon": 77.45102155,
             "lat": 18.44486273,
             "notes": "Perseverance Sol 34 (Van Zyl overlook; outside v2 valid stereo footprint)"
         },
         {
-            "name": "POI-M20-SOL-386",
+            "name": "SYNTH-GRID-POINT-04",
             "lon": 77.46313311,
             "lat": 18.46079140,
             "notes": "Perseverance Sol 386 (rapid transit waypoint; INSIDE v2 valid stereo footprint)"
         },
         {
-            "name": "POI-M20-SOL-387",
+            "name": "SYNTH-GRID-POINT-05",
             "lon": 77.46157944,
             "lat": 18.46447597,
             "notes": "Perseverance Sol 387 (rapid transit staging; INSIDE v2 valid stereo footprint)"
