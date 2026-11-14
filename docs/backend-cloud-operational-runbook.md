@@ -5,7 +5,7 @@
 **Author & Integration Owner:** Mayank Sharma (Backend & Cloud)  
 **Target Audience:** Mayank Sharma (Backend & Cloud), Pranav Sharma (Terrain and Scientific Analysis), Dheer Jain (QA and Testing), Arya Tiwari (Map Engineering), Kumkum Kushwah (UI/UX Dashboard), Shyam Sharma (Data and GIS)  
 **Last Updated:** November 14, 2026  
-**Governance State:** Implementation Baseline (`main` @ `c47dbc1`)  
+**Governance State:** Implementation Baseline (`main` @ `11be967`)
 **Hard Boundaries:** No real secrets in documentation; zero unverified claims; distinct mock vs live DTM modes; no large DTM binaries committed to Git.
 
 ---
@@ -15,10 +15,10 @@
 ### 1.1 Fresh Clone from Remote
 ```bash
 # Clone the canonical repository
-git clone https://github.com/MayankSharma-2812/nakshatra-vyompath.git
-cd nakshatra-vyompath
+git clone https://github.com/MayankSharma-2812/vyompath-spaceapps-2026.git
+cd vyompath-spaceapps-2026
 
-# Verify clean state and HEAD commit (Must match c47dbc1)
+# Verify clean state and HEAD commit (Must match 11be967)
 git status
 git log -1 --oneline
 ```
@@ -148,7 +148,7 @@ docker run -d \
 
 ## 7. Offline Deployment (Single-Command Air-Gapped Runner)
 
-The project includes an automated, self-contained launcher: [`scripts/run_offline.sh`](file:///home/mayank-sharma/Hackathon/NASA/nakshatra-vyompath/scripts/run_offline.sh).
+The project includes an automated, self-contained launcher: [`scripts/run_offline.sh`](file:///home/mayank-sharma/Hackathon/NASA/vyompath-spaceapps-2026/scripts/run_offline.sh).
 
 ```mermaid
 flowchart TD
@@ -381,7 +381,7 @@ curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:4173/tiles/99/0/0.jpg
 ## 14. Clean Shutdown Procedures
 
 ### 14.1 Offline Script Teardown
-When using [`scripts/run_offline.sh`](file:///home/mayank-sharma/Hackathon/NASA/nakshatra-vyompath/scripts/run_offline.sh):
+When using [`scripts/run_offline.sh`](file:///home/mayank-sharma/Hackathon/NASA/vyompath-spaceapps-2026/scripts/run_offline.sh):
 - Press `Ctrl+C`.
 - The bash trap triggers `cleanup()`, sending `SIGTERM` to the process groups (`kill -TERM -- -${PGID}`).
 - Any temporary symlink created at `frontend/dist/tiles` is unlinked automatically.
@@ -439,8 +439,8 @@ pgrep -fa "vite" || echo "No orphan vite processes."
 ### 17.1 Rolling Back Code Changes
 If event-day code changes introduce regressions:
 ```bash
-# Revert working directory to Gate G4 verified baseline commit (c47dbc1)
-git checkout -f c47dbc1
+# Revert working directory to verified baseline commit (11be967)
+git checkout -f 11be967
 
 # Re-run test suite to confirm baseline green state
 pytest tests/
@@ -461,4 +461,4 @@ docker run -d --name vyompath-backend -p 8000:8000 vyompath-api:g4-baseline-back
 Keep two physical USB flash drives at the team desk containing:
 1. `dist/offline_bundle/vyompath-offline-v1.4.0.tar.gz` (Complete offline app + tiles fallback).
 2. `jezero_aoi_v2.tif` ($125.8\text{ MB}$ raw Float32 DTM).
-3. `vyompath-repo.bundle` (Full Git commit history up to baseline `c47dbc1`).
+3. `vyompath-repo.bundle` (Full Git commit history up to baseline `11be967`).

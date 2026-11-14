@@ -57,7 +57,7 @@ flowchart LR
 
 ## 3. Authoritative Analytical Boundary
 
-1. **Authoritative Vector Boundary:** [`data/footprints/jezero_dtm.geojson`](file:///home/mayank-sharma/Hackathon/NASA/nakshatra-vyompath/data/footprints/jezero_dtm.geojson).
+1. **Authoritative Vector Boundary:** [`data/footprints/jezero_dtm.geojson`](file:///home/mayank-sharma/Hackathon/NASA/vyompath-spaceapps-2026/data/footprints/jezero_dtm.geojson).
 2. **Raster Coverage:** $63.16\%$ valid data within the $9014 \times 10896$ pixel HiRISE stereo DTM swath (`jezero_aoi_v2.tif`).
 3. **NoData Behavior:**
    - Traverses fully within the 63.16% mask return `coverage_status: "complete"`.

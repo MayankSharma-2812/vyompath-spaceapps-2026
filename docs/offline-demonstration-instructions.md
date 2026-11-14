@@ -70,7 +70,7 @@ On the Windows presentation laptop without bash:
 
 **Terminal 1 (Backend API):**
 ```powershell
-cd C:\path\to\nakshatra-vyompath
+cd C:\path\to\vyompath-spaceapps-2026
 $env:PORT="8000"
 $env:CORS_ORIGINS="http://localhost:4173,http://127.0.0.1:4173,http://localhost:5173"
 python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
@@ -78,7 +78,7 @@ python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
 
 **Terminal 2 (Frontend Preview):**
 ```powershell
-cd C:\path\to\nakshatra-vyompath\frontend
+cd C:\path\to\vyompath-spaceapps-2026\frontend
 npm run preview -- --host 127.0.0.1 --port 4173
 ```
 
