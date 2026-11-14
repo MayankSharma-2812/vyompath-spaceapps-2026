@@ -1005,6 +1005,9 @@ function Dashboard() {
               : 'Route exceeds maximum allowed length of 25.0 km or contains invalid coordinates.';
           throw new Error(msg);
         }
+        if (response.status === 404) {
+          throw new Error('Analysis endpoint not found (404). Please verify backend connectivity.');
+        }
         throw new Error(`Request failed with status ${response.status}`);
       }
 
