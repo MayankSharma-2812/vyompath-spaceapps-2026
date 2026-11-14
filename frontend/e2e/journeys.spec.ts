@@ -114,15 +114,9 @@ test.describe('VyomPath User Journeys', () => {
   // Journey J5: POI Card Displays Verified Citation
   // ---------------------------------------------------------------------------
   test('J5: Nearby scientific POI card displays NASA mission citation and source link', async ({ page }) => {
-    test.fixme(
-      true,
-      'Pending Event-Day Hackathon Implementation (Nov 14 E4): ' +
-      'Science POI corridor search integration into the frontend dashboard.'
-    );
-
     await page.goto('/');
-    const poiSection = page.locator('.summary-section');
-    await expect(poiSection).toContainText('Perseverance');
+    const summaryPanel = page.locator('.summary-panel');
+    await expect(summaryPanel).toContainText('Perseverance');
   });
 
   // ---------------------------------------------------------------------------

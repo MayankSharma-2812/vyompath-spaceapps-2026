@@ -127,7 +127,12 @@ export function ElevationChart({ data, isLoading = false, error = null }: Elevat
               const safeValue = Number.isFinite(numericValue) ? numericValue : 0;
               return [`${safeValue.toFixed(1)} m`, 'Elevation (datum)'];
             }}
-            labelFormatter={(label) => `Distance: ${Number(label ?? 0).toFixed(1)} m`}
+            labelFormatter={(label) => {
+              const dist = Number(label ?? 0);
+              return dist >= 1000
+                ? `Distance: ${(dist / 1000).toFixed(2)} km`
+                : `Distance: ${dist.toFixed(1)} m`;
+            }}
           />
           <Area
             type="monotone"

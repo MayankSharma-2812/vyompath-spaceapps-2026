@@ -148,7 +148,14 @@ function TopToolbar({
   onSelectPreset,
   onClearRoute,
 }: TopToolbarProps) {
-  const isMock = backendMode === 'development/mock';
+  const isLive = backendMode === 'production/live' || backendMode === 'live';
+  const isOffline = backendMode === 'offline/mock' || backendMode === 'offline';
+  const badgeVariant = isLive ? 'success' : isOffline ? 'neutral' : 'neutral';
+  const badgeText = isLive
+    ? 'LIVE TERRAIN ENGINE'
+    : isOffline
+      ? 'BACKEND OFFLINE (MOCK)'
+      : 'DEVELOPMENT / MOCK BACKEND';
 
   return (
     <header className="top-toolbar">
@@ -156,15 +163,15 @@ function TopToolbar({
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span className="eyebrow">MARS RESEARCH WORKSPACE</span>
           {backendMode && (
-            <StatusBadge variant={isMock ? 'neutral' : 'success'}>
-              {isMock ? 'DEVELOPMENT / MOCK BACKEND' : 'LIVE TERRAIN ENGINE'}
+            <StatusBadge variant={badgeVariant}>
+              {badgeText}
             </StatusBadge>
           )}
         </div>
         <h1>Explore the surface</h1>
       </div>
-      <div className="toolbar-controls" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div className="preset-selector" style={{ display: 'flex', gap: '6px' }}>
+      <div className="toolbar-controls" style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+        <div className="preset-selector" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
           <button
             type="button"
             onClick={() => onSelectPreset('jezeroFloor')}
@@ -392,18 +399,22 @@ function RouteComparison({
   isLoading,
   error,
   onSetAsRouteB,
+  onClearRouteB,
 }: {
   analysis: RouteAnalysisResponse | null;
   routeBAnalysis: RouteAnalysisResponse | null;
   isLoading: boolean;
   error: string | null;
   onSetAsRouteB: () => void;
+  onClearRouteB?: () => void;
 }) {
   const routeStatus = error
     ? `Route A analysis unavailable: ${error}`
-    : isLoading && !analysis
+    : isLoading
       ? 'Loading Route A analysis...'
-      : 'Route A analysis loaded.';
+      : analysis
+        ? 'Route A analysis loaded.'
+        : 'No Route A drawn. Draw a route or select a corridor to analyze Route A.';
 
   return (
     <section className="panel comparison-panel" aria-labelledby="comparison-title">
@@ -412,24 +423,44 @@ function RouteComparison({
           <span className="eyebrow">ROUTE ANALYSIS</span>
           <h2 id="comparison-title">Route A vs Route B Comparison</h2>
         </div>
-        {analysis && (
-          <button
-            type="button"
-            onClick={onSetAsRouteB}
-            style={{
-              padding: '4px 8px',
-              fontSize: '11px',
-              borderRadius: '4px',
-              border: '1px solid #d88a2d',
-              background: '#fff',
-              color: '#d88a2d',
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
-          >
-            Pin Current as Route B
-          </button>
-        )}
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          {analysis && (
+            <button
+              type="button"
+              onClick={onSetAsRouteB}
+              style={{
+                padding: '4px 8px',
+                fontSize: '11px',
+                borderRadius: '4px',
+                border: '1px solid #d88a2d',
+                background: '#fff',
+                color: '#d88a2d',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              Pin Current as Route B
+            </button>
+          )}
+          {routeBAnalysis && onClearRouteB && (
+            <button
+              type="button"
+              onClick={onClearRouteB}
+              style={{
+                padding: '4px 8px',
+                fontSize: '11px',
+                borderRadius: '4px',
+                border: '1px solid #cbd5e1',
+                background: '#fff',
+                color: '#64748b',
+                fontWeight: 500,
+                cursor: 'pointer',
+              }}
+            >
+              Clear Route B
+            </button>
+          )}
+        </div>
       </div>
       <div className="comparison-cards">
         {[
@@ -574,8 +605,8 @@ function TerrainProfile({ analysis, isLoading, error }: TerrainProfileProps) {
         <div className="terrain-metrics" aria-label="Terrain metrics">
           <MetricCard title="Elevation Gain" value={analysis ? `${analysis.total_gain_m.toFixed(1)} m` : 'Awaiting data'} />
           <MetricCard title="Elevation Loss" value={analysis ? `${analysis.total_loss_m.toFixed(1)} m` : 'Awaiting data'} />
-          <MetricCard title="Max Elevation" value={maxElevation !== null ? `${maxElevation.toFixed(1)} m` : 'Awaiting data'} />
-          <MetricCard title="Min Elevation" value={minElevation !== null ? `${minElevation.toFixed(1)} m` : 'Awaiting data'} />
+          <MetricCard title="Max Elevation" value={maxElevation !== null ? `${maxElevation.toFixed(1)} m` : (analysis ? 'No valid samples' : 'Awaiting data')} />
+          <MetricCard title="Min Elevation" value={minElevation !== null ? `${minElevation.toFixed(1)} m` : (analysis ? 'No valid samples' : 'Awaiting data')} />
         </div>
       </section>
     </div>
@@ -599,7 +630,14 @@ function RouteSummary({ analysis }: { analysis: RouteAnalysisResponse | null }) 
         <h3>Route metrics</h3>
         {analysis ? (
           <div className="summary-metrics-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-            <MetricCard title="Total distance" value={`${(analysis.total_distance_m / 1000).toFixed(2)} km`} />
+            <MetricCard
+              title="Total distance"
+              value={
+                analysis.total_distance_m >= 1000
+                  ? `${(analysis.total_distance_m / 1000).toFixed(2)} km`
+                  : `${analysis.total_distance_m.toFixed(1)} m`
+              }
+            />
             <MetricCard
               title="Coverage status"
               value={
@@ -832,6 +870,12 @@ function Dashboard() {
     }
   }, [drawnRoute, analysis]);
 
+  // Clear Route B comparison
+  const handleClearRouteB = useCallback(() => {
+    setRouteB(null);
+    setRouteBAnalysis(null);
+  }, []);
+
   return (
     <div className="dashboard-layout" id="dashboard">
       <Sidebar />
@@ -872,6 +916,7 @@ function Dashboard() {
               isLoading={isAnalyzing}
               error={analysisError}
               onSetAsRouteB={handleSetAsRouteB}
+              onClearRouteB={handleClearRouteB}
             />
             <RouteSummary analysis={analysis} />
           </div>
