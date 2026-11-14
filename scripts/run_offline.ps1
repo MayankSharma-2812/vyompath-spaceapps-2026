@@ -58,6 +58,20 @@ if (Test-PortOccupied $BackendHost $BackendPort) {
     exit 1
 }
 
+# Configure real DTM path if available
+if (-not $env:VYOMPATH_DEM_PATH) {
+    if (Test-Path "$RootDir\data\dtm\jezero_aoi_v2.tif") {
+        $env:VYOMPATH_DEM_PATH = "$RootDir\data\dtm\jezero_aoi_v2.tif"
+    } elseif (Test-Path "$RootDir\..\data\vyompath-demo-bundle-v1.4\jezero_aoi_v2.tif") {
+        $env:VYOMPATH_DEM_PATH = (Resolve-Path "$RootDir\..\data\vyompath-demo-bundle-v1.4\jezero_aoi_v2.tif").Path
+    }
+}
+if ($env:VYOMPATH_DEM_PATH -and (Test-Path $env:VYOMPATH_DEM_PATH)) {
+    Write-Host "Found Jezero HiRISE stereo DTM at: $env:VYOMPATH_DEM_PATH (LIVE DTM MODE)" -ForegroundColor Green
+} else {
+    Write-Host "NOTICE: Real DTM raster not mounted. Starting in DEVELOPMENT / MOCK mode." -ForegroundColor Yellow
+}
+
 $distPath = Join-Path $RootDir "frontend\dist"
 if (Test-Path $distPath) {
     if (Test-PortOccupied $FrontendHost $FrontendPort) {
@@ -68,17 +82,31 @@ if (Test-Path $distPath) {
 
 # 3. Detect offline regional tile assets
 $tileDir = $null
-if (Test-Path "$RootDir\data\tiles" -PathType Container) {
+if ($env:VYOMPATH_TILES_DIR -and (Test-Path $env:VYOMPATH_TILES_DIR -PathType Container)) {
+    $tileDir = $env:VYOMPATH_TILES_DIR
+} elseif (Test-Path "$RootDir\data\tiles" -PathType Container) {
     $tileDir = "$RootDir\data\tiles"
+} elseif (Test-Path "$RootDir\..\data\vyompath-demo-bundle-v1.4\tiles_aoi" -PathType Container) {
+    $tileDir = (Resolve-Path "$RootDir\..\data\vyompath-demo-bundle-v1.4\tiles_aoi").Path
 } elseif (Test-Path "$RootDir\tiles" -PathType Container) {
     $tileDir = "$RootDir\tiles"
 }
 
 if ($tileDir) {
     Write-Host "Found offline regional tile assets at: $tileDir" -ForegroundColor Green
+    if (Test-Path $distPath) {
+        $orthoDir = Join-Path $distPath "tiles\jezero_aoi_v2\ortho"
+        $parentDir = Split-Path $orthoDir -Parent
+        if (-not (Test-Path $parentDir)) {
+            New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
+        }
+        if (-not (Test-Path $orthoDir)) {
+            cmd /c mklink /J "$orthoDir" "$tileDir" 2>$null
+        }
+    }
 } else {
     Write-Host "NOTICE [TILE ASSET AVAILABILITY]:" -ForegroundColor Yellow
-    Write-Host "  Offline tile directory ('tiles/' or 'data/tiles/') not detected in working tree." -ForegroundColor Yellow
+    Write-Host "  Offline tile directory not detected in working tree." -ForegroundColor Yellow
     Write-Host "  Proceeding with mock route-analysis and layer API endpoints." -ForegroundColor Yellow
     Write-Host "-----------------------------------------------------------------"
 }

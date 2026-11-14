@@ -287,6 +287,25 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
     };
   }, [handleInternalRouteDrawn]);
 
+  // Sync incoming props from parent dashboard controls to internal state
+  useEffect(() => {
+    if (activeBaseLayer && activeBaseLayer !== selectedBaseLayer) {
+      handleBaseLayerSelect(activeBaseLayer);
+    }
+  }, [activeBaseLayer, handleBaseLayerSelect, selectedBaseLayer]);
+
+  useEffect(() => {
+    setIsRegionalVisible(showRegionalTiles);
+  }, [showRegionalTiles]);
+
+  useEffect(() => {
+    setIsFootprintVisible(showFootprint);
+  }, [showFootprint]);
+
+  useEffect(() => {
+    setIsWaypointsVisible(showWaypoints);
+  }, [showWaypoints]);
+
   // Sync layer visibility
   useEffect(() => {
     if (regionalLayerRef.current) {
