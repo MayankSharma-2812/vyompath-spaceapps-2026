@@ -29,6 +29,15 @@ export {
   createWaypointLayer,
 } from './layers';
 export {
+  createRouteLayer,
+  updateRouteSource,
+} from './routeLayer';
+export {
+  setupRouteDrawing,
+  type RouteDrawingController,
+  type RouteDrawingOptions,
+} from './routeInteraction';
+export {
   JEZERO_CENTER,
   JEZERO_DTM_FOOTPRINT_COORDINATES,
   ROVER_WAYPOINTS,
@@ -41,5 +50,8 @@ export type {
   BaseLayerId,
   BaseLayerConfig,
   TileGridConfig,
+  RouteGeometry,
+  RouteAnalysisData,
+  ElevationProfilePoint,
   MapCanvasProps,
 } from './types';

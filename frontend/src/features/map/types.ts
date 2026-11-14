@@ -51,6 +51,34 @@ export interface TileGridConfig {
   maxZoom: number;
 }
 
+export interface RouteGeometry {
+  id?: string;
+  name?: string;
+  coordinates: GeodeticCoordinate[];
+  style?: 'route-a' | 'route-b';
+}
+
+export interface ElevationProfilePoint {
+  distance_m: number;
+  elevation_m: number;
+}
+
+export interface RouteAnalysisData {
+  route_id: string;
+  total_distance_m: number;
+  elevation_profile: ElevationProfilePoint[];
+  total_gain_m: number;
+  total_loss_m: number;
+  max_slope_deg: number;
+  slope_window_m?: number;
+  coverage_status: 'complete' | 'partial_gap' | 'out_of_bounds';
+  dtm_source: string;
+  dtm_posting_m?: number;
+  nearby_pois?: any[];
+  limitations?: string[];
+  is_mock?: boolean;
+}
+
 export interface MapCanvasProps {
   className?: string;
   initialCenter?: [number, number]; // [lon, lat] in degrees
@@ -62,4 +90,12 @@ export interface MapCanvasProps {
   selectedSol?: number | null;
   onWaypointSelect?: (waypoint: RoverWaypoint) => void;
   onCoordinateHover?: (coord: GeodeticCoordinate | null) => void;
+  // Route Drawing & API Overlay Props
+  routeA?: RouteGeometry | null;
+  routeB?: RouteGeometry | null;
+  analysisResponse?: RouteAnalysisData | null;
+  isAnalyzing?: boolean;
+  analysisError?: string | null;
+  onRouteDrawn?: (coordinates: GeodeticCoordinate[]) => void;
+  onRouteClear?: () => void;
 }
