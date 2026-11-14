@@ -120,9 +120,11 @@ export function createRegionalTileLayer(): TileLayer<XYZ> {
     tileLoadFunction: (tile, src) => {
       if (tile instanceof ImageTile) {
         const image = tile.getImage() as HTMLImageElement;
+        let triedJpg = false;
         image.onerror = () => {
-          // If regional .png failed, try .jpg fallback before blanking out
-          if (src.endsWith('.png')) {
+          // If regional .png failed, try .jpg fallback once before blanking out
+          if (!triedJpg && src.endsWith('.png')) {
+            triedJpg = true;
             image.src = src.slice(0, -4) + '.jpg';
             return;
           }
