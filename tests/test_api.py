@@ -112,6 +112,7 @@ def test_route_analysis_valid_route(client: TestClient, monkeypatch: pytest.Monk
     assert data["analysis_mode"] == "mock"
     assert data["is_mock"] is True
     assert data["dtm_source"] == "synthetic/mock — no real DTM loaded"
+    assert data["is_mock"] is True
     assert data["nearby_pois"] == []
     assert len(data["limitations"]) >= 1
 

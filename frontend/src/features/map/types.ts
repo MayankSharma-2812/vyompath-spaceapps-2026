@@ -99,4 +99,9 @@ export interface MapCanvasProps {
   analysisError?: string | null;
   onRouteDrawn?: (coordinates: GeodeticCoordinate[]) => void;
   onRouteClear?: () => void;
+  // Analytical Overlay & Basemap Callbacks
+  onBaseLayerChange?: (layer: BaseLayerId) => void;
+  onToggleFootprint?: (visible: boolean) => void;
+  onToggleWaypoints?: (visible: boolean) => void;
+  onToggleRegionalTiles?: (visible: boolean) => void;
 }

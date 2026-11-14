@@ -191,6 +191,10 @@ class RouteAnalysisResponse(BaseModel):
         default=True,
         description="Boolean convenience flag: True when analysis_mode is 'mock', False when 'real_dtm'.",
     )
+    is_mock: bool = Field(
+        default=False,
+        description="Whether the analysis was generated via synthetic mock fallback.",
+    )
 
     # Science POIs
     nearby_pois: list[NearbyPOI] = Field(
