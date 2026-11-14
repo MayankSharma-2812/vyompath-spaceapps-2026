@@ -191,10 +191,6 @@ class RouteAnalysisResponse(BaseModel):
         default=True,
         description="Boolean convenience flag: True when analysis_mode is 'mock', False when 'real_dtm'.",
     )
-    is_mock: bool = Field(
-        default=False,
-        description="Whether the analysis was generated via synthetic mock fallback.",
-    )
 
     # Science POIs
     nearby_pois: list[NearbyPOI] = Field(
@@ -206,4 +202,25 @@ class RouteAnalysisResponse(BaseModel):
     limitations: list[str] = Field(
         default_factory=list,
         description="Known caveats, data gaps, or approximations.",
+    )
+
+
+# ---------------------------------------------------------------------------
+# Mission-Aware Traverse Intelligence Schemas
+# ---------------------------------------------------------------------------
+
+class TraverseIntelligenceRequest(BaseModel):
+    """Payload to evaluate routes under mission-specific priorities."""
+
+    objective: Literal["slope_conscious", "energy_efficient", "data_confidence"] = Field(
+        default="slope_conscious",
+        description="Mission priority driving the evaluation.",
+    )
+    route_a: RouteAnalysisResponse = Field(
+        ...,
+        description="Route A analysis data.",
+    )
+    route_b: Optional[RouteAnalysisResponse] = Field(
+        default=None,
+        description="Optional Route B analysis data for comparative evaluation.",
     )

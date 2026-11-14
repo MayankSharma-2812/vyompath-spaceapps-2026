@@ -20,9 +20,14 @@ from backend.app.schemas import (
     ElevationPoint,
     RouteAnalysisRequest,
     RouteAnalysisResponse,
+    TraverseIntelligenceRequest,
 )
 from backend.app.services.coords import MARS_RADIUS_M
 from backend.app.services.terrain import route_distance_m, sample_route_dtm
+from backend.app.services.traverse_intelligence import (
+    TraverseIntelligenceResult,
+    evaluate_traverse_intelligence,
+)
 
 router = APIRouter(tags=["routes"])
 
@@ -216,4 +221,23 @@ async def analyze_route(body: RouteAnalysisRequest) -> RouteAnalysisResponse:
         limitations=limitations,
         analysis_mode="mock",
         is_mock=True,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Traverse Intelligence Endpoint
+# ---------------------------------------------------------------------------
+
+@router.post(
+    "/routes/evaluate-intelligence",
+    summary="Evaluate mission-aware traverse intelligence",
+    response_model=TraverseIntelligenceResult,
+    response_description="Multi-objective mission score comparison, evidence, and explainable recommendation.",
+)
+async def evaluate_intelligence(body: TraverseIntelligenceRequest) -> TraverseIntelligenceResult:
+    """Evaluate routes under mission-specific priorities (slope, energy, or data confidence)."""
+    return evaluate_traverse_intelligence(
+        route_a=body.route_a,
+        route_b=body.route_b,
+        objective=body.objective,
     )

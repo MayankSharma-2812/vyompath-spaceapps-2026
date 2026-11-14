@@ -94,3 +94,8 @@ def root():
 app.include_router(health.router, prefix="/api")
 app.include_router(layers.router, prefix="/api")
 app.include_router(routes.router, prefix="/api")
+
+# Un-prefixed aliases ensure endpoints succeed even if client or proxy strips /api
+app.include_router(health.router, include_in_schema=False)
+app.include_router(layers.router, include_in_schema=False)
+app.include_router(routes.router, include_in_schema=False)

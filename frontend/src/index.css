@@ -271,6 +271,7 @@ input {
 .map-panel,
 .terrain-panel,
 .comparison-panel,
+.traverse-intelligence-panel,
 .summary-panel {
   padding: 16px;
 }
@@ -753,6 +754,7 @@ input {
   .map-panel,
   .terrain-panel,
   .comparison-panel,
+  .traverse-intelligence-panel,
   .summary-panel {
     padding: 13px;
   }
