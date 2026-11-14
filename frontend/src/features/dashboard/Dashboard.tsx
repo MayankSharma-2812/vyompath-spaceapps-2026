@@ -1,28 +1,27 @@
-import { useEffect, useState } from 'react';
-import { MapCanvas } from '../map';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  MapCanvas,
+  type GeodeticCoordinate,
+  type RouteGeometry,
+  type RouteAnalysisData,
+} from '../map';
 import { EmptyState, MetricCard, StatusBadge } from '../../components';
 import ElevationChart, { type ElevationChartPoint } from './ElevationChart';
 
-const SAMPLE_ROUTE = [
+const SAMPLE_ROUTE: GeodeticCoordinate[] = [
   { lon: 77.51, lat: 18.44 },
   { lon: 77.56, lat: 18.47 },
   { lon: 77.62, lat: 18.5 },
   { lon: 77.68, lat: 18.53 },
 ];
 
-interface RouteAnalysisResponse {
-  route_id: string;
-  total_distance_m: number;
-  elevation_profile: Array<{ distance_m: number; elevation_m: number }>;
-  total_gain_m: number;
-  total_loss_m: number;
-  max_slope_deg: number;
-  slope_window_m: number;
-  dtm_source?: string;
-  dtm_posting_m?: number;
-  coverage_status: 'complete' | 'partial_gap' | 'out_of_bounds';
-  limitations: string[];
-}
+export type RouteAnalysisResponse = RouteAnalysisData;
+
+const API_BASE_URL =
+  (import.meta.env.VITE_API_URL as string | undefined) ||
+  (typeof window !== 'undefined' && window.location.hostname === '127.0.0.1'
+    ? 'http://127.0.0.1:8000'
+    : 'http://localhost:8000');
 
 const COMPARISON_METRICS = [
   { key: 'total_distance_m', title: 'Distance', unit: 'm' },
@@ -138,14 +137,42 @@ function TopToolbar() {
         </label>
         <div className="region-indicator">
           <span className="region-label">STUDY REGION</span>
-          <strong>Not selected</strong>
+          <strong>Jezero Crater AOI</strong>
         </div>
       </div>
     </header>
   );
 }
 
-function MapContainer() {
+interface MapContainerProps {
+  drawnRoute: GeodeticCoordinate[] | null;
+  analysis: RouteAnalysisResponse | null;
+  isAnalyzing: boolean;
+  analysisError: string | null;
+  onRouteDrawn: (coords: GeodeticCoordinate[]) => void;
+  onRouteClear: () => void;
+}
+
+function MapContainer({
+  drawnRoute,
+  analysis,
+  isAnalyzing,
+  analysisError,
+  onRouteDrawn,
+  onRouteClear,
+}: MapContainerProps) {
+  const [hoverCoords, setHoverCoords] = useState<GeodeticCoordinate | null>(null);
+
+  const routeAGeometry: RouteGeometry | null =
+    drawnRoute && drawnRoute.length >= 2
+      ? {
+          id: 'route-a',
+          name: 'Traverse Route A',
+          coordinates: drawnRoute,
+          style: 'route-a',
+        }
+      : null;
+
   return (
     <section className="panel map-panel" aria-labelledby="map-title">
       <div className="panel-heading">
@@ -153,25 +180,31 @@ function MapContainer() {
           <span className="eyebrow">MAP WORKSPACE</span>
           <h2 id="map-title">Martian Surface Explorer</h2>
         </div>
-        <StatusBadge className="panel-tag">MAP DATA NOT CONNECTED</StatusBadge>
+        <StatusBadge className="panel-tag" variant="success">
+          INTERACTIVE MARS 2000
+        </StatusBadge>
       </div>
       <div className="map-stage">
-        <MapCanvas />
-        <EmptyState
-          className="map-empty-state"
-          icon={<span className="map-empty-icon" />}
-          title="Interactive Mars map will be integrated here"
-          description="Connect a validated basemap and mission layers to begin exploring."
+        <MapCanvas
+          routeA={routeAGeometry}
+          analysisResponse={analysis}
+          isAnalyzing={isAnalyzing}
+          analysisError={analysisError}
+          onRouteDrawn={onRouteDrawn}
+          onRouteClear={onRouteClear}
+          onCoordinateHover={setHoverCoords}
         />
-        <div className="map-layer-placeholder">
-          <span className="region-label">LAYER CONTROLS</span>
-          <span>Available when map layers are connected</span>
-        </div>
       </div>
-      <div className="map-statusbar" aria-label="Map information placeholders">
-        <span>Zoom controls reserved</span>
-        <span>Scale unavailable</span>
-        <span>Coordinates unavailable</span>
+      <div className="map-statusbar" aria-label="Map telemetry status">
+        {hoverCoords ? (
+          <span>
+            {hoverCoords.lat >= 0 ? `${hoverCoords.lat.toFixed(4)}°N` : `${Math.abs(hoverCoords.lat).toFixed(4)}°S`},{' '}
+            {hoverCoords.lon >= 0 ? `${hoverCoords.lon.toFixed(4)}°E` : `${Math.abs(hoverCoords.lon).toFixed(4)}°W`}
+          </span>
+        ) : (
+          <span>Hover map for coordinates</span>
+        )}
+        <span>Mars 2000 Equirectangular (R=3,396,190m)</span>
       </div>
     </section>
   );
@@ -256,70 +289,29 @@ function RouteComparison({
   );
 }
 
-function TerrainProfile({ route = SAMPLE_ROUTE }: { route?: Array<{ lon: number; lat: number }> }) {
-  const [analysis, setAnalysis] = useState<RouteAnalysisResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+interface TerrainProfileProps {
+  analysis: RouteAnalysisResponse | null;
+  isLoading: boolean;
+  error: string | null;
+}
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const runAnalysis = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const response = await fetch('http://localhost:8000/api/routes/analyze', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            route_id: 'demo-route',
-            coordinates: route,
-            buffer_distance_m: 250,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Request failed with status ${response.status}`);
-        }
-
-        const payload = (await response.json()) as RouteAnalysisResponse;
-
-        if (isMounted) {
-          setAnalysis(payload);
-        }
-      } catch (requestError) {
-        if (isMounted) {
-          setError(
-            requestError instanceof Error
-              ? requestError.message
-              : 'Unable to load elevation data from the terrain service.',
-          );
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    void runAnalysis();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [route]);
-
-  const profile: ElevationChartPoint[] = (analysis?.elevation_profile ?? []).map((point) => ({
-    distance: Number(point.distance_m),
-    elevation: Number(point.elevation_m),
-  }));
-
-  const validProfile = profile.filter(
-    (point) => Number.isFinite(point.distance) && Number.isFinite(point.elevation) && point.distance >= 0,
-  );
+function TerrainProfile({ analysis, isLoading, error }: TerrainProfileProps) {
+  // Fix null elevation defect: safely ignore null/undefined elevations so Number(null) !== 0
+  const validProfile: ElevationChartPoint[] = (analysis?.elevation_profile ?? [])
+    .filter(
+      (point) =>
+        point.elevation_m !== null &&
+        point.elevation_m !== undefined &&
+        point.distance_m !== null &&
+        point.distance_m !== undefined &&
+        Number.isFinite(Number(point.elevation_m)) &&
+        Number.isFinite(Number(point.distance_m)) &&
+        Number(point.distance_m) >= 0,
+    )
+    .map((point) => ({
+      distance: Number(point.distance_m),
+      elevation: Number(point.elevation_m),
+    }));
 
   const maxElevation = validProfile.length
     ? Math.max(...validProfile.map((point) => point.elevation))
@@ -329,6 +321,7 @@ function TerrainProfile({ route = SAMPLE_ROUTE }: { route?: Array<{ lon: number;
     : null;
 
   const isMock = Boolean(
+    analysis?.is_mock ||
     !analysis?.dtm_source ||
     analysis.dtm_source.toLowerCase().includes('mock') ||
     analysis.dtm_source.toLowerCase().includes('stub') ||
@@ -368,7 +361,9 @@ function TerrainProfile({ route = SAMPLE_ROUTE }: { route?: Array<{ lon: number;
   );
 }
 
-function RouteSummary() {
+function RouteSummary({ analysis }: { analysis: RouteAnalysisResponse | null }) {
+  const nearbyPois = analysis?.nearby_pois ?? [];
+
   return (
     <section className="panel summary-panel" aria-labelledby="summary-title">
       <div className="panel-heading">
@@ -379,33 +374,139 @@ function RouteSummary() {
       </div>
       <div className="summary-section">
         <h3>Route metrics</h3>
-        <EmptyState
-          title="No route metrics yet"
-          description="Metrics will be available when a validated route is loaded."
-        />
+        {analysis ? (
+          <div className="summary-metrics-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            <MetricCard title="Total distance" value={`${(analysis.total_distance_m / 1000).toFixed(2)} km`} />
+            <MetricCard title="Coverage status" value={analysis.coverage_status.toUpperCase()} />
+            <MetricCard title="DTM source" value={analysis.dtm_source || 'HiRISE / MOLA'} />
+            <MetricCard title="Max slope" value={`${analysis.max_slope_deg.toFixed(1)}°`} />
+          </div>
+        ) : (
+          <EmptyState
+            title="No route metrics yet"
+            description="Metrics will be available when a validated route is loaded."
+          />
+        )}
       </div>
       <div className="summary-section">
         <h3>Scientific points of interest</h3>
-        <EmptyState
-          title="No sites to display"
-          description="Verified site data will appear here when a study region is selected."
-        />
+        {nearbyPois.length > 0 ? (
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '6px' }}>
+            {nearbyPois.map((poi: any, idx: number) => (
+              <li key={poi.id || idx} style={{ padding: '8px', background: 'rgba(15, 23, 42, 0.6)', borderRadius: '6px', fontSize: '11px' }}>
+                <strong>{poi.name || poi.id}</strong> (Offset: {poi.cross_track_m?.toFixed(1) ?? 0}m)
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <EmptyState
+            title="No sites to display"
+            description="Verified site data will appear here when a study region is selected."
+          />
+        )}
       </div>
     </section>
   );
 }
 
 function Dashboard() {
+  const [drawnRoute, setDrawnRoute] = useState<GeodeticCoordinate[] | null>(SAMPLE_ROUTE);
+  const [analysis, setAnalysis] = useState<RouteAnalysisResponse | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState<boolean>(true);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+
+  const runAnalysis = useCallback(async (coords: GeodeticCoordinate[]) => {
+    if (!coords || coords.length < 2) {
+      setAnalysis(null);
+      setIsAnalyzing(false);
+      return;
+    }
+
+    setIsAnalyzing(true);
+    setAnalysisError(null);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/routes/analyze`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          route_id: `traverse-${Date.now().toString().slice(-4)}`,
+          coordinates: coords,
+          buffer_distance_m: 250,
+        }),
+      });
+
+      if (!response.ok) {
+        if (response.status === 422) {
+          const errJson = await response.json().catch(() => null);
+          const detail = errJson?.detail;
+          const msg = typeof detail === 'string'
+            ? detail
+            : Array.isArray(detail)
+              ? detail.map((d: any) => d.msg || (typeof d === 'string' ? d : JSON.stringify(d))).join(', ')
+              : 'Route exceeds maximum allowed length of 25.0 km or contains invalid coordinates.';
+          throw new Error(msg);
+        }
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+
+      const payload = (await response.json()) as RouteAnalysisResponse;
+      setAnalysis(payload);
+    } catch (requestError) {
+      setAnalysisError(
+        requestError instanceof Error
+          ? requestError.message
+          : 'Unable to load elevation data from the terrain service.',
+      );
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }, []);
+
+  // Initial analysis on mount
+  useEffect(() => {
+    void runAnalysis(drawnRoute ?? SAMPLE_ROUTE);
+  }, [runAnalysis]);
+
+  // Handle route drawn callback from MapCanvas
+  const handleRouteDrawn = useCallback(
+    (coords: GeodeticCoordinate[]) => {
+      setDrawnRoute(coords);
+      void runAnalysis(coords);
+    },
+    [runAnalysis],
+  );
+
+  // Handle route clear callback from MapCanvas
+  const handleRouteClear = useCallback(() => {
+    setDrawnRoute(null);
+    setAnalysis(null);
+    setAnalysisError(null);
+  }, []);
+
   return (
     <div className="dashboard-layout" id="dashboard">
       <Sidebar />
       <main className="dashboard-main">
         <TopToolbar />
         <div className="dashboard-content">
-          <MapContainer />
+          <MapContainer
+            drawnRoute={drawnRoute}
+            analysis={analysis}
+            isAnalyzing={isAnalyzing}
+            analysisError={analysisError}
+            onRouteDrawn={handleRouteDrawn}
+            onRouteClear={handleRouteClear}
+          />
           <div className="analysis-grid">
-            <TerrainProfile />
-            <RouteSummary />
+            <TerrainProfile
+              analysis={analysis}
+              isLoading={isAnalyzing}
+              error={analysisError}
+            />
+            <RouteSummary analysis={analysis} />
           </div>
         </div>
       </main>
