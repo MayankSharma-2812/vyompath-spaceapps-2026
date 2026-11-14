@@ -171,17 +171,19 @@ Evaluates a drawn traverse, calculates 2D/3D distances, elevation profile, slope
   "max_slope_deg": 3.45,
   "slope_window_m": 50.0,
   "coverage_status": "complete",
-  "dtm_source": "stub",
-  "dtm_posting_m": 0.0,
+  "dtm_source": "USGS/NASA HiRISE DTEEC_023524_1985_023379_1985_U01",
+  "dtm_posting_m": 1.0097,
   "nearby_pois": [],
   "limitations": [
-    "MOCK DATA: Elevation profile is a deterministic synthetic sine-wave, not sampled from real DTM rasters. No HiRISE or MOLA data was accessed.",
-    "MOCK DATA: Gain, loss and slope metrics are derived from the synthetic profile. They are internally consistent but do not represent actual Martian terrain.",
-    "MOCK DATA: Nearby POIs are empty. The science-POI service (owner: Dheer) is not yet integrated. No fabricated science points are returned.",
-    "MOCK DATA: Terrain service (owner: Pranav) is not yet integrated. DTM source and posting are placeholders.",
-    "This analysis is NOT scientifically validated and MUST NOT be used for mission-critical route planning."
+    "DTM SAMPLING: Sampled from USGS/NASA HiRISE DTEEC_023524_1985_023379_1985_U01 (1.0097 m/px posting) using bilinear 4-neighbor interpolation.",
+    "VERTICAL DATUM: Native HiRISE elevations reference the MOLA Areoid equipotential surface.",
+    "SCIENCE POIs: POI search is not integrated in this milestone (owner: Dheer). Returned nearby_pois is empty.",
+    "COVERAGE: 100% of route sample points fell within valid DTM stereo elevation data."
   ]
 }
+```
+
+*Note on Fallback Mode:* If `VYOMPATH_DEM_PATH` is not configured or unreadable, the endpoint safely falls back to deterministic synthetic sine curves (`dtm_source: "synthetic/mock — no real DTM loaded"`, `dtm_posting_m: 0.0`) with explicit `"MOCK DATA"` limitation disclosures.
 ```
 
 ---

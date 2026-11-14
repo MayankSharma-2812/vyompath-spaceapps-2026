@@ -13,10 +13,11 @@ Owner: Pranav (Terrain Service & Raster Sampling Lead).
 from __future__ import annotations
 
 import math
+import os
 from typing import Any, Dict, Optional, Sequence, Tuple, Union
 import numpy as np
 
-from backend.app.schemas import Coordinate
+from backend.app.schemas import Coordinate, ElevationPoint
 from backend.app.services.coords import (
     MARS_RADIUS_M,
     MARS_CIRCUMFERENCE_M,
@@ -551,6 +552,198 @@ def multi_scale_along_track_grades(
         "max_scale_grade_deg": max_scale,
         "grade_spread_deg": spread,
     }
+
+
+# ---------------------------------------------------------------------------
+# Real DTM Raster Sampling & Analysis Pipeline (Issue #7)
+# ---------------------------------------------------------------------------
+
+def sample_route_dtm(
+    coords: Sequence[Coordinate],
+    dem_path: Optional[str] = None,
+    step_m: float = 5.0,
+    slope_window_m: float = 50.0,
+) -> Optional[Dict[str, Any]]:
+    """Sample continuous elevations and calculate terrain metrics from a real DTM raster.
+
+    Args:
+        coords: Sequence of >= 2 Coordinate waypoints defining the route.
+        dem_path: Optional path to GeoTIFF DTM file. If None, reads $VYOMPATH_DEM_PATH.
+        step_m: Sampling interval along the route in metres (default: 5.0 m).
+        slope_window_m: Baseline evaluation window for primary max slope in metres (default: 50.0 m).
+
+    Returns:
+        Dict containing sampled elevation profile, metrics, DTM metadata and coverage status,
+        or None if no DTM is configured, the file does not exist, or cannot be opened as a raster.
+    """
+    _validate_route(coords)
+
+    if dem_path is None:
+        dem_path = os.environ.get("VYOMPATH_DEM_PATH")
+
+    if not dem_path or not os.path.isfile(dem_path):
+        return None
+
+    try:
+        import rasterio
+        import rasterio.windows
+        import pyproj
+    except ImportError:
+        return None
+
+    try:
+        with rasterio.open(dem_path) as src:
+            if src.count < 1 or src.width < 1 or src.height < 1:
+                return None
+
+            tags = src.tags()
+            product_id = tags.get("PRODUCT_ID", "HiRISE Stereo DTM").strip('"')
+            dtm_source = (
+                f"USGS/NASA HiRISE {product_id}"
+                if "HiRISE" not in product_id
+                else f"USGS/NASA {product_id}"
+            )
+            dtm_posting_m = round(float(src.res[0]), 4)
+            nodata = float(src.nodata) if src.nodata is not None else -3.4028227e+38
+            gt = src.transform
+            width = src.width
+            height = src.height
+
+            # Transformer: transforms (lon, lat) East-positive degrees to raster native projected CRS
+            crs_raster = pyproj.CRS.from_wkt(src.crs.to_wkt())
+            transformer = pyproj.Transformer.from_crs(
+                crs_raster.geodetic_crs, crs_raster, always_xy=True
+            )
+
+            # Densify route polyline to uniform step_m
+            densified = densify_route(coords, step_m=step_m)
+            n_dens = len(densified)
+
+            # Calculate cumulative 2D haversine distances
+            dists: list[float] = [0.0]
+            for i in range(n_dens - 1):
+                d = haversine_m(densified[i], densified[i + 1])
+                dists.append(dists[-1] + d)
+
+            # Transform geodetic degrees to native projected coordinates (metres)
+            lons = [c.lon for c in densified]
+            lats = [c.lat for c in densified]
+            xs, ys = transformer.transform(lons, lats)
+
+            # Convert projected metres to floating-point raster pixel coordinates
+            cols_f = [(x - gt.c) / gt.a for x in xs]
+            rows_f = [(y - gt.f) / gt.e for y in ys]
+
+            inside_mask = [
+                0 <= cf < width and 0 <= rf < height
+                for cf, rf in zip(cols_f, rows_f)
+            ]
+
+            # If entire traverse lies outside the raster bounds
+            if not any(inside_mask):
+                pts_2d = [(dists[i], float("nan")) for i in range(n_dens)]
+                downsampled_pts = lttb_downsample(pts_2d, threshold=500)
+                profile = [
+                    ElevationPoint(
+                        distance_m=round(d, 2),
+                        elevation_m=None,
+                    )
+                    for d, _ in downsampled_pts
+                ]
+                return {
+                    "elevation_profile": profile,
+                    "total_gain_m": 0.0,
+                    "total_loss_m": 0.0,
+                    "max_slope_deg": 0.0,
+                    "slope_window_m": slope_window_m,
+                    "dtm_source": dtm_source,
+                    "dtm_posting_m": dtm_posting_m,
+                    "coverage_status": "out_of_bounds",
+                    "limitations": [
+                        "OUT OF BOUNDS: Route coordinates lie entirely outside the valid HiRISE stereo DTM footprint.",
+                        "ELEVATION DATA: Uncovered segments retain null elevation values.",
+                        "SCIENCE POIs: POI search is not integrated in this milestone (owner: Dheer). Returned nearby_pois is empty.",
+                        "VERTICAL DATUM: Native HiRISE elevations reference the MOLA Areoid equipotential surface.",
+                    ],
+                }
+
+            # Bounding box for windowed raster read
+            valid_c = [cols_f[i] for i in range(n_dens) if inside_mask[i]]
+            valid_r = [rows_f[i] for i in range(n_dens) if inside_mask[i]]
+
+            min_c = max(0, int(math.floor(min(valid_c))) - 1)
+            max_c = min(width - 1, int(math.ceil(max(valid_c))) + 2)
+            min_r = max(0, int(math.floor(min(valid_r))) - 1)
+            max_r = min(height - 1, int(math.ceil(max(valid_r))) + 2)
+
+            win_w = max_c - min_c + 1
+            win_h = max_r - min_r + 1
+            win = rasterio.windows.Window(min_c, min_r, win_w, win_h)
+            data_win = src.read(1, window=win)
+
+            # Sample subpixel elevations with 4-neighbor bilinear interpolation
+            raw_elevations: list[float] = []
+            for cf, rf, ins in zip(cols_f, rows_f, inside_mask):
+                if ins and min_c <= cf <= max_c - 1 and min_r <= rf <= max_r - 1:
+                    loc_c = cf - min_c
+                    loc_r = rf - min_r
+                    z = sample_point_bilinear(data_win, loc_c, loc_r, nodata=nodata)
+                else:
+                    z = float("nan")
+                raw_elevations.append(z)
+
+            # Gap processing, coverage classification, and gain/loss accumulation
+            filled, status, gain, loss = process_elevation_gaps(
+                raw_elevations, step_m=step_m, max_fill_m=15.0
+            )
+
+            # Multi-scale slope evaluation at slope_window_m (and 20m, 100m)
+            grades_res = multi_scale_along_track_grades(
+                dists, filled, windows_m=(20.0, slope_window_m, 100.0)
+            )
+            max_slope = grades_res["by_window"].get(slope_window_m, {}).get("max_grade_deg", 0.0)
+            if math.isnan(max_slope):
+                max_slope = 0.0
+
+            # LTTB downsampling to preserve key topological features within 500 samples
+            pts_2d = [(dists[i], filled[i]) for i in range(n_dens)]
+            downsampled_pts = lttb_downsample(pts_2d, threshold=500)
+            profile = [
+                ElevationPoint(
+                    distance_m=round(d, 2),
+                    elevation_m=None if math.isnan(z) else round(float(z), 2),
+                )
+                for d, z in downsampled_pts
+            ]
+
+            limitations: list[str] = [
+                f"DTM SAMPLING: Sampled from {dtm_source} ({dtm_posting_m:.4f} m/px posting) using bilinear 4-neighbor interpolation.",
+                "VERTICAL DATUM: Native HiRISE elevations reference the MOLA Areoid equipotential surface.",
+                "SCIENCE POIs: POI search is not integrated in this milestone (owner: Dheer). Returned nearby_pois is empty.",
+            ]
+            if status == "partial_gap":
+                limitations.append(
+                    "PARTIAL COVERAGE: Route traversed NoData areas exceeding 15.0 m gap tolerance; missing segments retain null elevation."
+                )
+            elif status == "complete":
+                limitations.append(
+                    "COVERAGE: 100% of route sample points fell within valid DTM stereo elevation data."
+                )
+
+            return {
+                "elevation_profile": profile,
+                "total_gain_m": round(gain, 2),
+                "total_loss_m": round(loss, 2),
+                "max_slope_deg": round(abs(max_slope), 2),
+                "slope_window_m": slope_window_m,
+                "dtm_source": dtm_source,
+                "dtm_posting_m": dtm_posting_m,
+                "coverage_status": status,
+                "limitations": limitations,
+            }
+    except Exception:
+        # In case of corrupted raster file or read failure, return None to trigger truthful mock fallback
+        return None
 
 
 
