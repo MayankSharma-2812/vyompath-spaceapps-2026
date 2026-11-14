@@ -14,6 +14,20 @@
 - [ ] Verified on Windows
 - [ ] Verified on macOS
 - [ ] Automated tests pass (`pytest -v`)
+- [ ] Frontend linter and build pass (`npm run lint && npm run build`)
 
-## Maintainer Review & Approval Requirement
-> **IMPORTANT:** Per NAKSHATRA X project governance, **all pull requests must be explicitly reviewed and approved by the maintainer (@MayankSharma-2812)** before merging. No automated or self-merges are permitted for contributors.
+## Peer Review Assignment Matrix
+Per NAKSHATRA X team review workflow, every PR requires review and approval from the designated peer reviewer before merging:
+
+| PR Author | Primary Reviewer | Backup Reviewer |
+|---|---|---|
+| **Mayank** (`@MayankSharma-2812`) | Arya (`@aryatiwari124`) | Dheer (`@dheerjain0508`) |
+| **Arya** (`@aryatiwari124`) | Mayank (`@MayankSharma-2812`) | — |
+| **Kumkum** (`@kumkum098`) | Arya (`@aryatiwari124`) | — |
+| **Pranav** (`@PranavSharma124`) | Shyam (`@shyamsharmas124-commits`) | — |
+| **Shyam** (`@shyamsharmas124-commits`) | Pranav (`@PranavSharma124`) | — |
+| **Dheer** (`@dheerjain0508`) | Mayank (`@MayankSharma-2812`) | — |
+
+- [ ] Assigned peer reviewer has been requested on GitHub
+- [ ] Independent review completed under reviewer's authenticated account
+- [ ] No author self-merges or unverified approvals

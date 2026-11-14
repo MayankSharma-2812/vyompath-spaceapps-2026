@@ -1,0 +1,62 @@
+name: PR Reviewer Assignment
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, reopened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  auto-request-reviewer:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    steps:
+      - name: Request Designated Peer Reviewer
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          echo "Evaluating review assignment for PR #${PR_NUMBER} by @${AUTHOR}..."
+
+          case "$AUTHOR" in
+            "MayankSharma-2812")
+              PRIMARY_REVIEWER="aryatiwari124"
+              FALLBACK_REVIEWER="dheerjain0508"
+              ;;
+            "aryatiwari124")
+              PRIMARY_REVIEWER="MayankSharma-2812"
+              FALLBACK_REVIEWER=""
+              ;;
+            "kumkum098")
+              PRIMARY_REVIEWER="aryatiwari124"
+              FALLBACK_REVIEWER=""
+              ;;
+            "PranavSharma124")
+              PRIMARY_REVIEWER="shyamsharmas124-commits"
+              FALLBACK_REVIEWER=""
+              ;;
+            "shyamsharmas124-commits")
+              PRIMARY_REVIEWER="PranavSharma124"
+              FALLBACK_REVIEWER=""
+              ;;
+            "dheerjain0508")
+              PRIMARY_REVIEWER="MayankSharma-2812"
+              FALLBACK_REVIEWER=""
+              ;;
+            *)
+              echo "Author @${AUTHOR} is not in the team review matrix. Skipping auto-assignment."
+              exit 0
+              ;;
+          esac
+
+          echo "Requesting primary reviewer @${PRIMARY_REVIEWER}..."
+          if ! gh pr edit "$PR_NUMBER" --repo "$REPO" --add-reviewer "$PRIMARY_REVIEWER"; then
+            echo "Primary reviewer request failed. Checking fallback..."
+            if [ -n "$FALLBACK_REVIEWER" ]; then
+              echo "Requesting fallback reviewer @${FALLBACK_REVIEWER}..."
+              gh pr edit "$PR_NUMBER" --repo "$REPO" --add-reviewer "$FALLBACK_REVIEWER" || true
+            fi
+          fi

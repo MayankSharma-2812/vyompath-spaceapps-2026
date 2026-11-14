@@ -1,9 +1,37 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# VyomPath Code Owners
+# VyomPath Peer Review Code Owners — Team NAKSHATRA X
 # ─────────────────────────────────────────────────────────────────────────────
-# Every file in this repository requires review and approval from Mayank Sharma
-# (NAKSHATRA X Backend & Cloud Systems Lead / Repository Maintainer).
-# No code can be merged without maintainer review.
+# Peer review assignment matrix:
+#   PR Author: Mayank  → Primary Reviewer: Arya (@aryatiwari124) or Dheer (@dheerjain0508)
+#   PR Author: Arya    → Primary Reviewer: Mayank (@MayankSharma-2812)
+#   PR Author: Kumkum  → Primary Reviewer: Arya (@aryatiwari124)
+#   PR Author: Pranav  → Primary Reviewer: Shyam (@shyamsharmas124-commits)
+#   PR Author: Shyam   → Primary Reviewer: Pranav (@PranavSharma124)
+#   PR Author: Dheer   → Primary Reviewer: Mayank (@MayankSharma-2812)
 # ─────────────────────────────────────────────────────────────────────────────
 
-* @MayankSharma-2812
+# Backend & Cloud Infrastructure (Owner: Mayank → Reviewers: Arya, Dheer)
+/backend/                           @aryatiwari124 @dheerjain0508
+/Dockerfile                         @aryatiwari124 @dheerjain0508
+/.github/workflows/                 @aryatiwari124 @dheerjain0508
+
+# Map Engineering (Owner: Arya → Reviewer: Mayank)
+/frontend/src/features/map/         @MayankSharma-2812
+/scripts/arya/                      @MayankSharma-2812
+
+# UI/UX Dashboard (Owner: Kumkum → Reviewer: Arya)
+/frontend/src/features/dashboard/   @aryatiwari124
+/frontend/src/components/           @aryatiwari124
+
+# Terrain & Scientific Analysis (Owner: Pranav → Reviewer: Shyam)
+/backend/app/services/terrain.py    @shyamsharmas124-commits
+/backend/app/services/coords.py     @shyamsharmas124-commits
+
+# Data & GIS (Owner: Shyam → Reviewer: Pranav)
+/data/                              @PranavSharma124
+/scripts/build_regional_tiles.py    @PranavSharma124
+/scripts/fetch_data.py              @PranavSharma124
+
+# QA & Test Suites (Owner: Dheer → Reviewer: Mayank)
+/tests/                             @MayankSharma-2812
+/tools/                             @MayankSharma-2812
