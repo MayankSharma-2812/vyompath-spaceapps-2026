@@ -90,7 +90,38 @@ flowchart TD
 
 ---
 
-## 5. Quick Start & Execution
+## 5. Mission-Aware Traverse Intelligence (Flagship Feature & USP)
+
+VyomPath differentiates itself from conventional planetary map viewers through **Mission-Aware Traverse Intelligence**—a multi-criteria tactical decision-support engine designed to evaluate alternative rover paths across Jezero Crater under competing mission regimes.
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│               MISSION-AWARE TRAVERSE INTELLIGENCE (USP)                │
+├──────────────────────┬─────────────────────────┬───────────────────────┤
+│  1. SLOPE-CONSCIOUS  │   2. ENERGY-EFFICIENT   │   3. DATA-CONFIDENCE  │
+├──────────────────────┼─────────────────────────┼───────────────────────┤
+│ • Max slope penalty  │ • Great-circle distance │ • Valid DTM coverage  │
+│ • Steep segments >15°│ • Cumulative climb (gain)│ • NoData void penalty │
+│ • Average gradient   │ • Gravitational work (W)│ • Out-of-bounds drop  │
+│ • Weights: 60/20/20  │ • Weights: 20/60/20     │ • Weights: 15/15/70   │
+└──────────────────────┴─────────────────────────┴───────────────────────┘
+```
+
+### Key Capabilities:
+- **Three Mission Objective Profiles:**
+  1. **Slope-Conscious Traverse ($w_{\text{slope}} = 0.60, w_{\text{energy}} = 0.20, w_{\text{confidence}} = 0.20$):** Focuses on rover kinematic stability, mechanical tilt margins, and avoiding steep scarps ($>15^\circ$).
+  2. **Energy-Efficient Traverse ($w_{\text{slope}} = 0.20, w_{\text{energy}} = 0.60, w_{\text{confidence}} = 0.20$):** Minimizes path distance, cumulative vertical climb, and gravitational mechanical work ($W \approx m g \Delta z + C_{rr} m g d$) for a 1025 kg *Perseverance*-class rover against Mars gravity ($g = 3.721\text{ m/s}^2$).
+  3. **Data-Confidence-First Traverse ($w_{\text{slope}} = 0.15, w_{\text{energy}} = 0.15, w_{\text{confidence}} = 0.70$):** Maximizes verified HiRISE stereo DTM coverage, penalizing NoData voids and unmapped terrain.
+- **Normalized Multi-Criteria Scoring:** Bounded $[0, 100]$ sub-scores prevent arbitrary unit blending (metres, degrees, kilojoules, and percentages are never added directly).
+- **Explainable Natural Language Evidence:** Deterministic recommendations citing exact measured metric deltas ($\Delta z$, max slope, steep segment $\%$, DTM coverage) rather than black-box AI text.
+- **Honest Near-Parity Handling:** If alternative routes score within 2.0 points ($|\Delta S| < 2.0$), the system reports an honest tie / near parity instead of exaggerating trivial differences.
+- **Truth-in-Labeling:** Strictly non-flight-certified research decision support; explicitly distinguishes real HiRISE DTM analysis from synthetic mock demonstration data.
+
+*Complete mathematical formulations, validation benchmarks, and presentation pitch are documented in [`docs/mission-aware-traverse-intelligence.md`](docs/mission-aware-traverse-intelligence.md).*
+
+---
+
+## 6. Quick Start & Execution
 
 VyomPath is optimized for **instant launch on Linux, macOS, and Windows 11**.
 
@@ -166,7 +197,7 @@ VYOMPATH_DEM_PATH=/app/data/dtm/jezero_aoi_v2.tif docker compose up -d
 
 ---
 
-## 6. Operational Modes: Real DTM vs Mock Fallback
+## 7. Operational Modes: Real DTM vs Mock Fallback
 
 The application dynamically inspects its environment and truthfully reports its operational mode across API payloads, health probes, and the user interface:
 
@@ -201,18 +232,19 @@ VyomPath enforces strict separation between visual map presentation and quantita
 |:---|:---|:---|
 | **Traverse Drawing & Freehand Editing** | **100% Offline** | Full interactive OpenLayers line-drawing on client canvas. |
 | **Sub-Pixel DTM Elevation Analysis** | **100% Offline** | Python/Rasterio bilinear sampling over local GeoTIFF raster. |
+| **Mission-Aware Traverse Intelligence** | **100% Offline** | Multi-objective scoring, energy proxy, and explainable recommendations. |
 | **Route A vs Route B Comparison** | **100% Offline** | In-browser comparative KPI calculations and metric deltas ($\Delta$). |
 | **Regional HiRISE DTM Ortho Tiles** | **100% Offline** | Local pre-rendered XYZ tile pyramid in demo bundle (`z12–z15`). |
 | **Global Mars Trek Basemaps (MOLA/CTX/Viking)** | **Online Required** | Live NASA Trek WMTS endpoints. Transparent fallback ensures zero application crashes when offline. |
 
 ---
 
-## 7. Automated Test Suite & Quality Verification
+## 8. Automated Test Suite & Quality Verification
 
 VyomPath enforces comprehensive automated test gates:
 
 ```bash
-# 1. Run Backend Unit & Integration Tests (283 passed, 6 skipped in CI)
+# 1. Run Backend Unit & Integration Tests (293 passed, 6 skipped in CI)
 python3 -m pytest tests/ -q
 
 # 2. Run Targeted Real DTM Pipeline Tests (16 passed with real DTM mounted)
@@ -229,19 +261,19 @@ cd frontend
 npm run lint
 npm run build
 
-# 6. Run Playwright End-to-End Browser Journey Tests (17 passed)
+# 6. Run Playwright End-to-End Browser Journey Tests (32 passed, 3 skipped)
 npx playwright test
 ```
 
 ### Verification Proof Summary
-- **Python / FastAPI Tests:** `283 passed, 6 skipped, 0 failed` in CI; `16 passed` in live DTM suite.
-- **Frontend Quality:** `0 warnings, 0 errors` via `oxlint`; production bundle compiled cleanly via Vite 8.
-- **Playwright Browser Tests:** `17 passed, 0 failed, 3 skipped` across Chromium test runs.
+- **Python / FastAPI Tests:** `293 passed, 6 skipped, 0 failed` in CI; includes dedicated Traverse Intelligence unit & integration suites.
+- **Frontend Quality:** `0 warnings, 0 errors` via `oxlint`; production bundle compiled cleanly via Vite 8 (1,051 kB minified).
+- **Playwright Browser Tests:** `32 passed, 0 failed, 3 skipped` across automated Chromium journey and screenshot tests.
 - **Process Lifecycle:** Tested clean launch, health probe verification, and leak-free SIGINT/SIGTERM process teardown.
 
 ---
 
-## 8. Dataset Provenance & Licensing Register
+## 9. Dataset Provenance & Licensing Register
 
 | Dataset / Layer | Source Mission / Team | Product ID / DOI | License / Rights Status | Classification |
 |:---|:---|:---|:---|:---|
@@ -255,7 +287,7 @@ npx playwright test
 
 ---
 
-## 9. Team NAKSHATRA X — Subsystem Ownership
+## 10. Team NAKSHATRA X — Subsystem Ownership
 
 | Team Member | Subsystem Ownership | Core Contributions |
 |:---|:---|:---|
@@ -268,28 +300,30 @@ npx playwright test
 
 ---
 
-## 10. Canonical Documentation Package
+## 11. Canonical Documentation Package
 
 Detailed technical specifications and audit reports are available in the [`docs/`](docs/) directory and repository root:
 
-1. [Master Defect Register & Audit Log](bug.md): Full audit of application controls, defects, root cause resolutions, and verification proofs.
-2. [Production Containerization & Deployment Runbook](docs/deployment.md): Docker Compose multi-container setup, Nginx reverse proxy, and cloud deployment guidelines.
-3. [System Architecture](docs/architecture.md): Subsystem breakdown, planetary geodetics, and two-path design.
-4. [Backend/Frontend Integration Contract](docs/backend-frontend-integration-contract.md): Strict wire formats, schemas, and coordinate serialization.
-5. [Scientific Methodology & Limitations](docs/scientific-methodology-and-limitations.md): Mathematical formulations, geodetic error bounds, and truth-in-labeling policies.
-6. [Dataset Provenance & Licensing Register](docs/dataset-provenance-and-licensing.md): Sourcing, checksums, attribution, and license disclosures.
-7. [Offline Demonstration & Evaluation Guide](docs/offline-demonstration-instructions.md): Step-by-step judge walkthrough for air-gapped evaluation.
-8. [NASA Space Apps Submission Checklist](docs/nasa-submission-checklist.md): 9-gate verification and submission asset registry.
-9. [Dashboard QA & Regression Report](frontend/src/features/dashboard/DASHBOARD_QA_REPORT.md): Visual proof, defect resolutions, and responsive layout verification.
-10. [Scientific Validation Report](docs/scientific-validation-report.md): Ground-truth comparison against USGS/NASA benchmarks.
-11. [Operational Runbook](docs/backend-cloud-operational-runbook.md): Production runbook, Docker commands, troubleshooting, and disaster recovery.
-12. [Coordinate System Contract](docs/scientific-coordinate-contract.md): Strict wire conventions, geodetic formulas, and standard parallels.
+1. [Mission-Aware Traverse Intelligence Specification](docs/mission-aware-traverse-intelligence.md): Tactical multi-objective rover decision-support, bounded scoring formulas, test proofs, and 30-second presentation script.
+2. [Master Defect Register & Audit Log](bug.md): Full audit of application controls, defects, root cause resolutions, and verification proofs.
+3. [Production Containerization & Deployment Runbook](docs/deployment.md): Docker Compose multi-container setup, Nginx reverse proxy, and cloud deployment guidelines.
+4. [System Architecture](docs/architecture.md): Subsystem breakdown, planetary geodetics, and two-path design.
+5. [Backend/Frontend Integration Contract](docs/backend-frontend-integration-contract.md): Strict wire formats, schemas, and coordinate serialization.
+6. [Scientific Methodology & Limitations](docs/scientific-methodology-and-limitations.md): Mathematical formulations, geodetic error bounds, and truth-in-labeling policies.
+7. [Dataset Provenance & Licensing Register](docs/dataset-provenance-and-licensing.md): Sourcing, checksums, attribution, and license disclosures.
+8. [Offline Demonstration & Evaluation Guide](docs/offline-demonstration-instructions.md): Step-by-step judge walkthrough for air-gapped evaluation.
+9. [NASA Space Apps Submission Checklist](docs/nasa-submission-checklist.md): 9-gate verification and submission asset registry.
+10. [Dashboard QA & Regression Report](frontend/src/features/dashboard/DASHBOARD_QA_REPORT.md): Visual proof, defect resolutions, and responsive layout verification.
+11. [Scientific Validation Report](docs/scientific-validation-report.md): Ground-truth comparison against USGS/NASA benchmarks.
+12. [Operational Runbook](docs/backend-cloud-operational-runbook.md): Production runbook, Docker commands, troubleshooting, and disaster recovery.
+13. [Coordinate System Contract](docs/scientific-coordinate-contract.md): Strict wire conventions, geodetic formulas, and standard parallels.
 
 ---
 
-## 11. AI Tools Disclosure
+## 12. AI Tools Disclosure
 
 In accordance with NASA Space Apps Challenge 2026 rules:
 - **AI Assistants Used:** Google DeepMind / Antigravity Agent and Anthropic Claude.
 - **Specific Tasks Assisted:** Code scaffolding, unit and regression test authoring, Playwright journey script generation, documentation cross-referencing, and multi-perspective peer review simulation.
+- **Human Governance:** All physical equations (3D distance integration, bilinear interpolation, multi-scale slope baselines, geodetic radius constants), data rights determinations, and architectural decisions were established, reviewed, verified, and approved by human team leads.
 - **Human Governance:** All physical equations (3D distance integration, bilinear interpolation, multi-scale slope baselines, geodetic radius constants), data rights determinations, and architectural decisions were established, reviewed, verified, and approved by human team leads.
