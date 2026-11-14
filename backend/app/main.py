@@ -43,6 +43,7 @@ DEFAULT_CORS_ORIGINS: list[str] = [
     "http://127.0.0.1:8080",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://vyompath.onrender.com",
 ]
 
 
@@ -80,6 +81,16 @@ app.add_middleware(
 # ---------------------------------------------------------------------------
 # Routers — all mounted under /api
 # ---------------------------------------------------------------------------
+@app.get("/", include_in_schema=False)
+def root():
+    return {
+        "status": "ok",
+        "service": "VyomPath API",
+        "health": "/api/health",
+        "docs": "/docs",
+    }
+
+
 app.include_router(health.router, prefix="/api")
 app.include_router(layers.router, prefix="/api")
 app.include_router(routes.router, prefix="/api")
