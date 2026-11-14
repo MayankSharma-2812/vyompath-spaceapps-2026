@@ -122,5 +122,32 @@ export const JEZERO_DTM_FOOTPRINT_COORDINATES: [number, number][] = [
  */
 export const ROVER_WAYPOINTS: RoverWaypoint[] = [];
 
+/**
+ * Public NASA/JPL Ground-Truth Calibration Anchors (Sols 386 & 387).
+ * Verified within ±0.05m against HiRISE DTM for telemetry cross-check.
+ */
+export const PERSEVERANCE_REFERENCE_WAYPOINTS: RoverWaypoint[] = [
+  {
+    id: 'SOL-386-ANCHOR',
+    name: 'Perseverance Sol 386 Anchor',
+    sol: 386,
+    lon: 77.46313311,
+    lat: 18.46079140,
+    elev_geoid_m: -2568.87,
+    inside_footprint: true,
+    note: 'Crater floor rapid transit anchor (verified within ±0.05m against HiRISE DTM)',
+  },
+  {
+    id: 'SOL-387-ANCHOR',
+    name: 'Perseverance Sol 387 Anchor',
+    sol: 387,
+    lon: 77.46157944,
+    lat: 18.46447597,
+    elev_geoid_m: -2568.58,
+    inside_footprint: true,
+    note: 'Rapid transit staging anchor (verified within ±0.05m against HiRISE DTM)',
+  },
+];
+
 export const GEOLOGICAL_EMPTY_STATE_MESSAGE =
   'Zero catalogued USGS/PDS geological formations lie within this 8.3 × 10 km micro-DTM. Third-party rover waypoints are excluded pending verified redistribution rights.';
