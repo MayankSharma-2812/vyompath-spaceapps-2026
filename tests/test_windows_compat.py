@@ -44,8 +44,14 @@ def test_windows_path_normalization() -> None:
     assert science_file.exists(), f"Science file not found at {science_file}"
 
     # Verify path with explicit Windows backslashes
-    win_path_str = str(layers_file).replace("/", "\\")
-    assert os.path.exists(win_path_str)
+    if sys.platform == "win32":
+        win_path_str = str(layers_file).replace("/", "\\")
+        assert os.path.exists(win_path_str)
+    else:
+        # On POSIX hosts, verify PureWindowsPath handles backslash parsing safely
+        from pathlib import PureWindowsPath
+        win_path = PureWindowsPath(str(layers_file).replace("/", "\\"))
+        assert Path(win_path.as_posix()).exists()
 
 
 def test_windows_relative_paths() -> None:
