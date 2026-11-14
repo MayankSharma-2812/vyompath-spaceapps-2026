@@ -117,7 +117,7 @@ To guarantee high-speed operation during venue presentations without internet de
 
 ### 5.1 Authoritative Analytical Boundary
 The analytical boundary of the system is the **raster valid-data footprint** ($63.16\%$ valid data coverage inside the $9014 \times 10896$ pixel HiRISE stereo DTM `jezero_aoi_v2.tif`). 
-- Vector representation: [`data/footprints/jezero_dtm.geojson`](file:///home/mayank-sharma/Hackathon/NASA/nakshatra-vyompath/data/footprints/jezero_dtm.geojson).
+- Vector representation: [`data/footprints/jezero_dtm.geojson`](file:///home/mayank-sharma/Hackathon/NASA/vyompath-spaceapps-2026/data/footprints/jezero_dtm.geojson).
 - Traverses outside the valid footprint return `coverage_status: "out_of_bounds"`.
 - Traverses crossing the non-data margins return `coverage_status: "partial_gap"`.
 

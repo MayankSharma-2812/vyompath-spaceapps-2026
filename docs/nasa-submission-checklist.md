@@ -15,7 +15,7 @@
 - **Challenge:** Interplanetary Survival Guide: Martian Map
 - **Local Event:** Jaipur, India
 - **Event Window:** Saturday, November 14, 2026 – Sunday, November 15, 2026 (IST)
-- **Primary Public Repository:** `https://github.com/MayankSharma-2812/nakshatra-vyompath`
+- **Primary Public Repository:** `https://github.com/MayankSharma-2812/vyompath-spaceapps-2026`
 - **License:** Apache License 2.0 (`LICENSE`)
 - **Submission Operator:** Mayank Sharma (as Team Owner)
 
