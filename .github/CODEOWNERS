@@ -3,42 +3,43 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # Enforced by GitHub Branch Protection (require_code_owner_reviews: true)
 #
-# Peer review assignment matrix:
-#   PR Author: Mayank  → Primary Reviewer: Arya (@aryatiwari124) or Dheer (@dheerjain0508)
-#   PR Author: Arya    → Primary Reviewer: Mayank (@MayankSharma-2812)
-#   PR Author: Kumkum  → Primary Reviewer: Arya (@aryatiwari124)
-#   PR Author: Pranav  → Primary Reviewer: Shyam (@shyamsharmas124-commits)
-#   PR Author: Shyam   → Primary Reviewer: Pranav (@PranavSharma124)
-#   PR Author: Dheer   → Primary Reviewer: Mayank (@MayankSharma-2812)
+# Peer review assignment matrix (with Shyam authorized as active peer reviewer):
+#   PR Author: Mayank  → Reviewers: Arya (@aryatiwari124), Shyam (@shyamsharmas124-commits), Dheer (@dheerjain0508)
+#   PR Author: Arya    → Reviewers: Mayank (@MayankSharma-2812), Shyam (@shyamsharmas124-commits)
+#   PR Author: Kumkum  → Reviewers: Arya (@aryatiwari124), Shyam (@shyamsharmas124-commits)
+#   PR Author: Pranav  → Reviewer: Shyam (@shyamsharmas124-commits)
+#   PR Author: Shyam   → Reviewers: Pranav (@PranavSharma124), Mayank (@MayankSharma-2812)
+#   PR Author: Dheer   → Reviewers: Mayank (@MayankSharma-2812), Shyam (@shyamsharmas124-commits)
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Backend & Cloud Infrastructure (Author: Mayank → Reviewers: Arya, Dheer)
-/backend/                           @aryatiwari124 @dheerjain0508
-/Dockerfile                         @aryatiwari124 @dheerjain0508
-/.github/workflows/                 @aryatiwari124 @dheerjain0508
+# Backend & Cloud Infrastructure
+/backend/                           @aryatiwari124 @dheerjain0508 @shyamsharmas124-commits
+/Dockerfile                         @aryatiwari124 @dheerjain0508 @shyamsharmas124-commits
+/.github/workflows/                 @aryatiwari124 @dheerjain0508 @shyamsharmas124-commits
+/.github/                           @aryatiwari124 @MayankSharma-2812 @shyamsharmas124-commits
 
-# Map Engineering (Author: Arya → Reviewer: Mayank)
-/frontend/src/features/map/         @MayankSharma-2812
-/scripts/arya/                      @MayankSharma-2812
+# Map Engineering
+/frontend/src/features/map/         @MayankSharma-2812 @shyamsharmas124-commits
+/scripts/arya/                      @MayankSharma-2812 @shyamsharmas124-commits
 
-# UI/UX Dashboard (Author: Kumkum → Reviewer: Arya)
-/frontend/src/features/dashboard/   @aryatiwari124
-/frontend/src/components/           @aryatiwari124
-/frontend/                          @aryatiwari124
+# UI/UX Dashboard
+/frontend/src/features/dashboard/   @aryatiwari124 @shyamsharmas124-commits
+/frontend/src/components/           @aryatiwari124 @shyamsharmas124-commits
+/frontend/                          @aryatiwari124 @shyamsharmas124-commits
 
-# Terrain & Scientific Analysis (Author: Pranav → Reviewer: Shyam)
-/backend/app/services/terrain.py    @shyamsharmas124-commits
-/backend/app/services/coords.py     @shyamsharmas124-commits
+# Terrain & Scientific Analysis
+/backend/app/services/terrain.py    @shyamsharmas124-commits @PranavSharma124
+/backend/app/services/coords.py     @shyamsharmas124-commits @PranavSharma124
 
-# Data & GIS (Author: Shyam → Reviewer: Pranav)
-/data/                              @PranavSharma124
-/scripts/build_regional_tiles.py    @PranavSharma124
-/scripts/fetch_data.py              @PranavSharma124
+# Data & GIS
+/data/                              @PranavSharma124 @shyamsharmas124-commits
+/scripts/build_regional_tiles.py    @PranavSharma124 @shyamsharmas124-commits
+/scripts/fetch_data.py              @PranavSharma124 @shyamsharmas124-commits
 
-# QA & Test Suites (Author: Dheer → Reviewer: Mayank)
-/tests/                             @MayankSharma-2812
-/tools/                             @MayankSharma-2812
+# QA & Test Suites
+/tests/                             @MayankSharma-2812 @shyamsharmas124-commits
+/tools/                             @MayankSharma-2812 @shyamsharmas124-commits
 
-# General Documentation & Project Root (Shared peer review)
+# General Documentation & Project Root
 /docs/                              @MayankSharma-2812 @PranavSharma124 @shyamsharmas124-commits
-*                                   @aryatiwari124 @MayankSharma-2812 @PranavSharma124
+*                                   @aryatiwari124 @MayankSharma-2812 @PranavSharma124 @shyamsharmas124-commits
