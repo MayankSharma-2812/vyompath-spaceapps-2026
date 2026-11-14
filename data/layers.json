@@ -94,7 +94,7 @@
       "source": "NASA / PDS Geosciences Node",
       "citation": "Zuber, M. T., et al. (1992). The Mars Observer laser altimeter investigation. J. Geophys. Res., 97(E5), 7781-7797.",
       "source_url": "https://pds-geosciences.wustl.edu/missions/mgs/mola.html",
-      "description": "Global numerical areoid-referenced elevation map. Used as wide-area terrain fallback when route traverses outside HiRISE micro-DTM coverage."
+      "description": "Global numerical areoid-referenced elevation map rendered as visual WMTS tiles via NASA Solar System Treks. Requires internet access. Note: In this release, visual WMTS map tiles provide visual context only and are not queried for numerical route elevation sampling."
     }
   ]
 }

@@ -19,6 +19,7 @@
 | **BUG-005** | P2 | Backend / Security | `backend/app/main.py` (L37–43) | `DEFAULT_CORS_ORIGINS` omitted standard local preview and container ports (4173, 8080, 3000). | Run `vite preview` on port 4173 without `CORS_ORIGINS` env var; attempt fetch. | Standard local preview and container ports permitted by default. | Cross-origin preflight rejected for port 4173. | Expanded `DEFAULT_CORS_ORIGINS` to include ports 4173, 8080, and 3000 for localhost and 127.0.0.1. | `pytest tests/test_api.py` (18 passed). | **VERIFIED** |
 | **BUG-006** | P2 | Docker / Healthcheck | `frontend/nginx.conf` (L2), `frontend/Dockerfile` (L33) | Alpine `wget` healthcheck failed with connection refused due to IPv6 localhost resolution mismatch. | Run `wget -q --spider http://localhost:80/` in `nginx:1.27-alpine` container. | Healthcheck successfully probes running Nginx web server. | Fails with `Connection refused` because Nginx was only bound to IPv4 `listen 80;`. | Added `listen [::]:80;` to `nginx.conf` and updated healthcheck probe target to `http://127.0.0.1:80/`. | `docker compose ps` reporting `vyompath-frontend Up (healthy)`. | **VERIFIED** |
 | **BUG-007** | P3 | Documentation | `docs/event-day-implementation-plan.md`, `docs/team-task-allocation-and-timeline.md` | Obsolete event-day internal planning and team task allocation docs cluttering repository. | Browse `docs/` directory; find conflicting hackathon internal schedules. | Public release documentation contains only architecture, methodology, dataset provenance, deployment, and test evidence. | Outdated internal planning notes present. | Removed obsolete internal planning documents and consolidated all technical and licensing details into canonical documentation. | File tree inspection and link validation. | **VERIFIED** |
+| **BUG-008** | P1 | Scientific Integrity & Transparency | `backend/app/schemas.py`, `backend/app/api/routes.py`, `backend/app/api/health.py`, `frontend/src/features/dashboard/Dashboard.tsx`, `frontend/src/features/map/MapCanvas.tsx` | Mock analysis returned `coverage_status: complete` and ambiguous transparency in public deployment. | Query `/api/routes/analyze` without DTM mounted; inspect returned `coverage_status` and frontend dashboard banners. | Mock analysis returns `coverage_status: "not_applicable"`, explicit `analysis_mode: "mock"`, and prominent `DEMONSTRATION MODE — SYNTHETIC TERRAIN DATA` banner. | Mock analysis returned `coverage_status: "complete"` and lacked explicit machine-readable `analysis_mode` and prominent mock warning banner. | (1) Added `not_applicable` to `coverage_status` enum and added `analysis_mode: "real_dtm" | "mock"`. (2) Added `is_dtm_available()` validating raster readability via `rasterio.open()`. (3) Added prominent UI warning banner and labeled mock chart & metrics as illustrative. (4) Added truthful `REAL HiRISE DTM ANALYSIS` banner when genuine raster is active. | Verified via pytest suite (283 passed) and Playwright `mock-mode-transparency.spec.ts` (22 passed). | **VERIFIED** |
 
 ---
 
@@ -44,9 +45,9 @@
 | Severity | Count Discovered | Count Fixed | Count Verified | Open / Unresolved |
 |---|---|---|---|---|
 | **P0 (Critical Blocker)** | 0 | 0 | 0 | **0** |
-| **P1 (Core Feature / Integrity)** | 2 | 2 | 2 | **0** |
+| **P1 (Core Feature / Integrity)** | 3 | 3 | 3 | **0** |
 | **P2 (Usability / Architecture)** | 4 | 4 | 4 | **0** |
 | **P3 (Documentation / Polish)** | 1 | 1 | 1 | **0** |
-| **TOTAL** | **7** | **7** | **7** | **0** |
+| **TOTAL** | **8** | **8** | **8** | **0** |
 
-**Conclusion:** The application contains **0 unresolved P0 defects** and **0 unresolved P1 defects**. All 7 identified defects have been remediated and verified through automated tests, Docker runtime probes, and manual inspections.
+**Conclusion:** The application contains **0 unresolved P0 defects** and **0 unresolved P1 defects**. All 8 identified defects have been remediated and verified through automated tests, Docker runtime probes, and manual inspections.

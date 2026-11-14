@@ -179,9 +179,17 @@ class RouteAnalysisResponse(BaseModel):
         ge=0.0,
         description="Native DTM posting / ground sample distance, in metres.",
     )
-    coverage_status: Literal["complete", "partial_gap", "out_of_bounds"] = Field(
-        default="complete",
-        description="Whether the DTM fully covers the requested route.",
+    coverage_status: Literal["complete", "partial_gap", "out_of_bounds", "not_applicable"] = Field(
+        default="not_applicable",
+        description="Whether the DTM fully covers the requested route, or not_applicable for synthetic mock analysis.",
+    )
+    analysis_mode: Literal["real_dtm", "mock"] = Field(
+        default="mock",
+        description="Explicit machine-readable analysis mode: 'real_dtm' when sampled from valid raster, 'mock' for synthetic fallback.",
+    )
+    is_mock: bool = Field(
+        default=True,
+        description="Boolean convenience flag: True when analysis_mode is 'mock', False when 'real_dtm'.",
     )
 
     # Science POIs
