@@ -145,6 +145,27 @@ npm run dev
 
 ---
 
+### Option C: Docker Multi-Container Deployment (Production Arranged)
+
+Run VyomPath as a production-grade multi-container stack orchestrated via Docker Compose:
+
+```bash
+# 1. Build and start frontend (Nginx reverse proxy) and backend (FastAPI):
+docker compose up -d --build
+
+# 2. Verify health status:
+docker compose ps
+
+# 3. Mount external DTM (optional):
+VYOMPATH_DEM_PATH=/app/data/dtm/jezero_aoi_v2.tif docker compose up -d
+```
+- **Web UI & Map Explorer:** `http://localhost:8080`
+- **Health Check Probe:** `http://localhost:8080/api/health`
+- **Interactive API Docs:** `http://localhost:8080/api/docs`
+- For cloud deployment instructions (AWS, GCP, DigitalOcean, Railway), see [docs/deployment.md](docs/deployment.md).
+
+---
+
 ## 6. Operational Modes: Real DTM vs Mock Fallback
 
 The application dynamically inspects its environment and truthfully reports its operational mode in the top toolbar:
@@ -154,6 +175,16 @@ The application dynamically inspects its environment and truthfully reports its 
 | `VYOMPATH_DEM_PATH` set to valid GeoTIFF | `production/live` | `LIVE TERRAIN ENGINE` (Green) | Real sub-pixel Float32 HiRISE elevation sampling, genuine slopes, and valid-data mask coverage. |
 | `VYOMPATH_DEM_PATH` unset or unreadable | `development/mock` | `DEVELOPMENT / MOCK BACKEND` (Neutral) | Deterministic synthetic elevation profile with explicit transparency caveat banners. |
 | Backend service unreachable | `offline/mock` | `BACKEND OFFLINE (MOCK)` (Neutral) | Offline client preview with clear notice that API analysis is unavailable. |
+
+### What Works Offline vs What Requires Internet Access
+
+| Capability | Connectivity | Operational Behavior |
+|:---|:---|:---|
+| **Traverse Drawing & Freehand Editing** | **100% Offline** | Full interactive OpenLayers line-drawing on client canvas. |
+| **Sub-Pixel DTM Elevation Analysis** | **100% Offline** | Python/Rasterio bilinear sampling over local GeoTIFF raster. |
+| **Route A vs Route B Comparison** | **100% Offline** | In-browser comparative KPI calculations and metric deltas ($\Delta$). |
+| **Regional HiRISE DTM Ortho Tiles** | **100% Offline** | Local pre-rendered XYZ tile pyramid in demo bundle (`z12–z15`). |
+| **Global Mars Trek Basemaps (MOLA/CTX/Viking)** | **Online Required** | Live NASA Trek WMTS endpoints. Transparent fallback ensures zero application crashes when offline. |
 
 ---
 
@@ -220,18 +251,20 @@ npx playwright test
 
 ## 10. Canonical Documentation Package
 
-Detailed technical specifications and audit reports are available in the [`docs/`](docs/) directory:
+Detailed technical specifications and audit reports are available in the [`docs/`](docs/) directory and repository root:
 
-1. [System Architecture](docs/architecture.md): Subsystem breakdown, planetary geodetics, and two-path design.
-2. [Backend/Frontend Integration Contract](docs/backend-frontend-integration-contract.md): Strict wire formats, schemas, and coordinate serialization.
-3. [Scientific Methodology & Limitations](docs/scientific-methodology-and-limitations.md): Mathematical formulations, geodetic error bounds, and truth-in-labeling policies.
-4. [Dataset Provenance & Licensing Register](docs/dataset-provenance-and-licensing.md): Sourcing, checksums, attribution, and license disclosures.
-5. [Offline Demonstration & Evaluation Guide](docs/offline-demonstration-instructions.md): Step-by-step judge walkthrough for air-gapped evaluation.
-6. [NASA Space Apps Submission Checklist](docs/nasa-submission-checklist.md): 9-gate verification and submission asset registry.
-7. [Dashboard QA & Regression Report](frontend/src/features/dashboard/DASHBOARD_QA_REPORT.md): Visual proof, defect resolutions, and responsive layout verification.
-8. [Scientific Validation Report](docs/scientific-validation-report.md): Ground-truth comparison against USGS/NASA benchmarks.
-9. [Operational Runbook](docs/backend-cloud-operational-runbook.md): Production runbook, Docker commands, troubleshooting, and disaster recovery.
-10. [Coordinate System Contract](docs/scientific-coordinate-contract.md): Strict wire conventions, geodetic formulas, and standard parallels.
+1. [Master Defect Register & Audit Log](bug.md): Full audit of application controls, defects, root cause resolutions, and verification proofs.
+2. [Production Containerization & Deployment Runbook](docs/deployment.md): Docker Compose multi-container setup, Nginx reverse proxy, and cloud deployment guidelines.
+3. [System Architecture](docs/architecture.md): Subsystem breakdown, planetary geodetics, and two-path design.
+4. [Backend/Frontend Integration Contract](docs/backend-frontend-integration-contract.md): Strict wire formats, schemas, and coordinate serialization.
+5. [Scientific Methodology & Limitations](docs/scientific-methodology-and-limitations.md): Mathematical formulations, geodetic error bounds, and truth-in-labeling policies.
+6. [Dataset Provenance & Licensing Register](docs/dataset-provenance-and-licensing.md): Sourcing, checksums, attribution, and license disclosures.
+7. [Offline Demonstration & Evaluation Guide](docs/offline-demonstration-instructions.md): Step-by-step judge walkthrough for air-gapped evaluation.
+8. [NASA Space Apps Submission Checklist](docs/nasa-submission-checklist.md): 9-gate verification and submission asset registry.
+9. [Dashboard QA & Regression Report](frontend/src/features/dashboard/DASHBOARD_QA_REPORT.md): Visual proof, defect resolutions, and responsive layout verification.
+10. [Scientific Validation Report](docs/scientific-validation-report.md): Ground-truth comparison against USGS/NASA benchmarks.
+11. [Operational Runbook](docs/backend-cloud-operational-runbook.md): Production runbook, Docker commands, troubleshooting, and disaster recovery.
+12. [Coordinate System Contract](docs/scientific-coordinate-contract.md): Strict wire conventions, geodetic formulas, and standard parallels.
 
 ---
 

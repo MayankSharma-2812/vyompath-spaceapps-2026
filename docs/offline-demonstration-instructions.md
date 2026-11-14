@@ -79,6 +79,17 @@ On the Windows presentation laptop, launch both backend and frontend with a sing
 
 ---
 
+### Method 3: Docker Compose (Multi-Container Production Stack)
+
+Run the full containerized stack with Nginx reverse proxy and FastAPI backend:
+
+```bash
+docker compose up -d --build
+```
+Open browser at: **`http://localhost:8080`**.
+
+---
+
 ## 4. Step-by-Step Judge Walkthrough (60 Seconds)
 
 Open browser at: **`http://localhost:4173`** (or in an incognito window).
@@ -132,3 +143,26 @@ When the evaluation concludes:
    pgrep -fa uvicorn || echo "Clean: No lingering uvicorn processes."
    pgrep -fa vite || echo "Clean: No lingering vite processes."
    ```
+
+---
+
+## 6. 30-Second Video / Rapid Elevator Demo Script
+
+| Timestamp | Screen Action | Narration Script |
+|---|---|---|
+| **00:00 – 00:06** | Browser opens `http://localhost:8080`, showing offline status badge and Mars Equirectangular map canvas centered on Jezero Crater. | *"VyomPath is an air-gapped Martian traverse analysis workspace for planetary rovers and astronaut crews, running 100% locally on uncompressed NASA HiRISE stereo DTMs."* |
+| **00:06 – 00:14** | Cursor draws a candidate traverse across Jezero crater floor (`Draw Route` tool). Double-click to submit. | *"Planners draw candidate traverses directly on the map. VyomPath eliminates the 431-pixel northing trap and bilinearly interpolates Float32 elevations at 1.01-meter posting in real time."* |
+| **00:14 – 00:22** | Screen scrolls to Elevation Profile Chart and multi-scale slope KPIs; Route B comparison is pinned. | *"The dashboard renders sub-meter elevation profiles, multi-scale wheel grades, and head-to-head Route A vs Route B comparative deltas without ever estimating over missing data."* |
+| **00:22 – 00:30** | Hover over scientific limitations and dataset attribution badge; show zero fabricated safety claims. | *"Traverses are strictly labeled as advisory risk indicators with complete mathematical transparency. VyomPath: science-first navigation for the Martian frontier."* |
+
+---
+
+## 7. 7-Slide Judge Presentation Structure
+
+1. **Slide 1 — Title & Hook:** *VyomPath: Interplanetary Survival Guide — Martian Map.* Team NAKSHATRA X. The Challenge: Enabling safe, autonomous traverse planning on Mars without relying on earth-bound cloud compute.
+2. **Slide 2 — The Problem:** The 431-Pixel Northing Trap (PDS standard parallel shifts), uncompressed Float32 raster handling, communication delays, and dangerous "fake safety" claims in automated navigation tools.
+3. **Slide 3 — The Two-Path Architecture:** Physical separation of visual display (8-bit OpenLayers XYZ pyramids) from quantitative terrain science (sub-pixel bilinear Float32 sampling on native GeoTIFFs).
+4. **Slide 4 — Live Demonstration:** Real-time traverse drawing, sub-meter elevation profile generation, multi-scale slope evaluation (20m, 50m, 100m windows), and Route A vs Route B comparison deltas.
+5. **Slide 5 — Scientific Truth & Data Licensing:** Rigorous provenance register: HiRISE, CTX Global Mosaic (Murray Lab), MOLA. Quarantined unverified telemetry (`terms_of_use: null`). Advisory labeling over subjective "safe route" claims.
+6. **Slide 6 — Engineering Rigor & Containerization:** 283 backend tests, 11 Playwright E2E browser journeys, multi-container Docker Compose with Nginx reverse proxy, non-root execution, and 100% offline air-gapped capability.
+7. **Slide 7 — Mission Impact & Roadmap:** Deployment-ready container for future Artemis/Mars missions; path to integrating Mars 2020 SPICE archives and autonomous onboard rover science.

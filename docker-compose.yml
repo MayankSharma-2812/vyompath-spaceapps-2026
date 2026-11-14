@@ -1,0 +1,62 @@
+# =============================================================================
+# VyomPath — Production Multi-Container Orchestration
+# Team NAKSHATRA X | NASA Space Apps Challenge 2026
+#
+# Services:
+#   backend:  FastAPI Uvicorn service (internal on port 8000)
+#   frontend: Nginx web server & reverse proxy (public on port 8080)
+#
+# Quick start:
+#   docker compose up -d --build
+#
+# Custom DTM mounting:
+#   VYOMPATH_DEM_PATH=/app/data/dtm/jezero_aoi_v2.tif docker compose up -d
+# =============================================================================
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: vyompath-backend:latest
+    container_name: vyompath-backend
+    restart: unless-stopped
+    environment:
+      - PORT=8000
+      - CORS_ORIGINS=http://localhost:8080,http://127.0.0.1:8080,http://localhost:5173,http://127.0.0.1:5173
+      - VYOMPATH_DEM_PATH=${VYOMPATH_DEM_PATH:-}
+    volumes:
+      - ${LOCAL_DATA_DIR:-./data}:/app/data:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    networks:
+      - vyompath-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: vyompath-frontend:latest
+    container_name: vyompath-frontend
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8080}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:80/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 3s
+    networks:
+      - vyompath-network
+
+networks:
+  vyompath-network:
+    driver: bridge
