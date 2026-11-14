@@ -31,6 +31,24 @@ def test_health_check_status_and_mode(client: TestClient) -> None:
     assert "notes" in data
 
 
+def test_health_check_live_dtm_mode(monkeypatch, client: TestClient, tmp_path: Path) -> None:
+    fake_dem = tmp_path / "jezero_test.tif"
+    fake_dem.write_bytes(b"mock-geotiff-header")
+
+    monkeypatch.setenv("VYOMPATH_DEM_PATH", str(fake_dem))
+    res_live = client.get("/api/health")
+    assert res_live.status_code == 200
+    data_live = res_live.json()
+    assert data_live["mode"] == "production/live"
+    assert "Real Jezero HiRISE stereo DTM is mounted" in data_live["notes"]
+
+    monkeypatch.delenv("VYOMPATH_DEM_PATH", raising=False)
+    res_mock = client.get("/api/health")
+    assert res_mock.status_code == 200
+    data_mock = res_mock.json()
+    assert data_mock["mode"] == "development/mock"
+
+
 # ---------------------------------------------------------------------------
 # 2. Layer Catalogue Tests
 # ---------------------------------------------------------------------------

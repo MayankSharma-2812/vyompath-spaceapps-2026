@@ -25,6 +25,21 @@ if ! command -v python3 >/dev/null 2>&1; then
   exit 1
 fi
 
+# Check for real DTM raster and configure live DTM mode if present
+if [ -z "${VYOMPATH_DEM_PATH:-}" ]; then
+  if [ -f "data/dtm/jezero_aoi_v2.tif" ]; then
+    export VYOMPATH_DEM_PATH="$(pwd)/data/dtm/jezero_aoi_v2.tif"
+  elif [ -f "../data/vyompath-demo-bundle-v1.4/jezero_aoi_v2.tif" ]; then
+    export VYOMPATH_DEM_PATH="$(cd ../data/vyompath-demo-bundle-v1.4 && pwd)/jezero_aoi_v2.tif"
+  fi
+fi
+
+if [ -n "${VYOMPATH_DEM_PATH:-}" ] && [ -f "$VYOMPATH_DEM_PATH" ]; then
+  echo "Found Jezero HiRISE stereo DTM at: $VYOMPATH_DEM_PATH (LIVE DTM MODE)"
+else
+  echo "NOTICE: Real DTM raster not mounted. Starting in DEVELOPMENT / MOCK mode."
+fi
+
 BACKEND_PORT="${BACKEND_PORT:-${PORT:-8000}}"
 FRONTEND_PORT="${FRONTEND_PORT:-4173}"
 BACKEND_HOST="${BACKEND_HOST:-127.0.0.1}"
@@ -65,30 +80,33 @@ fi
 
 # 3. Check for curated regional tile assets
 TILE_DIR_FOUND=""
-if [ -d "data/tiles" ] && [ "$(ls -A data/tiles 2>/dev/null)" ]; then
+if [ -n "${VYOMPATH_TILES_DIR:-}" ] && [ -d "$VYOMPATH_TILES_DIR" ]; then
+  TILE_DIR_FOUND="$VYOMPATH_TILES_DIR"
+elif [ -d "data/tiles" ] && [ "$(ls -A data/tiles 2>/dev/null)" ]; then
   TILE_DIR_FOUND="$(pwd)/data/tiles"
 elif [ -d "tiles" ] && [ "$(ls -A tiles 2>/dev/null)" ]; then
   TILE_DIR_FOUND="$(pwd)/tiles"
+elif [ -d "../data/vyompath-demo-bundle-v1.4/tiles_aoi" ]; then
+  TILE_DIR_FOUND="$(cd ../data/vyompath-demo-bundle-v1.4/tiles_aoi && pwd)"
 elif [ -d "../tiles" ] && [ "$(ls -A ../tiles 2>/dev/null)" ]; then
   TILE_DIR_FOUND="$(cd ../tiles && pwd)"
 fi
 
 if [ -n "$TILE_DIR_FOUND" ]; then
   echo "Found offline regional tile assets at: $TILE_DIR_FOUND"
-  if [ -d "frontend/dist" ] && [ ! -e "frontend/dist/tiles" ]; then
-    if [ -d "$TILE_DIR_FOUND/tiles_aoi" ]; then
-      ln -sfn "$TILE_DIR_FOUND/tiles_aoi" frontend/dist/tiles 2>/dev/null || cp -R "$TILE_DIR_FOUND/tiles_aoi" frontend/dist/tiles
-    else
-      ln -sfn "$TILE_DIR_FOUND" frontend/dist/tiles 2>/dev/null || cp -R "$TILE_DIR_FOUND" frontend/dist/tiles
+  if [ -d "frontend/dist" ]; then
+    TARGET_DIR="frontend/dist/tiles/jezero_aoi_v2/ortho"
+    mkdir -p "$(dirname "$TARGET_DIR")"
+    if [ ! -e "$TARGET_DIR" ]; then
+      ln -sfn "$TILE_DIR_FOUND" "$TARGET_DIR" 2>/dev/null || cp -R "$TILE_DIR_FOUND" "$TARGET_DIR"
+      echo "Linked tile assets to $TARGET_DIR for client requests."
     fi
-    echo "Linked tile assets to frontend/dist/tiles for Vite preview."
   fi
 else
   echo "NOTICE [TILE ASSET AVAILABILITY]:"
-  echo "  Offline tile directory ('tiles/', 'data/tiles/', or '../tiles/') not detected in working tree."
-  echo "  Basemap tiles must be extracted from 'vyompath-demo-bundle-v1.4.zip' or generated"
-  echo "  via 'python3 scripts/build_regional_tiles.py' to render offline regional maps."
-  echo "  Proceeding with mock route-analysis and layer API endpoints."
+  echo "  Offline tile directory not detected in working tree."
+  echo "  Basemap tiles can be mounted from 'vyompath-demo-bundle-v1.4/tiles_aoi' or"
+  echo "  via VYOMPATH_TILES_DIR. Transparent fallback tiles are active."
   echo "-----------------------------------------------------------------"
 fi
 
@@ -115,8 +133,8 @@ cleanup() {
   fi
 
   # Clean up ephemeral tile symlink in frontend/dist if created by this script
-  if [ -L "frontend/dist/tiles" ]; then
-    rm -f "frontend/dist/tiles" 2>/dev/null || true
+  if [ -e "frontend/dist/tiles" ]; then
+    rm -rf "frontend/dist/tiles" 2>/dev/null || true
   fi
 
   echo "Shutdown complete. All child processes terminated."
