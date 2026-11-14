@@ -183,6 +183,10 @@ class RouteAnalysisResponse(BaseModel):
         default="complete",
         description="Whether the DTM fully covers the requested route.",
     )
+    is_mock: bool = Field(
+        default=False,
+        description="Whether the analysis was generated via synthetic mock fallback.",
+    )
 
     # Science POIs
     nearby_pois: list[NearbyPOI] = Field(

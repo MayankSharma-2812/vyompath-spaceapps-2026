@@ -54,7 +54,25 @@ import type {
   BaseLayerId,
   RoverWaypoint,
   GeodeticCoordinate,
+  RouteAnalysisData,
 } from './types';
+
+/**
+ * Robustly inspects route analysis response to determine if data is synthetic / mock fallback.
+ * Checks explicit boolean is_mock, missing dtm_source, or keywords in dtm_source.
+ */
+export function isMockAnalysis(analysis: RouteAnalysisData | null | undefined): boolean {
+  if (!analysis) return false;
+  if (analysis.is_mock === true) return true;
+  if (!analysis.dtm_source) return true;
+  const src = analysis.dtm_source.toLowerCase();
+  return (
+    src.includes('mock') ||
+    src.includes('stub') ||
+    src.includes('synthetic') ||
+    src.includes('fallback')
+  );
+}
 
 export const MapCanvas: React.FC<MapCanvasProps> = ({
   className = '',
@@ -73,6 +91,10 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
   onRouteClear,
   onWaypointSelect,
   onCoordinateHover,
+  onBaseLayerChange,
+  onToggleFootprint,
+  onToggleWaypoints,
+  onToggleRegionalTiles,
 }) => {
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<Map | null>(null);
@@ -122,7 +144,10 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
         layer.setVisible(id === layerId);
       }
     });
-  }, []);
+    if (onBaseLayerChange) {
+      onBaseLayerChange(layerId);
+    }
+  }, [onBaseLayerChange]);
 
   // Internal route drawn handler
   const handleInternalRouteDrawn = useCallback(
@@ -408,7 +433,11 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
             <input
               type="checkbox"
               checked={isFootprintVisible}
-              onChange={(e) => setIsFootprintVisible(e.target.checked)}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                setIsFootprintVisible(checked);
+                if (onToggleFootprint) onToggleFootprint(checked);
+              }}
               className="rounded bg-slate-800 border-slate-600 text-amber-500 focus:ring-0 focus:ring-offset-0"
             />
             <span className="flex items-center gap-1.5">
@@ -420,7 +449,11 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
             <input
               type="checkbox"
               checked={isWaypointsVisible}
-              onChange={(e) => setIsWaypointsVisible(e.target.checked)}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                setIsWaypointsVisible(checked);
+                if (onToggleWaypoints) onToggleWaypoints(checked);
+              }}
               className="rounded bg-slate-800 border-slate-600 text-cyan-500 focus:ring-0 focus:ring-offset-0"
             />
             <span className="flex items-center gap-1.5">
@@ -432,7 +465,11 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
             <input
               type="checkbox"
               checked={isRegionalVisible}
-              onChange={(e) => setIsRegionalVisible(e.target.checked)}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                setIsRegionalVisible(checked);
+                if (onToggleRegionalTiles) onToggleRegionalTiles(checked);
+              }}
               className="rounded bg-slate-800 border-slate-600 text-emerald-500 focus:ring-0 focus:ring-offset-0"
             />
             <span className="flex items-center gap-1.5">
@@ -528,7 +565,7 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                   }`}
                 >
                   {analysisResponse.coverage_status === 'complete'
-                    ? 'Coverage: 100% In-Footprint'
+                    ? (isMockAnalysis(analysisResponse) ? 'Coverage: Synthetic Profile' : 'Coverage: 100% In-Footprint')
                     : analysisResponse.coverage_status === 'partial_gap'
                     ? 'Coverage: Partial HiRISE Gap'
                     : 'Coverage: Out of Stereo Bounds'}
@@ -536,12 +573,12 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
               </div>
               <span
                 className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
-                  analysisResponse.is_mock
+                  isMockAnalysis(analysisResponse)
                     ? 'bg-amber-950/70 border-amber-500/40 text-amber-300'
                     : 'bg-emerald-950/70 border-emerald-500/40 text-emerald-300'
                 }`}
               >
-                {analysisResponse.is_mock ? 'DEVELOPMENT / MOCK DATA' : 'LIVE HiRISE DTM'}
+                {isMockAnalysis(analysisResponse) ? 'DEVELOPMENT / MOCK DATA' : 'LIVE HiRISE DTM'}
               </span>
             </div>
 

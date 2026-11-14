@@ -160,6 +160,7 @@ async def analyze_route(body: RouteAnalysisRequest) -> RouteAnalysisResponse:
             coverage_status=real_terrain["coverage_status"],
             nearby_pois=[],
             limitations=real_terrain["limitations"],
+            is_mock=False,
         )
 
     # 2. Truthful Mock Fallback Mode
@@ -205,4 +206,5 @@ async def analyze_route(body: RouteAnalysisRequest) -> RouteAnalysisResponse:
         coverage_status="complete",
         nearby_pois=[],
         limitations=limitations,
+        is_mock=True,
     )
