@@ -258,3 +258,45 @@ def test_cors_resolve_origins_wildcard_disables_credentials() -> None:
     origins, creds = _resolve_cors_origins("http://localhost:5173, *")
     assert "*" in origins
     assert creds is False
+
+
+# ---------------------------------------------------------------------------
+# 5. Mission-Aware Traverse Intelligence Endpoint Tests
+# ---------------------------------------------------------------------------
+
+def test_evaluate_intelligence_api_endpoint(client: TestClient) -> None:
+    # First obtain a valid route analysis for Route A
+    coords_a = [{"lon": 77.4631, "lat": 18.4608}, {"lon": 77.4615, "lat": 18.4645}]
+    res_a = client.post("/api/routes/analyze", json={"route_id": "test-a", "coordinates": coords_a})
+    assert res_a.status_code == 200
+    route_a_data = res_a.json()
+
+    # Obtain Route B analysis
+    coords_b = [{"lon": 77.5480, "lat": 18.4650}, {"lon": 77.5560, "lat": 18.4750}]
+    res_b = client.post("/api/routes/analyze", json={"route_id": "test-b", "coordinates": coords_b})
+    assert res_b.status_code == 200
+    route_b_data = res_b.json()
+
+    # 1. Single Route evaluation
+    single_res = client.post(
+        "/api/routes/evaluate-intelligence",
+        json={"objective": "slope_conscious", "route_a": route_a_data},
+    )
+    assert single_res.status_code == 200
+    single_json = single_res.json()
+    assert single_json["recommendation"] == "single_route"
+    assert single_json["route_a"] is not None
+    assert single_json["route_b"] is None
+
+    # 2. Comparative evaluation
+    comp_res = client.post(
+        "/api/routes/evaluate-intelligence",
+        json={"objective": "slope_conscious", "route_a": route_a_data, "route_b": route_b_data},
+    )
+    assert comp_res.status_code == 200
+    comp_json = comp_res.json()
+    assert comp_json["recommendation"] in ("route_a", "route_b", "tie")
+    assert comp_json["route_a"]["overall_score"] >= 0.0
+    assert comp_json["route_b"]["overall_score"] >= 0.0
+    assert "evidence_explanation" in comp_json
+    assert len(comp_json["scientific_disclaimers"]) > 0

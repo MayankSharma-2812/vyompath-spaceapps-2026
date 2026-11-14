@@ -11,6 +11,7 @@ import {
 } from '../map';
 import { EmptyState, MetricCard, StatusBadge } from '../../components';
 import ElevationChart from './ElevationChart';
+import { TraverseIntelligence } from './TraverseIntelligence';
 
 // Golden reference corridors from scientific fixtures
 const PRESET_CORRIDORS: Record<string, { name: string; description: string; coords: GeodeticCoordinate[] }> = {
@@ -114,6 +115,7 @@ const navigationItems = [
   'Scientific Sites',
   'Terrain Profile',
   'Route Comparison',
+  'Traverse Intelligence',
   'Data Sources',
 ];
 
@@ -124,6 +126,7 @@ const NAVIGATION_TARGETS: Record<string, string> = {
   'Scientific Sites': 'scientific-sites-section',
   'Terrain Profile': 'terrain-section',
   'Route Comparison': 'comparison-section',
+  'Traverse Intelligence': 'traverse-intelligence-section',
   'Data Sources': 'provenance-section',
 };
 
@@ -1254,6 +1257,13 @@ function Dashboard() {
               error={analysisError}
               onSetAsRouteB={handleSetAsRouteB}
               onClearRouteB={handleClearRouteB}
+              onLoadPresetAsRouteB={handleLoadPresetAsRouteB}
+            />
+            <TraverseIntelligence
+              analysis={analysis}
+              routeBAnalysis={routeBAnalysis}
+              isLoading={isAnalyzing}
+              onSetAsRouteB={handleSetAsRouteB}
               onLoadPresetAsRouteB={handleLoadPresetAsRouteB}
             />
             <RouteSummary
