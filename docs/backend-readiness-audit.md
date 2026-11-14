@@ -19,7 +19,7 @@ Currently, the public API router (`backend/app/api/routes.py`) operates in **100
 2. The terrain processing service (`backend/app/services/terrain.py`) and science POI buffering engine (`backend/app/services/science.py`) are **not imported or invoked** by the public route endpoint.
 3. A critical **Mars radius discrepancy** exists between the route endpoint ($R = 3,389,500.0\text{ m}$) and the rest of the geodetic subsystem ($R = 3,396,190.0\text{ m}$).
 4. The claimed **25.0 km traverse cumulative length limit** is **unenforced** in the backend code.
-5. The authoritative $121\text{ MB}$ HiRISE stereo Float32 DTM (`jezero_aoi_v2.tif`) is available in the local external data bundle (`/home/mayank-sharma/Hackathon/NASA/data/vyompath-demo-bundle-v1.4/`) and passes 100% of unit verification tests when mounted, but the application runtime lacks a persistent dataset lifecycle loader.
+5. The authoritative 121 MB HiRISE stereo Float32 DTM (`jezero_aoi_v2.tif`) is available in the local external data bundle (`<external-data-bundle>/vyompath-demo-bundle-v1.4/`) and passes 100% of unit verification tests when mounted, but the application runtime lacks a persistent dataset lifecycle loader.
 
 Connecting real terrain analysis to `POST /api/routes/analyze` in Issue #7 is **BLOCKED** until Pranav Sharma signs off on the canonical planetary radius in **Issue #1**.
 
@@ -69,10 +69,10 @@ flowchart TD
 | `GET /api/layers` | **VERIFIED** | Authoritative loading from `data/layers.json` with synthetic fallback. | Cites remote NASA Trek WMTS URLs; local offline tile bundles are served separately. |
 | `POST /api/routes/analyze` | **MOCK** | Pydantic validation, great-circle haversine distance. | Does not call terrain or science services; returns synthetic sine curve and empty POIs. |
 | `GET /api/science/points` | **NOT IMPLEMENTED** | Documented in contract; internal logic in `science.py`. | Endpoint router is unmounted in `backend/app/main.py`. |
-| Route Distance Math | **PARTIALLY IMPLEMENTED** | Haversine formula implemented in pure geometry. | Uses incorrect radius ($3,389,500\text{ m}$); 2D distance only (no 3D slope adjustment). |
-| 25 km Route Length Limit | **NOT IMPLEMENTED** | Documented in specifications and README. | Zero validation in `schemas.py` or `routes.py`; routes $>25\text{ km}$ are accepted. |
+| Route Distance Math | **PARTIALLY IMPLEMENTED** | Haversine formula implemented in pure geometry. | Uses incorrect radius ($R = 3,389,500.0\text{ m}$); 2D distance only (no 3D slope adjustment). |
+| 25 km Route Length Limit | **NOT IMPLEMENTED** | Documented in specifications and README. | Zero validation in `schemas.py` or `routes.py`; routes > 25 km are accepted. |
 | Bilinear DTM Sampling | **PARTIALLY IMPLEMENTED** | Strict 4-neighbor algorithm in `terrain.py`. | Operates on NumPy array in memory; lacks a raster file loader and coordinate-to-pixel projection. |
-| Multi-Scale Slope ($20/50/100\text{ m}$) | **VERIFIED** | Fully implemented in `terrain.py` with central differences & spread. | Unconnected to API wire response. |
+| Multi-Scale Slope (20m / 50m / 100m) | **VERIFIED** | Fully implemented in `terrain.py` with central differences & spread. | Unconnected to API wire response. |
 | Science POI Buffering | **VERIFIED** | Analytical cross-track vector projection in `science.py`. | Unconnected to API wire response (`nearby_pois=[]`). |
 | DTM File Lifecycle | **NOT IMPLEMENTED** | None. | No singleton dataset cache, concurrency locks, or clean shutdown hooks. |
 
@@ -91,16 +91,16 @@ Difference: 6,690.0 m (~0.197% scaling distortion)
 
 ### Callers & Affected Files:
 1. **`backend/app/api/routes.py` (Line 36):** Hardcodes `_MARS_RADIUS_M = 3_389_500.0`.
-   - Used in `_haversine_m()`. All route distances returned by `/api/routes/analyze` currently underestimate metric length by $\sim 0.2\%$.
+   - Used in `_haversine_m()`. All route distances returned by `/api/routes/analyze` currently underestimate metric length by ~0.2%.
 2. **`backend/app/services/coords.py` (Line 28):** Defines `MARS_RADIUS_M = 3_396_190.0`.
    - Used by `haversine_m()`, `surface_distance_3d_m()`, `local_xy_m()`.
-3. **`backend/app/services/science.py` (Line 38):** Imports `MARS_RADIUS_M` ($3,396,190.0\text{ m}$) for cross-track corridor buffering.
-4. **`backend/app/services/terrain.py` (Line 21):** Imports `MARS_RADIUS_M` ($3,396,190.0\text{ m}$) for route densification and spacing.
+3. **`backend/app/services/science.py` (Line 38):** Imports `MARS_RADIUS_M` ($R = 3,396,190.0\text{ m}$) for cross-track corridor buffering.
+4. **`backend/app/services/terrain.py` (Line 21):** Imports `MARS_RADIUS_M` ($R = 3,396,190.0\text{ m}$) for route densification and spacing.
 5. **`data/layers.json` (Line 5):** Specifies `"semi_major_axis_m": 3396190.0`, `"semi_minor_axis_m": 3396190.0`.
 6. **`frontend/src/features/map/marsProjection.ts` (Line 5):** Registers `+R=3396190`.
 
 > [!WARNING]
-> **Resolution Directive:** The route endpoint distance calculation in `routes.py` must be upgraded to use `backend/app/services/coords.py::MARS_RADIUS_M` ($3,396,190.0\text{ m}$), but this change must await formal sign-off in **Issue #1** (Owner: Pranav Sharma).
+> **Resolution Directive:** The route endpoint distance calculation in `routes.py` must be upgraded to use `backend/app/services/coords.py::MARS_RADIUS_M` ($R = 3,396,190.0\text{ m}$), but this change must await formal sign-off in **Issue #1** (Owner: Pranav Sharma).
 
 ---
 
@@ -111,11 +111,11 @@ Difference: 6,690.0 m (~0.197% scaling distortion)
 - `coordinates`: List of `Coordinate`, length $2 \le N \le 500$ (`HTTP 422` on failure).
 - `Coordinate.lon`: Float, $-180.0 \le \text{lon} \le 180.0$ (`HTTP 422` on failure).
 - `Coordinate.lat`: Float, $-90.0 \le \text{lat} \le 90.0$ (`HTTP 422` on failure).
-- `buffer_distance_m`: Float, $50.0 \le \text{dist} \le 2000.0$, default $250.0\text{ m}$ (`HTTP 422` on failure).
+- `buffer_distance_m`: Float, $50.0 \le \text{dist} \le 2000.0$, default 250.0 m (`HTTP 422` on failure).
 
 ### B. Missing Validation Rules
-- **Cumulative Route Length Cap ($25.0\text{ km}$):** Documented across README and contracts, but completely missing from backend code. A client submitting a $100\text{ km}$ traverse receives `HTTP 200 OK`.
-- **Duplicate Waypoint Detection:** No check for identical consecutive waypoints (causes zero-division in local projection if unhandled).
+- **Cumulative Route Length Cap (25.0 km):** Documented across README and contracts, but completely missing from backend code. A client submitting a 100 km traverse receives `HTTP 200 OK`.
+- **Duplicate Waypoint Handling:** No validation against identical consecutive waypoints. In `backend/app/services/coords.py::cross_along_m()`, zero-division is avoided mathematically via denominator clamping (`denom = np.maximum(seg_lens ** 2, 1e-9)`), but identical consecutive waypoints introduce zero-length segments, redundant elevation sampling, and degraded along-track step resolution.
 
 ---
 
@@ -124,14 +124,14 @@ Difference: 6,690.0 m (~0.197% scaling distortion)
 `backend/app/services/terrain.py` contains verified algorithms authored by Pranav Sharma, but lacks integration glue:
 
 ### Implemented Algorithms (Unit-Tested):
-1. **`densify_route(coords, step_m=5.0)`:** Correctly interpolates route polyline to uniform $5.0\text{ m}$ intervals using spherical linear math.
+1. **`densify_route(coords, step_m=5.0)`:** Correctly interpolates route polyline to uniform 5.0 m intervals using spherical linear math.
 2. **`sample_point_bilinear(data, col_f, row_f, nodata)`:** Implements strict 4-neighbor bilinear interpolation. Returns `NaN` if any surrounding pixel is NoData.
-3. **`process_elevation_gaps(elevations, step_m, max_fill_m=15.0)`:** Linearly bridges short micro-gaps ($\le 3$ steps at $5\text{ m}$), flags larger gaps as `partial_gap`, flags empty profiles as `out_of_bounds`, and computes cumulative elevation gain and loss.
-4. **`multi_scale_along_track_grades(distances, elevations, windows=(20, 50, 100))`:** Calculates along-track grade at $20\text{ m}, 50\text{ m}, 100\text{ m}$ baselines and reports grade spread.
+3. **`process_elevation_gaps(elevations, step_m, max_fill_m=15.0)`:** Linearly bridges short micro-gaps ($\le 3$ steps at 5.0 m), flags larger gaps as `partial_gap`, flags empty profiles as `out_of_bounds`, and computes cumulative elevation gain and loss.
+4. **`multi_scale_along_track_grades(distances, elevations, windows=(20, 50, 100))`:** Calculates along-track grade at 20 m, 50 m, 100 m baselines and reports grade spread.
 5. **`lttb_downsample(points, threshold=500)`:** Downsamples dense elevation curves for lightweight JSON transmission.
 
 ### Missing Integration Capabilities:
-1. **Rasterio Dataset Lifecyle & Concurrency:** No code loads GeoTIFF files into memory or manages `rasterio.io.DatasetReader` handles. Repeated requests attempting to open raster files on disk concurrently risk descriptor exhaustion or thread contention.
+1. **Rasterio Dataset Lifecycle & Concurrency:** No code loads GeoTIFF files into memory or manages `rasterio.io.DatasetReader` handles. Repeated requests attempting to open raster files on disk concurrently risk descriptor exhaustion or thread contention.
 2. **Geodetic-to-Pixel Coordinate Transformation:** No function transforms planetocentric `(lon, lat)` degrees into HiRISE raster column and row pixel indices.
 3. **Environment Configuration:** The backend ignores `VYOMPATH_DEM_PATH`.
 4. **Fallback Mechanism:** No graceful fallback exists if the DTM raster is missing or corrupted.
@@ -142,14 +142,14 @@ Difference: 6,690.0 m (~0.197% scaling distortion)
 
 | Dataset Product | Location | File Size | Status | Scientific Validity |
 |---|---|---|---|---|
-| `syrtis_major_sample_dtm.tif` | `data/dtm/syrtis_major_sample_dtm.tif` | $705\text{ KB}$ | **TRACKED IN GIT** | Low-resolution synthetic test artifact. NOT suitable for HiRISE micro-analysis. |
-| `jezero_aoi_v2.tif` | `/home/mayank-sharma/Hackathon/NASA/data/vyompath-demo-bundle-v1.4/` | $120.02\text{ MiB}$ ($125.85\text{ MB}$) | **AVAILABLE LOCALLY** | Canonical USGS/NASA HiRISE stereo DTM ($1.00966\text{ m/px}$, $63.16\%$ valid data). |
+| `syrtis_major_sample_dtm.tif` | `data/dtm/syrtis_major_sample_dtm.tif` | 705 KB | **TRACKED IN GIT** | Low-resolution synthetic test artifact. NOT suitable for HiRISE micro-analysis. |
+| `jezero_aoi_v2.tif` | `<external-data-bundle>/vyompath-demo-bundle-v1.4/` | 120.02 MiB (125.85 MB) | **AVAILABLE LOCALLY** | Canonical USGS/NASA HiRISE stereo DTM (1.00966 m/px, 63.16% valid data). |
 
 ### Storage Rule Compliance
-- The authoritative $121\text{ MB}$ DTM must **NEVER** be committed to Git.
+- The authoritative 121 MB DTM must **NEVER** be committed to Git.
 - It must be mounted at runtime via environment variable:
   ```bash
-  export VYOMPATH_DEM_PATH="/home/mayank-sharma/Hackathon/NASA/data/vyompath-demo-bundle-v1.4/jezero_aoi_v2.tif"
+  export VYOMPATH_DEM_PATH="/path/to/vyompath-demo-bundle-v1.4/jezero_aoi_v2.tif"
   ```
 
 ---
@@ -170,25 +170,31 @@ Difference: 6,690.0 m (~0.197% scaling distortion)
 - **Pytest Version:** 9.1.1
 - **Key Installed Dependencies:** `fastapi 0.135.3`, `pydantic 2.13.0`, `rasterio 1.4.4`, `numpy 2.4.3`, `shapely 2.1.2`, `pyproj 3.7.2`.
 
-### Baseline Test Run (`python3 -m pytest -rs`)
-```text
-=========================== short test summary info ============================
-SKIPPED [1] tests/unit/test_fixture_reproducibility.py:64: Requires rasterio and local jezero_aoi_v2.tif DTM
-SKIPPED [1] tests/unit/test_fixture_reproducibility.py:82: Requires rasterio and local jezero_aoi_v2.tif DTM
-SKIPPED [1] tests/unit/test_fixture_reproducibility.py:144: Requires rasterio and local jezero_aoi_v2.tif DTM
-SKIPPED [1] tests/unit/test_terrain.py:1053: jezero_aoi_v2.tif not available (CI skip)
-SKIPPED [1] tests/unit/test_terrain.py:1071: jezero_aoi_v2.tif not available (CI skip)
-SKIPPED [1] tests/unit/test_terrain.py:1078: jezero_aoi_v2.tif not available (CI skip)
-================== 251 passed, 6 skipped, 1 warning in 8.08s ===================
+### Baseline Test Run (Unmounted DTM)
+Command:
+```bash
+python3 -m pytest -q
 ```
+Outcome:
+```text
+251 passed, 6 skipped, 1 warning in 8.10s
+```
+*(The 6 skipped tests check for the external HiRISE stereo DTM and skip cleanly when `VYOMPATH_DEM_PATH` is not configured).*
 
-### Mounted DTM Test Run (`VYOMPATH_DEM_PATH=... pytest`)
-When pointed to the local $121\text{ MB}$ HiRISE DTM file:
-```text
-pytest tests/unit/test_fixture_reproducibility.py tests/unit/test_terrain.py -q
-95 passed in 4.87s (100% of terrain & golden fixture tests PASS, 0 SKIPPED)
-```
-Combined suite passes **257 out of 257 tests**.
+### External Jezero DTM Test Runs (`VYOMPATH_DEM_PATH=...`)
+When pointed to the external 121 MB HiRISE DTM file (`export VYOMPATH_DEM_PATH="/path/to/vyompath-demo-bundle-v1.4/jezero_aoi_v2.tif"`):
+
+1. **Targeted DTM & Reproducibility Suite:**
+   ```bash
+   VYOMPATH_DEM_PATH=/path/to/vyompath-demo-bundle-v1.4/jezero_aoi_v2.tif python3 -m pytest tests/unit/test_fixture_reproducibility.py tests/unit/test_terrain.py -q
+   ```
+   Outcome: **95 passed** in 4.67s (0 skipped, 100% of golden DTM fixture tests pass).
+
+2. **Complete Repository Test Suite:**
+   ```bash
+   VYOMPATH_DEM_PATH=/path/to/vyompath-demo-bundle-v1.4/jezero_aoi_v2.tif python3 -m pytest -q
+   ```
+   Outcome: **257 passed**, 1 warning in 12.23s (0 skipped, 100% of entire repository test suite passes).
 
 ---
 
@@ -207,7 +213,7 @@ During this audit, the following stale references and inconsistencies were ident
 3. **Unimplemented Environment Variable:**
    - `docs/backend-cloud-operational-runbook.md` cites `VYOMPATH_DEM_PATH`, but backend runtime code never reads this variable.
 4. **Unenforced Rule Claim:**
-   - `docs/backend-frontend-integration-contract.md:104`: Claims traverses $>25\text{ km}$ return `HTTP 422`, but `schemas.py` and `routes.py` lack this check.
+   - `docs/backend-frontend-integration-contract.md:104`: Claims traverses > 25 km return `HTTP 422`, but `schemas.py` and `routes.py` lack this check.
 
 ---
 
@@ -221,7 +227,7 @@ To successfully connect terrain analysis to `POST /api/routes/analyze` in **Issu
    - Use `rasterio` and `pyproj` to transform `(lon, lat)` into projected raster coordinates and pixel column/row indices.
    - Cache the opened raster dataset handle safely across async requests.
 3. **Pydantic Cumulative Distance Validator:**
-   - Implement root validator in `RouteAnalysisRequest` to reject routes exceeding $25,000.0\text{ m}$ with `HTTP 422`.
+   - Implement root validator in `RouteAnalysisRequest` to reject routes exceeding 25,000.0 m with `HTTP 422`.
 4. **Full Pipeline Wiring:**
    - `densify_route(coords, step_m=5.0)`
    - Extract elevation profile via `sample_point_bilinear()`
@@ -239,6 +245,6 @@ To successfully connect terrain analysis to `POST /api/routes/analyze` in **Issu
 
 | Blocker ID | Description | Owner | Status | Target Resolution |
 |---|---|---|---|---|
-| **BLK-01** | Formal sign-off on Mars radius ($3,396,190.0\text{ m}$) | Pranav Sharma | **PENDING** | [Issue #1](https://github.com/MayankSharma-2812/vyompath-spaceapps-2026/issues/1) (12:30 IST Checkpoint) |
-| **BLK-02** | Authoritative DTM file path configuration | Mayank Sharma | **READY** | Set `VYOMPATH_DEM_PATH` to `/home/mayank-sharma/Hackathon/NASA/data/vyompath-demo-bundle-v1.4/jezero_aoi_v2.tif` |
+| **BLK-01** | Formal sign-off on Mars radius ($R = 3,396,190.0\text{ m}$) | Pranav Sharma | **PENDING** | [Issue #1](https://github.com/MayankSharma-2812/vyompath-spaceapps-2026/issues/1) (12:30 IST Checkpoint) |
+| **BLK-02** | Authoritative DTM file path configuration | Mayank Sharma | **READY** | Set `VYOMPATH_DEM_PATH` to external bundle path (e.g., `/path/to/vyompath-demo-bundle-v1.4/jezero_aoi_v2.tif`) |
 | **BLK-03** | 25 km route limit validation implementation | Mayank Sharma | **READY FOR DEV** | Scheduled in [Issue #7](https://github.com/MayankSharma-2812/vyompath-spaceapps-2026/issues/7) |
