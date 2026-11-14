@@ -2,19 +2,33 @@
   {
     "id": "SYNTH-POI-001",
     "name": "Synthetic Corridor Benchmark 001",
+    "coordinates": [77.4635, 18.4600],
     "lon": 77.4635,
     "lat": 18.4600,
     "mission": "Synthetic Corridor Benchmark",
+    "significance": "Synthetic verification anchor 001",
     "source_url": "https://vyompath.internal/fixtures/synthetic",
-    "significance": "Synthetic verification anchor 001"
+    "citation": "VyomPath Synthetic Benchmark Fixture",
+    "source_title": "VyomPath Synthetic Benchmark Fixture",
+    "terms_of_use": null,
+    "source_policy_reference": null,
+    "terms_of_use_status": "unverified",
+    "source_policy_status": "unverified"
   },
   {
     "id": "SYNTH-POI-002",
     "name": "Synthetic Corridor Benchmark 002",
+    "coordinates": [77.4620, 18.4650],
     "lon": 77.4620,
     "lat": 18.4650,
     "mission": "Synthetic Corridor Benchmark",
+    "significance": "Synthetic verification anchor 002",
     "source_url": "https://vyompath.internal/fixtures/synthetic",
-    "significance": "Synthetic verification anchor 002"
+    "citation": "VyomPath Synthetic Benchmark Fixture",
+    "source_title": "VyomPath Synthetic Benchmark Fixture",
+    "terms_of_use": null,
+    "source_policy_reference": null,
+    "terms_of_use_status": "unverified",
+    "source_policy_status": "unverified"
   }
 ]
