@@ -418,6 +418,10 @@ function MapContainer({
           onRouteClear={onRouteClear}
           onWaypointSelect={onWaypointSelect}
           onCoordinateHover={setHoverCoords}
+          onBaseLayerChange={onChangeBaseLayer}
+          onToggleFootprint={onToggleFootprint}
+          onToggleWaypoints={onToggleWaypoints}
+          onToggleRegionalTiles={onToggleRegionalTiles}
         />
       </div>
       <div className="map-statusbar" aria-label="Map telemetry status">

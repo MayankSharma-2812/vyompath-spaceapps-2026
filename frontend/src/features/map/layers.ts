@@ -21,7 +21,7 @@ import { Style, Stroke, Fill, Circle as CircleStyle, Text } from 'ol/style';
 import type { TileCoord } from 'ol/tilecoord';
 
 import { fromGeodetic } from './marsProjection';
-import { getMarsTileGrid } from './tileGrid';
+import { getMarsTileGrid, getMarsTrekTileGrid, getCtxTileGrid } from './tileGrid';
 import {
   JEZERO_DTM_FOOTPRINT_COORDINATES,
   ROVER_WAYPOINTS,
@@ -40,16 +40,16 @@ export const BASE_LAYER_CONFIGS: Record<BaseLayerId, BaseLayerConfig> = {
     urlTemplate:
       'https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0/default/default028mm/{z}/{y}/{x}.jpg',
     attribution: '© NASA / GSFC / JPL Solar System Treks (MOLA)',
-    maxZoom: 10,
+    maxZoom: 7, // Native Trek tile limit; OpenLayers overzooms for z >= 8
   },
   'ctx-mosaic': {
     id: 'ctx-mosaic',
     name: 'CTX Visible Mosaic',
-    title: 'MRO CTX Global Grayscale Mosaic (~6m)',
+    title: 'MRO CTX Global Mosaic (~6m)',
     urlTemplate:
-      'https://trek.nasa.gov/tiles/Mars/EQ/Mars_MRO_CTX_Mosaic_global_6m/1.0.0/default/default028mm/{z}/{y}/{x}.jpg',
-    attribution: '© NASA / JPL-Caltech / MSSS / Murray Lab (CTX)',
-    maxZoom: 14,
+      'https://astro.arcgis.com/arcgis/rest/services/OnMars/CTX/MapServer/tile/{z}/{y}/{x}',
+    attribution: '© NASA / JPL-Caltech / MSSS / Murray Lab / USGS Astrogeology (CTX)',
+    maxZoom: 12, // Native 512px pyramid limit (levels 0–12); overzooms for z >= 13
   },
   'viking-mdim21': {
     id: 'viking-mdim21',
@@ -58,22 +58,65 @@ export const BASE_LAYER_CONFIGS: Record<BaseLayerId, BaseLayerConfig> = {
     urlTemplate:
       'https://trek.nasa.gov/tiles/Mars/EQ/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0/default/default028mm/{z}/{y}/{x}.jpg',
     attribution: '© USGS Astrogeology Science Center / NASA PDS (Viking)',
-    maxZoom: 10,
+    maxZoom: 7, // Native Trek tile limit; OpenLayers overzooms for z >= 8
   },
 };
 
 /**
- * Creates an OpenLayers TileLayer for NASA Mars Trek WMTS base maps.
- * Handles row/column inversion: Mars Trek uses {z}/{y}/{x}.jpg where y is row and x is col.
+ * Creates an OpenLayers TileLayer for Mars base maps.
+ * - MOLA & Viking: NASA Mars Trek WMTS (z=0–7, 256x256 px). Capped at z=7 so OpenLayers
+ *   smoothly overzooms (stretches) tiles when the user inspects Jezero Crater at z=8–15.
+ * - CTX: Caltech Murray Lab / USGS global mosaic hosted via ArcGIS Server (z=0–12, 512x512 px).
  */
 export function createMarsTrekLayer(layerId: BaseLayerId): TileLayer<XYZ> {
   const config = BASE_LAYER_CONFIGS[layerId];
-  const tileGrid = getMarsTileGrid();
+
+  if (layerId === 'ctx-mosaic') {
+    const tileGrid = getCtxTileGrid();
+    const source = new XYZ({
+      tileGrid,
+      wrapX: false,
+      maxZoom: config.maxZoom,
+      crossOrigin: 'anonymous',
+      tileUrlFunction: (tileCoord: TileCoord): string | undefined => {
+        const z = tileCoord[0];
+        const x = tileCoord[1];
+        const y = tileCoord[2];
+
+        if (z > config.maxZoom || z < 0) return undefined;
+
+        // ArcGIS tile template: /tile/{level}/{row}/{column}
+        return config.urlTemplate
+          .replace('{z}', String(z))
+          .replace('{y}', String(y))
+          .replace('{x}', String(x));
+      },
+      tileLoadFunction: (tile, src) => {
+        if (tile instanceof ImageTile) {
+          const image = tile.getImage() as HTMLImageElement;
+          image.crossOrigin = 'anonymous';
+          image.onerror = () => {
+            image.src = EMPTY_TILE_DATA_URI;
+          };
+          image.src = src;
+        }
+      },
+    });
+
+    return new TileLayer({
+      source,
+      properties: { id: layerId, title: config.title },
+    });
+  }
+
+  // MOLA & Viking: 256x256 tiles, capped at native z=7 for continuous overzoom
+  const tileGrid = getMarsTrekTileGrid(config.maxZoom);
 
   const source = new XYZ({
     tileGrid,
     wrapX: false,
     maxZoom: config.maxZoom,
+    crossOrigin: 'anonymous',
     tileUrlFunction: (tileCoord: TileCoord): string | undefined => {
       const z = tileCoord[0];
       const x = tileCoord[1];
@@ -81,11 +124,21 @@ export function createMarsTrekLayer(layerId: BaseLayerId): TileLayer<XYZ> {
 
       if (z > config.maxZoom || z < 0) return undefined;
 
-      // Mars Trek WMTS uses {z}/{y}/{x}.jpg
+      // Mars Trek WMTS uses {z}/{y}/{x}.jpg where y is row and x is col
       return config.urlTemplate
         .replace('{z}', String(z))
         .replace('{y}', String(y))
         .replace('{x}', String(x));
+    },
+    tileLoadFunction: (tile, src) => {
+      if (tile instanceof ImageTile) {
+        const image = tile.getImage() as HTMLImageElement;
+        image.crossOrigin = 'anonymous';
+        image.onerror = () => {
+          image.src = EMPTY_TILE_DATA_URI;
+        };
+        image.src = src;
+      }
     },
   });
 

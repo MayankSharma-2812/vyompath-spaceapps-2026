@@ -91,6 +91,7 @@ def test_route_analysis_valid_route(client: TestClient, monkeypatch: pytest.Monk
     assert len(data["elevation_profile"]) >= 2
     assert data["coverage_status"] == "complete"
     assert data["dtm_source"] == "synthetic/mock — no real DTM loaded"
+    assert data["is_mock"] is True
     assert data["nearby_pois"] == []
     assert len(data["limitations"]) >= 1
 
