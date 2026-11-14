@@ -94,7 +94,15 @@ export function ElevationChart({ data, isLoading = false, error = null }: Elevat
   return (
     <div className="chart-surface" aria-label="Elevation profile chart" role="img">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={chartData} margin={{ top: 10, right: 18, bottom: 10, left: 8 }}>
+        <AreaChart
+          data={chartData}
+          margin={{
+            top: 10,
+            right: 14,
+            bottom: 10,
+            left: 0,
+          }}
+        >
           <defs>
             <linearGradient id="terrain-fill" x1="0" x2="0" y1="0" y2="1">
               <stop offset="0%" stopColor="#d88a2d" stopOpacity={0.32} />
@@ -117,7 +125,7 @@ export function ElevationChart({ data, isLoading = false, error = null }: Elevat
             tickLine={{ stroke: '#aab4bf' }}
             tick={{ fill: '#435064', fontSize: 10 }}
             axisLine={{ stroke: '#aab4bf' }}
-            width={62}
+            width={typeof window !== 'undefined' && window.innerWidth < 640 ? 48 : 60}
             domain={['auto', 'auto']}
             tickFormatter={(val: number) => `${Math.round(val)} m`}
           />

@@ -134,6 +134,7 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
   const [selectedWaypoint, setSelectedWaypoint] = useState<RoverWaypoint | null>(null);
   const [showDisclaimer, setShowDisclaimer] = useState(true);
   const [isLegendOpen, setIsLegendOpen] = useState(true);
+  const [isLayersPanelOpen, setIsLayersPanelOpen] = useState(false);
   const [isDrawingMode, setIsDrawingMode] = useState(false);
   const [drawnCoordinates, setDrawnCoordinates] = useState<GeodeticCoordinate[]>([]);
 
@@ -397,9 +398,9 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
       />
 
       {/* Top Floating Controls: Basemap & Layer Switchers */}
-      <div className="absolute top-4 left-4 z-20 flex flex-col gap-2 max-w-sm">
+      <div className="absolute top-2 left-2 sm:top-4 sm:left-4 z-20 flex flex-col gap-1.5 sm:gap-2 max-w-[calc(100vw-16px)] sm:max-w-sm">
         {/* Route Drawing Action Toolbar */}
-        <div className="bg-slate-900/90 backdrop-blur-md border border-cyan-500/50 rounded-lg p-2 shadow-2xl flex items-center gap-2">
+        <div className="bg-slate-900/90 backdrop-blur-md border border-cyan-500/50 rounded-lg p-2 shadow-2xl flex flex-wrap items-center gap-1.5">
           <button
             type="button"
             onClick={toggleDrawingMode}
@@ -434,107 +435,119 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
               Clear
             </button>
           )}
+          <button
+            type="button"
+            onClick={() => setIsLayersPanelOpen((prev) => !prev)}
+            className="mobile-layers-btn px-2.5 py-1.5 text-xs font-semibold rounded-md bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 transition-all shadow-sm"
+            title="Toggle Mars basemaps and analytical overlays"
+          >
+            <span>⚙️ Layers</span>
+            <span className="text-[9px]">{isLayersPanelOpen ? '▲' : '▼'}</span>
+          </button>
           {isDrawingMode && (
-            <span className="text-[11px] text-cyan-300 italic px-1 animate-pulse">
-              Click points on map; click Complete Traverse or double-click to finish.
-            </span>
+            <div className="w-full text-[11px] text-cyan-300 italic px-1 animate-pulse">
+              Click/tap points on map; tap Complete Traverse to finish.
+            </div>
           )}
         </div>
 
-        {/* Basemap Selector */}
-        <div className="bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-lg p-2 shadow-2xl">
-          <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5 px-1">
-            Mars Basemap (WMTS)
+        {/* Basemap Selector & Overlays (visible on desktop or when expanded on mobile) */}
+        <div className={`map-floating-layers ${isLayersPanelOpen ? 'is-open' : ''}`}>
+          {/* Basemap Selector */}
+          <div className="bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-lg p-2 shadow-2xl">
+            <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5 px-1">
+              Mars Basemap (WMTS)
+            </div>
+            <div className="grid grid-cols-3 gap-1">
+              {(Object.keys(BASE_LAYER_CONFIGS) as BaseLayerId[]).map((id) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => handleBaseLayerSelect(id)}
+                  className={`px-2 py-1 text-xs font-medium rounded transition-all ${
+                    selectedBaseLayer === id
+                      ? 'bg-cyan-600 text-white shadow-sm'
+                      : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700 hover:text-white'
+                  }`}
+                >
+                  {BASE_LAYER_CONFIGS[id].name.split(' ')[0]}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-3 gap-1">
-            {(Object.keys(BASE_LAYER_CONFIGS) as BaseLayerId[]).map((id) => (
-              <button
-                key={id}
-                type="button"
-                onClick={() => handleBaseLayerSelect(id)}
-                className={`px-2 py-1 text-xs font-medium rounded transition-all ${
-                  selectedBaseLayer === id
-                    ? 'bg-cyan-600 text-white shadow-sm'
-                    : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700 hover:text-white'
-                }`}
-              >
-                {BASE_LAYER_CONFIGS[id].name.split(' ')[0]}
-              </button>
-            ))}
-          </div>
-        </div>
 
-        {/* Analytical Layers Toggle */}
-        <div className="bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-lg p-2 shadow-2xl flex flex-col gap-1.5">
-          <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-1">
-            Analytical Overlays
+          {/* Analytical Layers Toggle */}
+          <div className="bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-lg p-2 shadow-2xl flex flex-col gap-1.5">
+            <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-1">
+              Analytical Overlays
+            </div>
+            <label className="flex items-center gap-2 px-1 text-xs text-slate-300 hover:text-white cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isFootprintVisible}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  setIsFootprintVisible(checked);
+                  if (onToggleFootprint) onToggleFootprint(checked);
+                }}
+                className="rounded bg-slate-800 border-slate-600 text-amber-500 focus:ring-0 focus:ring-offset-0"
+              />
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-sm border border-dashed border-amber-400 bg-amber-400/20" />
+                HiRISE DTM Footprint (63.16%)
+              </span>
+            </label>
+            <label className="flex items-center gap-2 px-1 text-xs text-slate-300 hover:text-white cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isWaypointsVisible}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  setIsWaypointsVisible(checked);
+                  if (onToggleWaypoints) onToggleWaypoints(checked);
+                }}
+                className="rounded bg-slate-800 border-slate-600 text-cyan-500 focus:ring-0 focus:ring-offset-0"
+              />
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-cyan-400" />
+                Rover Waypoints (Sols 383–387)
+              </span>
+            </label>
+            <label className="flex items-center gap-2 px-1 text-xs text-slate-300 hover:text-white cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isRegionalVisible}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  setIsRegionalVisible(checked);
+                  if (onToggleRegionalTiles) onToggleRegionalTiles(checked);
+                }}
+                className="rounded bg-slate-800 border-slate-600 text-emerald-500 focus:ring-0 focus:ring-offset-0"
+              />
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500/30 border border-emerald-400" />
+                Regional DTM Tiles (z12–15)
+              </span>
+            </label>
           </div>
-          <label className="flex items-center gap-2 px-1 text-xs text-slate-300 hover:text-white cursor-pointer">
-            <input
-              type="checkbox"
-              checked={isFootprintVisible}
-              onChange={(e) => {
-                const checked = e.target.checked;
-                setIsFootprintVisible(checked);
-                if (onToggleFootprint) onToggleFootprint(checked);
-              }}
-              className="rounded bg-slate-800 border-slate-600 text-amber-500 focus:ring-0 focus:ring-offset-0"
-            />
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm border border-dashed border-amber-400 bg-amber-400/20" />
-              HiRISE DTM Footprint (63.16%)
-            </span>
-          </label>
-          <label className="flex items-center gap-2 px-1 text-xs text-slate-300 hover:text-white cursor-pointer">
-            <input
-              type="checkbox"
-              checked={isWaypointsVisible}
-              onChange={(e) => {
-                const checked = e.target.checked;
-                setIsWaypointsVisible(checked);
-                if (onToggleWaypoints) onToggleWaypoints(checked);
-              }}
-              className="rounded bg-slate-800 border-slate-600 text-cyan-500 focus:ring-0 focus:ring-offset-0"
-            />
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-cyan-400" />
-              Rover Waypoints (Sols 383–387)
-            </span>
-          </label>
-          <label className="flex items-center gap-2 px-1 text-xs text-slate-300 hover:text-white cursor-pointer">
-            <input
-              type="checkbox"
-              checked={isRegionalVisible}
-              onChange={(e) => {
-                const checked = e.target.checked;
-                setIsRegionalVisible(checked);
-                if (onToggleRegionalTiles) onToggleRegionalTiles(checked);
-              }}
-              className="rounded bg-slate-800 border-slate-600 text-emerald-500 focus:ring-0 focus:ring-offset-0"
-            />
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500/30 border border-emerald-400" />
-              Regional DTM Tiles (z12–15)
-            </span>
-          </label>
         </div>
       </div>
 
       {/* Top-Right: Map Legend Overlay */}
-      <div className="absolute top-4 right-4 z-20">
-        <div className="bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-lg p-2.5 shadow-2xl text-xs max-w-xs">
-          <div className="flex items-center justify-between gap-4 mb-2 pb-1 border-b border-slate-800">
-            <span className="font-semibold text-slate-200">Map Symbology</span>
+      <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-20 max-w-[calc(100vw-20px)]">
+        <div className="bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-lg p-2 sm:p-2.5 shadow-2xl text-xs max-w-xs">
+          <div className="flex items-center justify-between gap-3 pb-1 border-b border-slate-800">
+            <span className="font-semibold text-slate-200 text-[11px] sm:text-xs">Map Symbology</span>
             <button
               type="button"
               onClick={() => setIsLegendOpen(!isLegendOpen)}
-              className="text-slate-400 hover:text-white text-[10px]"
+              className="text-slate-400 hover:text-white text-[10px] px-1"
             >
-              {isLegendOpen ? 'Collapse' : 'Expand'}
+              {isLegendOpen ? 'Collapse ▲' : 'Expand ▼'}
             </button>
           </div>
           {isLegendOpen && (
-            <div className="flex flex-col gap-2 text-[11px] text-slate-300">
+            <div className="flex flex-col gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] text-slate-300 mt-1.5">
               <div className="flex items-center gap-2">
                 <span className="w-4 h-3 rounded-sm border border-dashed border-amber-400 bg-amber-400/20" />
                 <span>HiRISE Stereo DTM (Analytical Boundary)</span>
@@ -627,7 +640,7 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
             </div>
 
             {/* Metrics Grid */}
-            <div className="grid grid-cols-4 gap-2 text-center text-xs">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 text-center text-xs">
               <div className="bg-slate-800/60 p-1.5 rounded-lg border border-slate-700/60">
                 <div className="text-[10px] text-slate-400">Total Distance</div>
                 <div className="font-mono font-bold text-cyan-300">
@@ -668,16 +681,16 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
 
       {/* Geological POI Disclaimer Banner (when no analysis is displayed) */}
       {!analysisResponse && showDisclaimer && (
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 max-w-xl w-[90%]">
+        <div className="absolute bottom-11 sm:bottom-12 left-1/2 -translate-x-1/2 z-20 w-[94%] sm:max-w-xl">
           <div className="bg-slate-900/95 backdrop-blur-md border border-amber-500/40 rounded-lg p-2 px-3 shadow-xl flex items-center justify-between gap-3 text-xs text-amber-200">
             <div className="flex items-center gap-2">
-              <span className="text-amber-400 font-bold">ℹ️ NOTE:</span>
-              <span className="text-[11px] leading-tight text-slate-300">{GEOLOGICAL_EMPTY_STATE_MESSAGE}</span>
+              <span className="text-amber-400 font-bold shrink-0">ℹ️ NOTE:</span>
+              <span className="text-[10px] sm:text-[11px] leading-tight text-slate-300">{GEOLOGICAL_EMPTY_STATE_MESSAGE}</span>
             </div>
             <button
               type="button"
               onClick={() => setShowDisclaimer(false)}
-              className="text-slate-400 hover:text-white text-xs px-1"
+              className="text-slate-400 hover:text-white text-xs px-1 shrink-0"
               title="Dismiss note"
             >
               ✕
@@ -688,7 +701,7 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
 
       {/* Waypoint Telemetry Modal / Card */}
       {selectedWaypoint && (
-        <div className="absolute top-20 right-4 z-30 w-72 bg-slate-900/95 backdrop-blur-md border border-cyan-500/60 rounded-xl p-3.5 shadow-2xl text-xs">
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 sm:left-auto sm:right-4 sm:translate-x-0 z-30 w-[90%] max-w-xs bg-slate-900/95 backdrop-blur-md border border-cyan-500/60 rounded-xl p-3 sm:p-3.5 shadow-2xl text-xs">
           <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
             <span className="font-bold text-cyan-300">{selectedWaypoint.name}</span>
             <button
@@ -744,22 +757,23 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
       )}
 
       {/* Bottom Status Bar: Cursor Coordinates & Planetary Projection Info */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 bg-slate-950/90 backdrop-blur-md border-t border-slate-800 px-3 py-1 flex items-center justify-between text-[11px] font-mono text-slate-400">
-        <div className="flex items-center gap-4">
-          <span>CRS: <strong className="text-slate-200">MARS:2000 (IAU Sphere R=3,396,190m)</strong></span>
-          <span>Extent: <strong className="text-slate-200">2:1 Equirectangular</strong></span>
+      <div className="absolute bottom-0 left-0 right-0 z-20 bg-slate-950/95 backdrop-blur-md border-t border-slate-800 px-2 sm:px-3 py-1 flex items-center justify-between text-[10px] sm:text-[11px] font-mono text-slate-400">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <span className="hidden sm:inline">CRS: <strong className="text-slate-200">MARS:2000 (IAU Sphere R=3,396,190m)</strong></span>
+          <span className="sm:hidden font-semibold text-slate-300 text-[9px]">MARS:2000</span>
+          <span className="hidden sm:inline">Extent: <strong className="text-slate-200">2:1 Equirectangular</strong></span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 text-[10px] sm:text-[11px]">
           <span>
             Lon:{' '}
             <strong className="text-cyan-300">
-              {cursorCoords ? `${cursorCoords.lon.toFixed(5)}° E` : '--.-----°'}
+              {cursorCoords ? `${cursorCoords.lon.toFixed(4)}°E` : '--.----°'}
             </strong>
           </span>
           <span>
             Lat:{' '}
             <strong className="text-cyan-300">
-              {cursorCoords ? `${cursorCoords.lat.toFixed(5)}° N` : '--.-----°'}
+              {cursorCoords ? `${cursorCoords.lat.toFixed(4)}°N` : '--.----°'}
             </strong>
           </span>
         </div>
