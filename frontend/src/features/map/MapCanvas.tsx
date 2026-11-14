@@ -8,8 +8,10 @@
  * - Regional HiRISE DTM Tile Layer with transparent NoData fallback
  * - Canonical Jezero DTM Vector Boundary (98 vertices from jezero_dtm.geojson)
  * - Mars 2020 Perseverance Rover Waypoints (Sols 383–387) with decluttering & popup
- * - Geological Empty State Disclaimer per Pranav Sharma's scientific sign-off
- * - Real-time geodetic coordinate bar [lon° E, lat° N]
+ * - Interactive Route Drawing with Geodetic Degree Serialization [{"lon": ..., "lat": ...}]
+ * - Dual Route A (Solid Blue) and Route B (Dashed Amber) Visualization
+ * - API Response Overlays (Distance, Elevation Gain/Loss, Slope, Coverage Status)
+ * - Transparent Truthful Mock Mode Indicator Banner
  * - StrictMode lifecycle isolation & ResizeObserver handling
  */
 
@@ -19,6 +21,8 @@ import Map from 'ol/Map';
 import View from 'ol/View';
 import type { Coordinate } from 'ol/coordinate';
 import type BaseLayer from 'ol/layer/Base';
+import type VectorLayer from 'ol/layer/Vector';
+import type VectorSource from 'ol/source/Vector';
 
 import {
   marsProjection,
@@ -33,6 +37,14 @@ import {
   createWaypointLayer,
   BASE_LAYER_CONFIGS,
 } from './layers';
+import {
+  createRouteLayer,
+  updateRouteSource,
+} from './routeLayer';
+import {
+  setupRouteDrawing,
+  type RouteDrawingController,
+} from './routeInteraction';
 import {
   JEZERO_CENTER,
   GEOLOGICAL_EMPTY_STATE_MESSAGE,
@@ -52,11 +64,19 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
   showRegionalTiles = true,
   showFootprint = true,
   showWaypoints = true,
+  routeA = null,
+  routeB = null,
+  analysisResponse = null,
+  isAnalyzing = false,
+  analysisError = null,
+  onRouteDrawn,
+  onRouteClear,
   onWaypointSelect,
   onCoordinateHover,
 }) => {
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<Map | null>(null);
+  const drawingControllerRef = useRef<RouteDrawingController | null>(null);
 
   // Layer references
   const baseLayersRef = useRef<Record<BaseLayerId, BaseLayer | null>>({
@@ -67,6 +87,7 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
   const regionalLayerRef = useRef<BaseLayer | null>(null);
   const footprintLayerRef = useRef<BaseLayer | null>(null);
   const waypointLayerRef = useRef<BaseLayer | null>(null);
+  const routeLayerRef = useRef<VectorLayer<VectorSource> | null>(null);
 
   // Component state
   const [selectedBaseLayer, setSelectedBaseLayer] = useState<BaseLayerId>(activeBaseLayer);
@@ -77,6 +98,8 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
   const [selectedWaypoint, setSelectedWaypoint] = useState<RoverWaypoint | null>(null);
   const [showDisclaimer, setShowDisclaimer] = useState(true);
   const [isLegendOpen, setIsLegendOpen] = useState(true);
+  const [isDrawingMode, setIsDrawingMode] = useState(false);
+  const [drawnCoordinates, setDrawnCoordinates] = useState<GeodeticCoordinate[]>([]);
 
   // Switch base layer
   const handleBaseLayerSelect = useCallback((layerId: BaseLayerId) => {
@@ -88,6 +111,49 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
       }
     });
   }, []);
+
+  // Internal route drawn handler
+  const handleInternalRouteDrawn = useCallback(
+    (coords: GeodeticCoordinate[]) => {
+      setDrawnCoordinates(coords);
+      setIsDrawingMode(false);
+      if (drawingControllerRef.current) {
+        drawingControllerRef.current.deactivate();
+      }
+      if (onRouteDrawn) {
+        onRouteDrawn(coords);
+      }
+    },
+    [onRouteDrawn]
+  );
+
+  // Toggle route drawing mode
+  const toggleDrawingMode = useCallback(() => {
+    if (!drawingControllerRef.current) return;
+    if (isDrawingMode) {
+      drawingControllerRef.current.deactivate();
+      setIsDrawingMode(false);
+    } else {
+      drawingControllerRef.current.activate();
+      setIsDrawingMode(true);
+    }
+  }, [isDrawingMode]);
+
+  // Clear routes
+  const handleClearRoutes = useCallback(() => {
+    setDrawnCoordinates([]);
+    if (drawingControllerRef.current) {
+      drawingControllerRef.current.clear();
+      drawingControllerRef.current.deactivate();
+    }
+    setIsDrawingMode(false);
+    if (routeLayerRef.current) {
+      routeLayerRef.current.getSource()?.clear();
+    }
+    if (onRouteClear) {
+      onRouteClear();
+    }
+  }, [onRouteClear]);
 
   // Initialize Map
   useEffect(() => {
@@ -122,6 +188,10 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
     waypointLayer.setVisible(isWaypointsVisible);
     waypointLayerRef.current = waypointLayer;
 
+    // Route Layer
+    const routeLayer = createRouteLayer();
+    routeLayerRef.current = routeLayer;
+
     // Projected center
     const centerMetres = fromGeodetic(initialCenter[0], initialCenter[1]);
 
@@ -134,6 +204,7 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
         regionalLayer,
         footprintLayer,
         waypointLayer,
+        routeLayer,
       ],
       view: new View({
         projection: marsProjection,
@@ -148,6 +219,13 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
 
     mapInstanceRef.current = map;
 
+    // Initialize Route Drawing Controller
+    const controller = setupRouteDrawing({
+      map,
+      onRouteDrawn: handleInternalRouteDrawn,
+    });
+    drawingControllerRef.current = controller;
+
     // Cursor position handler
     map.on('pointermove', (evt) => {
       if (evt.dragging) return;
@@ -161,6 +239,8 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
 
     // Click handler for waypoint selection
     map.on('click', (evt) => {
+      if (drawingControllerRef.current?.isActive()) return;
+
       let clickedWp: RoverWaypoint | null = null;
       map.forEachFeatureAtPixel(evt.pixel, (feature) => {
         const wp = feature.get('waypoint') as RoverWaypoint | undefined;
@@ -189,10 +269,11 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
 
     return () => {
       resizeObserver.disconnect();
+      controller.destroy();
       map.setTarget(undefined);
       mapInstanceRef.current = null;
     };
-  }, []); // Run once on mount
+  }, [handleInternalRouteDrawn]);
 
   // Sync layer visibility
   useEffect(() => {
@@ -213,17 +294,55 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
     }
   }, [isWaypointsVisible]);
 
+  // Sync route geometries to route layer source
+  useEffect(() => {
+    if (!routeLayerRef.current) return;
+    const source = routeLayerRef.current.getSource();
+    if (source) {
+      updateRouteSource(source, routeA, routeB, drawnCoordinates);
+    }
+  }, [routeA, routeB, drawnCoordinates]);
+
   return (
-    <div className={`relative w-full h-full min-h-[500px] bg-slate-950 overflow-hidden select-none font-sans text-slate-100 ${className}`}>
+    <div className={`relative w-full h-full min-h-[550px] bg-slate-950 overflow-hidden select-none font-sans text-slate-100 ${className}`}>
       {/* Map Viewport Container */}
       <div
         ref={mapElementRef}
-        className="w-full h-full cursor-crosshair"
+        className={`w-full h-full ${isDrawingMode ? 'cursor-crosshair' : 'cursor-default'}`}
         data-testid="mars-map-canvas"
       />
 
       {/* Top Floating Controls: Basemap & Layer Switchers */}
       <div className="absolute top-4 left-4 z-20 flex flex-col gap-2 max-w-sm">
+        {/* Route Drawing Action Toolbar */}
+        <div className="bg-slate-900/90 backdrop-blur-md border border-cyan-500/50 rounded-lg p-2 shadow-2xl flex items-center gap-2">
+          <button
+            type="button"
+            onClick={toggleDrawingMode}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5 ${
+              isDrawingMode
+                ? 'bg-rose-600 text-white animate-pulse shadow-md'
+                : 'bg-cyan-600 hover:bg-cyan-500 text-white shadow-sm'
+            }`}
+          >
+            <span>{isDrawingMode ? '⏹ Cancel Drawing' : '✏️ Draw Route'}</span>
+          </button>
+          {(drawnCoordinates.length > 0 || routeA || routeB) && (
+            <button
+              type="button"
+              onClick={handleClearRoutes}
+              className="px-2.5 py-1.5 text-xs font-medium rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all border border-slate-700"
+            >
+              Clear
+            </button>
+          )}
+          {isDrawingMode && (
+            <span className="text-[11px] text-cyan-300 italic px-1 animate-pulse">
+              Click points on map; double-click to finish.
+            </span>
+          )}
+        </div>
+
         {/* Basemap Selector */}
         <div className="bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-lg p-2 shadow-2xl">
           <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5 px-1">
@@ -318,13 +437,117 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                 <span className="w-3 h-3 rounded-full bg-slate-500 border border-slate-300" />
                 <span>Historical Waypoint (Landing Vicinity / Outside)</span>
               </div>
+              <div className="flex items-center gap-2">
+                <span className="w-5 h-1 bg-blue-600 rounded" />
+                <span>Route A (Primary Traverse)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-5 h-1 border-t-2 border-dashed border-amber-500" />
+                <span>Route B (Candidate / Alternate)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-500 ml-1" />
+                <span className="ml-1">Start / End Coordinates</span>
+              </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Bottom Center: Geological POI Disclaimer Banner */}
-      {showDisclaimer && (
+      {/* Center-Top: Analyzing Spinner Overlay */}
+      {isAnalyzing && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30">
+          <div className="bg-slate-900/95 border border-cyan-500/60 rounded-full px-4 py-1.5 shadow-2xl flex items-center gap-2.5 text-xs text-cyan-200">
+            <div className="w-3.5 h-3.5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+            <span className="font-medium">Evaluating Martian Terrain Profile...</span>
+          </div>
+        </div>
+      )}
+
+      {/* Center-Top: Error Banner */}
+      {analysisError && (
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 max-w-lg w-[90%]">
+          <div className="bg-rose-950/95 border border-rose-500/70 rounded-lg p-2.5 shadow-2xl flex items-center justify-between text-xs text-rose-200">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-rose-400">⚠️ ERROR:</span>
+              <span>{analysisError}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bottom Center: Route Analysis Response Overlay Card */}
+      {analysisResponse && (
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-25 max-w-2xl w-[92%]">
+          <div className="bg-slate-900/95 backdrop-blur-md border border-cyan-500/50 rounded-xl p-3 shadow-2xl space-y-2">
+            {/* Header with Mode & Status Badges */}
+            <div className="flex items-center justify-between pb-1.5 border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-slate-200 text-xs">{analysisResponse.route_id}</span>
+                <span
+                  className={`text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider ${
+                    analysisResponse.coverage_status === 'complete'
+                      ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/50'
+                      : analysisResponse.coverage_status === 'partial_gap'
+                      ? 'bg-amber-950 text-amber-300 border border-amber-500/50'
+                      : 'bg-rose-950 text-rose-300 border border-rose-500/50'
+                  }`}
+                >
+                  {analysisResponse.coverage_status === 'complete'
+                    ? 'Coverage: 100% In-Footprint'
+                    : analysisResponse.coverage_status === 'partial_gap'
+                    ? 'Coverage: Partial HiRISE Gap'
+                    : 'Coverage: Out of Stereo Bounds'}
+                </span>
+              </div>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-950/70 border border-amber-500/40 text-amber-300">
+                DEVELOPMENT / MOCK DATA
+              </span>
+            </div>
+
+            {/* Metrics Grid */}
+            <div className="grid grid-cols-4 gap-2 text-center text-xs">
+              <div className="bg-slate-800/60 p-1.5 rounded-lg border border-slate-700/60">
+                <div className="text-[10px] text-slate-400">Total Distance</div>
+                <div className="font-mono font-bold text-cyan-300">
+                  {analysisResponse.total_distance_m >= 1000
+                    ? `${(analysisResponse.total_distance_m / 1000).toFixed(2)} km`
+                    : `${analysisResponse.total_distance_m.toFixed(1)} m`}
+                </div>
+              </div>
+              <div className="bg-slate-800/60 p-1.5 rounded-lg border border-slate-700/60">
+                <div className="text-[10px] text-slate-400">Elevation Gain</div>
+                <div className="font-mono font-bold text-emerald-400">
+                  +{analysisResponse.total_gain_m.toFixed(1)} m
+                </div>
+              </div>
+              <div className="bg-slate-800/60 p-1.5 rounded-lg border border-slate-700/60">
+                <div className="text-[10px] text-slate-400">Elevation Loss</div>
+                <div className="font-mono font-bold text-amber-400">
+                  -{analysisResponse.total_loss_m.toFixed(1)} m
+                </div>
+              </div>
+              <div className="bg-slate-800/60 p-1.5 rounded-lg border border-slate-700/60">
+                <div className="text-[10px] text-slate-400">Max Slope</div>
+                <div className="font-mono font-bold text-rose-300">
+                  {analysisResponse.max_slope_deg.toFixed(1)}°
+                </div>
+              </div>
+            </div>
+
+            {/* Scientific limitations notice per Section 7.2 of contract */}
+            {analysisResponse.limitations && analysisResponse.limitations.length > 0 && (
+              <div className="text-[10px] text-slate-400 italic bg-slate-950/50 p-1.5 rounded border border-slate-800">
+                {analysisResponse.limitations[0]}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Geological POI Disclaimer Banner (when no analysis is displayed) */}
+      {!analysisResponse && showDisclaimer && (
         <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 max-w-xl w-[90%]">
           <div className="bg-slate-900/95 backdrop-blur-md border border-amber-500/40 rounded-lg p-2 px-3 shadow-xl flex items-center justify-between gap-3 text-xs text-amber-200">
             <div className="flex items-center gap-2">
