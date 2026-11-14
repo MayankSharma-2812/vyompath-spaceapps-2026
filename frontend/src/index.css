@@ -664,6 +664,32 @@ input {
   line-height: 1.5;
 }
 
+.mobile-layers-btn {
+  display: none;
+}
+
+.map-floating-layers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .mobile-layers-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .map-floating-layers {
+    display: none;
+  }
+
+  .map-floating-layers.is-open {
+    display: flex;
+  }
+}
+
 @media (max-width: 1000px) {
   .dashboard-layout {
     grid-template-columns: 200px minmax(0, 1fr);
@@ -707,10 +733,16 @@ input {
 
   .navigation-list {
     display: flex;
-    gap: 5px;
+    gap: 6px;
     margin: 0;
     overflow-x: auto;
-    padding-bottom: 3px;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .navigation-list::-webkit-scrollbar {
+    display: none;
   }
 
   .navigation-list li {
@@ -718,11 +750,22 @@ input {
   }
 
   .navigation-item {
-    min-height: 34px;
-    gap: 7px;
-    padding: 0 8px;
-    font-size: 10px;
+    min-height: 38px;
+    gap: 6px;
+    padding: 0 12px;
+    font-size: 11px;
+    font-weight: 500;
     white-space: nowrap;
+    border-radius: 20px;
+    background: #182638;
+    border: 1px solid #2d3f56;
+    color: #cbd5e1;
+  }
+
+  .navigation-item.is-active {
+    background: #d88a2d;
+    color: #ffffff;
+    border-color: #d88a2d;
   }
 
   .top-toolbar {
@@ -739,6 +782,17 @@ input {
     align-items: flex-start;
     flex-direction: column;
     gap: 12px;
+  }
+
+  .preset-selector button {
+    min-height: 36px;
+    font-size: 11px !important;
+    padding: 6px 10px !important;
+  }
+
+  .region-indicator {
+    width: 100%;
+    text-align: left !important;
   }
 
   .search-field {
@@ -774,7 +828,12 @@ input {
   }
 
   .map-stage {
-    min-height: 300px;
+    min-height: 420px;
+    height: 55vh;
+  }
+
+  .mars-map-canvas {
+    touch-action: pan-x pan-y pinch-zoom;
   }
 
   .map-layer-placeholder {
@@ -800,5 +859,17 @@ input {
   .comparison-cards,
   .comparison-deltas dl {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .comparison-delta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .demo-mode-banner,
+  .real-dtm-banner {
+    margin: 0 10px 12px 10px !important;
+    padding: 10px 14px !important;
   }
 }

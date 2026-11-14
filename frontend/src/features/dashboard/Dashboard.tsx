@@ -344,12 +344,12 @@ function MapContainer({
 
   return (
     <section className="panel map-panel" id="map-section" aria-labelledby="map-title">
-      <div className="panel-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="panel-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
         <div>
           <span className="eyebrow">MAP WORKSPACE</span>
           <h2 id="map-title">Martian Surface Explorer</h2>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
           <label style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', color: '#475569' }}>
             Base Layer:
             <select
@@ -1160,7 +1160,6 @@ function Dashboard() {
             role="status"
             aria-label="Demonstration mode notice"
             style={{
-              margin: '0 24px 16px 24px',
               padding: '12px 18px',
               borderRadius: '8px',
               background: 'rgba(245, 158, 11, 0.08)',
@@ -1187,7 +1186,6 @@ function Dashboard() {
             role="status"
             aria-label="Real DTM active notice"
             style={{
-              margin: '0 24px 16px 24px',
               padding: '10px 18px',
               borderRadius: '8px',
               background: 'rgba(16, 185, 129, 0.08)',
