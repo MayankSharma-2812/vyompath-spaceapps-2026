@@ -104,4 +104,6 @@ export interface MapCanvasProps {
   onToggleFootprint?: (visible: boolean) => void;
   onToggleWaypoints?: (visible: boolean) => void;
   onToggleRegionalTiles?: (visible: boolean) => void;
+  focusWaypoint?: GeodeticCoordinate | null;
+  resetViewTrigger?: number;
 }

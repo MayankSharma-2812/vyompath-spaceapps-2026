@@ -29,6 +29,7 @@ export interface RouteDrawingController {
   deactivate: () => void;
   isActive: () => boolean;
   clear: () => void;
+  finish: () => void;
   destroy: () => void;
 }
 
@@ -93,6 +94,11 @@ export function setupRouteDrawing({
     isActive: () => active,
     clear: () => {
       drawingSource.clear();
+    },
+    finish: () => {
+      if (active && drawInteraction) {
+        drawInteraction.finishDrawing();
+      }
     },
     destroy: () => {
       if (drawInteraction) {

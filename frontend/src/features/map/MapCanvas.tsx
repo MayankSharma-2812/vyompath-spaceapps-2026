@@ -87,6 +87,8 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
   analysisResponse = null,
   isAnalyzing = false,
   analysisError = null,
+  focusWaypoint = null,
+  resetViewTrigger = 0,
   onRouteDrawn,
   onRouteClear,
   onWaypointSelect,
@@ -359,6 +361,30 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
     }
   }, [routeA, routeB, drawnCoordinates]);
 
+  // Smoothly center and zoom to focused waypoint
+  useEffect(() => {
+    if (!focusWaypoint || !mapInstanceRef.current) return;
+    const view = mapInstanceRef.current.getView();
+    const targetMetres = fromGeodetic(focusWaypoint.lon, focusWaypoint.lat);
+    view.animate({
+      center: targetMetres,
+      zoom: Math.max(view.getZoom() ?? 12, 14),
+      duration: 800,
+    });
+  }, [focusWaypoint]);
+
+  // Smoothly reset view to Jezero Crater AOI
+  useEffect(() => {
+    if (!resetViewTrigger || !mapInstanceRef.current) return;
+    const view = mapInstanceRef.current.getView();
+    const centerMetres = fromGeodetic(initialCenter[0], initialCenter[1]);
+    view.animate({
+      center: centerMetres,
+      zoom: initialZoom,
+      duration: 700,
+    });
+  }, [resetViewTrigger, initialCenter, initialZoom]);
+
   return (
     <div
       className={`mars-map-canvas relative w-full h-full min-h-[365px] bg-slate-950 overflow-hidden select-none font-sans text-slate-100 ${className}`}
@@ -385,6 +411,20 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
           >
             <span>{isDrawingMode ? '⏹ Cancel Drawing' : '✏️ Draw Route'}</span>
           </button>
+          {isDrawingMode && (
+            <button
+              type="button"
+              onClick={() => {
+                if (drawingControllerRef.current) {
+                  drawingControllerRef.current.finish();
+                }
+              }}
+              className="px-2.5 py-1.5 text-xs font-semibold rounded-md bg-emerald-600 hover:bg-emerald-500 text-white transition-all shadow-sm"
+              title="Finish and analyze current traverse"
+            >
+              ✓ Complete Traverse
+            </button>
+          )}
           {(drawnCoordinates.length > 0 || routeA || routeB) && (
             <button
               type="button"
@@ -396,7 +436,7 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
           )}
           {isDrawingMode && (
             <span className="text-[11px] text-cyan-300 italic px-1 animate-pulse">
-              Click points on map; double-click to finish.
+              Click points on map; click Complete Traverse or double-click to finish.
             </span>
           )}
         </div>

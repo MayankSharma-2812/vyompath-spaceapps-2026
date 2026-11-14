@@ -236,6 +236,19 @@ input {
   display: grid;
   min-width: 120px;
   gap: 5px;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 4px 8px;
+  text-align: right;
+  transition: all 0.2s ease;
+}
+
+.region-indicator:hover {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: #cbd5e1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .region-indicator strong {
@@ -527,7 +540,7 @@ input {
 
 .chart-layout {
   display: grid;
-  height: 112px;
+  height: 180px;
   grid-template-columns: 22px minmax(0, 1fr);
   gap: 8px;
 }
