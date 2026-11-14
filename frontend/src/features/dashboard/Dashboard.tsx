@@ -35,14 +35,26 @@ const PRESET_CORRIDORS: Record<string, { name: string; description: string; coor
 
 export type RouteAnalysisResponse = RouteAnalysisData;
 
+const rawApiUrl = (import.meta.env.VITE_API_URL as string | undefined)?.trim();
+// Strip trailing slash and trailing /api if user accidentally configured .../api
+const cleanApiUrl = rawApiUrl
+  ? rawApiUrl.replace(/\/api\/?$/, '').replace(/\/+$/, '')
+  : undefined;
+
 const API_BASE_URL =
-  (import.meta.env.VITE_API_URL as string | undefined) ||
-  (typeof window !== 'undefined' &&
-  (window.location.port === '' || window.location.port === '80' || window.location.port === '8080')
-    ? ''
-    : typeof window !== 'undefined' && window.location.hostname === '127.0.0.1'
-      ? 'http://127.0.0.1:8000'
-      : 'http://localhost:8000');
+  cleanApiUrl !== undefined && cleanApiUrl !== ''
+    ? cleanApiUrl
+    : typeof window !== 'undefined' &&
+      window.location.hostname !== 'localhost' &&
+      window.location.hostname !== '127.0.0.1' &&
+      window.location.hostname.includes('onrender.com')
+      ? 'https://vyompath-api.onrender.com'
+      : typeof window !== 'undefined' &&
+        (window.location.port === '80' || window.location.port === '8080')
+        ? ''
+        : typeof window !== 'undefined' && window.location.hostname === '127.0.0.1'
+          ? 'http://127.0.0.1:8000'
+          : 'http://localhost:8000';
 
 const COMPARISON_METRICS = [
   { key: 'total_distance_m', title: 'Distance', unit: 'm' },
