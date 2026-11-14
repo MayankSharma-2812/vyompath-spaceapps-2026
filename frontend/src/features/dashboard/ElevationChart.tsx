@@ -104,27 +104,30 @@ export function ElevationChart({ data, isLoading = false, error = null }: Elevat
           <CartesianGrid stroke="#d9d7cf" strokeDasharray="3 3" vertical={false} />
           <XAxis
             dataKey="distance"
-            tickLine={false}
-            tick={false}
-            axisLine={false}
-            height={0}
-            minTickGap={26}
+            tickLine={{ stroke: '#aab4bf' }}
+            tick={{ fill: '#435064', fontSize: 10 }}
+            axisLine={{ stroke: '#aab4bf' }}
+            height={28}
+            minTickGap={28}
             domain={['dataMin', 'dataMax']}
+            tickFormatter={(val: number) => (val >= 1000 ? `${(val / 1000).toFixed(1)} km` : `${Math.round(val)} m`)}
           />
           <YAxis
             dataKey="elevation"
-            tickLine={false}
-            tick={false}
-            axisLine={false}
-            width={0}
+            tickLine={{ stroke: '#aab4bf' }}
+            tick={{ fill: '#435064', fontSize: 10 }}
+            axisLine={{ stroke: '#aab4bf' }}
+            width={62}
+            domain={['auto', 'auto']}
+            tickFormatter={(val: number) => `${Math.round(val)} m`}
           />
           <Tooltip
             formatter={(value) => {
               const numericValue = Number(value ?? 0);
               const safeValue = Number.isFinite(numericValue) ? numericValue : 0;
-              return [`${safeValue.toFixed(1)} m`, 'Elevation'];
+              return [`${safeValue.toFixed(1)} m`, 'Elevation (datum)'];
             }}
-            labelFormatter={(label) => `Distance: ${Number(label ?? 0).toFixed(0)} m`}
+            labelFormatter={(label) => `Distance: ${Number(label ?? 0).toFixed(1)} m`}
           />
           <Area
             type="monotone"

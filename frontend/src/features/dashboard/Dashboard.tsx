@@ -4,16 +4,34 @@ import {
   type GeodeticCoordinate,
   type RouteGeometry,
   type RouteAnalysisData,
+  type BaseLayerId,
+  type RoverWaypoint,
+  GEOLOGICAL_EMPTY_STATE_MESSAGE,
 } from '../map';
 import { EmptyState, MetricCard, StatusBadge } from '../../components';
-import ElevationChart, { type ElevationChartPoint } from './ElevationChart';
+import ElevationChart from './ElevationChart';
 
-const SAMPLE_ROUTE: GeodeticCoordinate[] = [
-  { lon: 77.51, lat: 18.44 },
-  { lon: 77.56, lat: 18.47 },
-  { lon: 77.62, lat: 18.5 },
-  { lon: 77.68, lat: 18.53 },
-];
+// Golden reference corridors from scientific fixtures
+const PRESET_CORRIDORS: Record<string, { name: string; description: string; coords: GeodeticCoordinate[] }> = {
+  jezeroFloor: {
+    name: 'Jezero Floor (Sols 386–387)',
+    description: 'Crater floor rapid transit corridor between Sol 386 and Sol 387 in HiRISE stereo DTM strip.',
+    coords: [
+      { lon: 77.46313311, lat: 18.46079140 },
+      { lon: 77.46235628, lat: 18.46263369 },
+      { lon: 77.46157944, lat: 18.46447597 },
+    ],
+  },
+  jezeroDelta: {
+    name: 'Jezero Delta Scarp',
+    description: 'Steep delta scarp ingress corridor with significant elevation changes and varied slopes.',
+    coords: [
+      { lon: 77.54800000, lat: 18.46500000 },
+      { lon: 77.55200000, lat: 18.47000000 },
+      { lon: 77.55600000, lat: 18.47500000 },
+    ],
+  },
+};
 
 export type RouteAnalysisResponse = RouteAnalysisData;
 
@@ -44,7 +62,6 @@ function formatMetricValue(value: number | null, unit: string): string {
   if (value === null) {
     return 'Unavailable';
   }
-
   return `${value.toFixed(1)}${unit === '°' ? '' : ` ${unit}`}`;
 }
 
@@ -118,23 +135,84 @@ function Sidebar() {
   );
 }
 
-function TopToolbar() {
+interface TopToolbarProps {
+  backendMode: string | null;
+  activePreset: string;
+  onSelectPreset: (presetKey: string) => void;
+  onClearRoute: () => void;
+}
+
+function TopToolbar({
+  backendMode,
+  activePreset,
+  onSelectPreset,
+  onClearRoute,
+}: TopToolbarProps) {
+  const isMock = backendMode === 'development/mock';
+
   return (
     <header className="top-toolbar">
       <div className="toolbar-heading">
-        <span className="eyebrow">MARS RESEARCH WORKSPACE</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span className="eyebrow">MARS RESEARCH WORKSPACE</span>
+          {backendMode && (
+            <StatusBadge variant={isMock ? 'neutral' : 'success'}>
+              {isMock ? 'DEVELOPMENT / MOCK BACKEND' : 'LIVE TERRAIN ENGINE'}
+            </StatusBadge>
+          )}
+        </div>
         <h1>Explore the surface</h1>
       </div>
-      <div className="toolbar-controls">
-        <label className="search-field">
-          <span className="search-icon" aria-hidden="true" />
-          <input
-            type="search"
-            placeholder="Location search coming soon"
-            aria-label="Martian location search"
-            disabled
-          />
-        </label>
+      <div className="toolbar-controls" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div className="preset-selector" style={{ display: 'flex', gap: '6px' }}>
+          <button
+            type="button"
+            onClick={() => onSelectPreset('jezeroFloor')}
+            style={{
+              padding: '6px 10px',
+              fontSize: '11px',
+              fontWeight: 600,
+              borderRadius: '4px',
+              border: activePreset === 'jezeroFloor' ? '1px solid #d88a2d' : '1px solid #cbd5e1',
+              background: activePreset === 'jezeroFloor' ? '#fef3c7' : '#ffffff',
+              color: activePreset === 'jezeroFloor' ? '#92400e' : '#334155',
+              cursor: 'pointer',
+            }}
+          >
+            Floor Corridor (Sol 386–387)
+          </button>
+          <button
+            type="button"
+            onClick={() => onSelectPreset('jezeroDelta')}
+            style={{
+              padding: '6px 10px',
+              fontSize: '11px',
+              fontWeight: 600,
+              borderRadius: '4px',
+              border: activePreset === 'jezeroDelta' ? '1px solid #d88a2d' : '1px solid #cbd5e1',
+              background: activePreset === 'jezeroDelta' ? '#fef3c7' : '#ffffff',
+              color: activePreset === 'jezeroDelta' ? '#92400e' : '#334155',
+              cursor: 'pointer',
+            }}
+          >
+            Delta Scarp
+          </button>
+          <button
+            type="button"
+            onClick={onClearRoute}
+            style={{
+              padding: '6px 10px',
+              fontSize: '11px',
+              borderRadius: '4px',
+              border: '1px solid #cbd5e1',
+              background: '#ffffff',
+              color: '#64748b',
+              cursor: 'pointer',
+            }}
+          >
+            Clear / Draw Freehand
+          </button>
+        </div>
         <div className="region-indicator">
           <span className="region-label">STUDY REGION</span>
           <strong>Jezero Crater AOI</strong>
@@ -146,20 +224,40 @@ function TopToolbar() {
 
 interface MapContainerProps {
   drawnRoute: GeodeticCoordinate[] | null;
+  routeB: GeodeticCoordinate[] | null;
   analysis: RouteAnalysisResponse | null;
   isAnalyzing: boolean;
   analysisError: string | null;
+  activeBaseLayer: BaseLayerId;
+  showRegionalTiles: boolean;
+  showFootprint: boolean;
+  showWaypoints: boolean;
+  onChangeBaseLayer: (layer: BaseLayerId) => void;
+  onToggleRegionalTiles: () => void;
+  onToggleFootprint: () => void;
+  onToggleWaypoints: () => void;
   onRouteDrawn: (coords: GeodeticCoordinate[]) => void;
   onRouteClear: () => void;
+  onWaypointSelect?: (waypoint: RoverWaypoint) => void;
 }
 
 function MapContainer({
   drawnRoute,
+  routeB,
   analysis,
   isAnalyzing,
   analysisError,
+  activeBaseLayer,
+  showRegionalTiles,
+  showFootprint,
+  showWaypoints,
+  onChangeBaseLayer,
+  onToggleRegionalTiles,
+  onToggleFootprint,
+  onToggleWaypoints,
   onRouteDrawn,
   onRouteClear,
+  onWaypointSelect,
 }: MapContainerProps) {
   const [hoverCoords, setHoverCoords] = useState<GeodeticCoordinate | null>(null);
 
@@ -173,25 +271,103 @@ function MapContainer({
         }
       : null;
 
+  const routeBGeometry: RouteGeometry | null =
+    routeB && routeB.length >= 2
+      ? {
+          id: 'route-b',
+          name: 'Comparison Route B',
+          coordinates: routeB,
+          style: 'route-b',
+        }
+      : null;
+
   return (
     <section className="panel map-panel" aria-labelledby="map-title">
-      <div className="panel-heading">
+      <div className="panel-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <span className="eyebrow">MAP WORKSPACE</span>
           <h2 id="map-title">Martian Surface Explorer</h2>
         </div>
-        <StatusBadge className="panel-tag" variant="success">
-          INTERACTIVE MARS 2000
-        </StatusBadge>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <label style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', color: '#475569' }}>
+            Base Layer:
+            <select
+              value={activeBaseLayer}
+              onChange={(e) => onChangeBaseLayer(e.target.value as BaseLayerId)}
+              style={{
+                fontSize: '11px',
+                padding: '3px 6px',
+                borderRadius: '4px',
+                border: '1px solid #cbd5e1',
+                background: '#ffffff',
+              }}
+            >
+              <option value="mola-colorhillshade">MOLA Color Shaded Relief</option>
+              <option value="ctx-mosaic">CTX Visible Mosaic</option>
+              <option value="viking-mdim21">Viking MDIM 2.1</option>
+            </select>
+          </label>
+          <button
+            type="button"
+            onClick={onToggleRegionalTiles}
+            style={{
+              fontSize: '10px',
+              padding: '4px 7px',
+              borderRadius: '4px',
+              border: '1px solid #cbd5e1',
+              background: showRegionalTiles ? '#e0f2fe' : '#ffffff',
+              color: showRegionalTiles ? '#0369a1' : '#64748b',
+              cursor: 'pointer',
+            }}
+          >
+            HiRISE DTM
+          </button>
+          <button
+            type="button"
+            onClick={onToggleFootprint}
+            style={{
+              fontSize: '10px',
+              padding: '4px 7px',
+              borderRadius: '4px',
+              border: '1px solid #cbd5e1',
+              background: showFootprint ? '#fef3c7' : '#ffffff',
+              color: showFootprint ? '#92400e' : '#64748b',
+              cursor: 'pointer',
+            }}
+          >
+            Footprint
+          </button>
+          <button
+            type="button"
+            onClick={onToggleWaypoints}
+            style={{
+              fontSize: '10px',
+              padding: '4px 7px',
+              borderRadius: '4px',
+              border: '1px solid #cbd5e1',
+              background: showWaypoints ? '#dcfce7' : '#ffffff',
+              color: showWaypoints ? '#15803d' : '#64748b',
+              cursor: 'pointer',
+            }}
+          >
+            Waypoints
+          </button>
+        </div>
       </div>
-      <div className="map-stage">
+      <div className="map-stage" style={{ position: 'relative' }}>
         <MapCanvas
+          activeBaseLayer={activeBaseLayer}
+          showRegionalTiles={showRegionalTiles}
+          showFootprint={showFootprint}
+          showWaypoints={showWaypoints}
           routeA={routeAGeometry}
+          routeB={routeBGeometry}
           analysisResponse={analysis}
           isAnalyzing={isAnalyzing}
           analysisError={analysisError}
           onRouteDrawn={onRouteDrawn}
           onRouteClear={onRouteClear}
+          onWaypointSelect={onWaypointSelect}
           onCoordinateHover={setHoverCoords}
         />
       </div>
@@ -202,7 +378,7 @@ function MapContainer({
             {hoverCoords.lon >= 0 ? `${hoverCoords.lon.toFixed(4)}°E` : `${Math.abs(hoverCoords.lon).toFixed(4)}°W`}
           </span>
         ) : (
-          <span>Hover map for coordinates</span>
+          <span>Hover map for coordinates · Click & drag on map to draw route</span>
         )}
         <span>Mars 2000 Equirectangular (R=3,396,190m)</span>
       </div>
@@ -212,33 +388,53 @@ function MapContainer({
 
 function RouteComparison({
   analysis,
-  routeB = null,
+  routeBAnalysis,
   isLoading,
   error,
+  onSetAsRouteB,
 }: {
   analysis: RouteAnalysisResponse | null;
-  routeB?: RouteAnalysisResponse | null;
+  routeBAnalysis: RouteAnalysisResponse | null;
   isLoading: boolean;
   error: string | null;
+  onSetAsRouteB: () => void;
 }) {
   const routeStatus = error
     ? `Route A analysis unavailable: ${error}`
     : isLoading && !analysis
-      ? 'Loading Route A analysis.'
+      ? 'Loading Route A analysis...'
       : 'Route A analysis loaded.';
 
   return (
     <section className="panel comparison-panel" aria-labelledby="comparison-title">
-      <div className="panel-heading">
+      <div className="panel-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <span className="eyebrow">ROUTE ANALYSIS</span>
-          <h2 id="comparison-title">Route A vs Route B</h2>
+          <h2 id="comparison-title">Route A vs Route B Comparison</h2>
         </div>
+        {analysis && (
+          <button
+            type="button"
+            onClick={onSetAsRouteB}
+            style={{
+              padding: '4px 8px',
+              fontSize: '11px',
+              borderRadius: '4px',
+              border: '1px solid #d88a2d',
+              background: '#fff',
+              color: '#d88a2d',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            Pin Current as Route B
+          </button>
+        )}
       </div>
       <div className="comparison-cards">
         {[
           { label: 'Route A', route: analysis },
-          { label: 'Route B', route: routeB },
+          { label: 'Route B', route: routeBAnalysis },
         ].map(({ label, route }) => (
           <article className="comparison-route-card" key={label} aria-label={`${label} metrics`}>
             <h3>{label}</h3>
@@ -246,8 +442,8 @@ function RouteComparison({
               {label === 'Route A'
                 ? routeStatus
                 : route
-                  ? 'Route B analysis loaded.'
-                  : 'No distinct Route B has been selected. The dashboard has no route-selection flow yet.'}
+                  ? 'Route B analysis pinned.'
+                  : 'No distinct Route B pinned. Draw another route or select a preset, then pin as Route B.'}
             </p>
             <div className="comparison-metrics">
               {COMPARISON_METRICS.map((metric) => (
@@ -264,12 +460,12 @@ function RouteComparison({
       <div className="comparison-deltas" aria-label="Route metric differences">
         <h3>Differences <span>Δ = Route B − Route A</span></h3>
         <p className="comparison-note">
-          Direction is descriptive only; whether a higher or lower value is preferable depends on the mission.
+          Direction is descriptive only; whether a higher or lower value is preferable depends on mission criteria. Traversability outputs are advisory risk indicators.
         </p>
         <dl>
           {COMPARISON_METRICS.map((metric) => {
             const routeAValue = getMetricValue(analysis, metric.key);
-            const routeBValue = getMetricValue(routeB, metric.key);
+            const routeBValue = getMetricValue(routeBAnalysis, metric.key);
             const delta = routeAValue !== null && routeBValue !== null
               ? routeBValue - routeAValue
               : null;
@@ -296,28 +492,23 @@ interface TerrainProfileProps {
 }
 
 function TerrainProfile({ analysis, isLoading, error }: TerrainProfileProps) {
-  // Fix null elevation defect: safely ignore null/undefined elevations so Number(null) !== 0
-  const validProfile: ElevationChartPoint[] = (analysis?.elevation_profile ?? [])
-    .filter(
-      (point) =>
-        point.elevation_m !== null &&
-        point.elevation_m !== undefined &&
-        point.distance_m !== null &&
-        point.distance_m !== undefined &&
-        Number.isFinite(Number(point.elevation_m)) &&
-        Number.isFinite(Number(point.distance_m)) &&
-        Number(point.distance_m) >= 0,
-    )
-    .map((point) => ({
-      distance: Number(point.distance_m),
-      elevation: Number(point.elevation_m),
-    }));
+  // Safe filtering of null elevation values
+  const validProfile = (analysis?.elevation_profile ?? []).filter(
+    (point) =>
+      point.elevation_m !== null &&
+      point.elevation_m !== undefined &&
+      point.distance_m !== null &&
+      point.distance_m !== undefined &&
+      Number.isFinite(Number(point.elevation_m)) &&
+      Number.isFinite(Number(point.distance_m)) &&
+      Number(point.distance_m) >= 0,
+  );
 
   const maxElevation = validProfile.length
-    ? Math.max(...validProfile.map((point) => point.elevation))
+    ? Math.max(...validProfile.map((point) => Number(point.elevation_m)))
     : null;
   const minElevation = validProfile.length
-    ? Math.min(...validProfile.map((point) => point.elevation))
+    ? Math.min(...validProfile.map((point) => Number(point.elevation_m)))
     : null;
 
   const isMock = Boolean(
@@ -327,8 +518,34 @@ function TerrainProfile({ analysis, isLoading, error }: TerrainProfileProps) {
     analysis.dtm_source.toLowerCase().includes('stub') ||
     analysis.dtm_source.toLowerCase().includes('synthetic')
   );
-  const badgeVariant = error ? 'error' : isLoading ? 'warning' : isMock ? 'neutral' : 'success';
-  const badgeText = error ? 'DATA ERROR' : isLoading ? 'LOADING DATA' : isMock ? 'DEVELOPMENT / MOCK' : 'LIVE DTM DATA';
+
+  const coverageStatus = analysis?.coverage_status ?? 'complete';
+  const hasCoverageGap = coverageStatus === 'partial_gap';
+  const isOutOfBounds = coverageStatus === 'out_of_bounds';
+
+  const badgeVariant = error
+    ? 'error'
+    : isLoading
+      ? 'warning'
+      : isOutOfBounds
+        ? 'error'
+        : hasCoverageGap
+          ? 'warning'
+          : isMock
+            ? 'neutral'
+            : 'success';
+
+  const badgeText = error
+    ? 'DATA ERROR'
+    : isLoading
+      ? 'LOADING DATA'
+      : isOutOfBounds
+        ? 'OUT OF COVERAGE'
+        : hasCoverageGap
+          ? 'PARTIAL DTM GAP'
+          : isMock
+            ? 'DEVELOPMENT / MOCK'
+            : 'LIVE DTM DATA';
 
   return (
     <div className="terrain-analysis-stack">
@@ -338,88 +555,194 @@ function TerrainProfile({ analysis, isLoading, error }: TerrainProfileProps) {
             <span className="eyebrow">ELEVATION ANALYSIS</span>
             <h2 id="terrain-title">Terrain Elevation Profile</h2>
           </div>
-          <StatusBadge className="panel-tag" variant={badgeVariant}>
-            {badgeText}
-          </StatusBadge>
+          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+            {hasCoverageGap && (
+              <StatusBadge variant="warning">PARTIAL GAP</StatusBadge>
+            )}
+            <StatusBadge className="panel-tag" variant={badgeVariant}>
+              {badgeText}
+            </StatusBadge>
+          </div>
         </div>
         <div className="chart-layout">
-          <span className="axis-label axis-label-y">Elevation</span>
+          <span className="axis-label axis-label-y">Elevation (m)</span>
           <div className="chart-plot" role="img" aria-label="Terrain elevation profile chart">
             <ElevationChart data={analysis?.elevation_profile ?? []} isLoading={isLoading} error={error} />
-            <span className="axis-label axis-label-x">Distance</span>
+            <span className="axis-label axis-label-x">Distance along traverse</span>
           </div>
         </div>
         <div className="terrain-metrics" aria-label="Terrain metrics">
-          <MetricCard title="Gain" value={analysis ? `${analysis.total_gain_m.toFixed(1)} m` : 'Awaiting data'} />
-          <MetricCard title="Loss" value={analysis ? `${analysis.total_loss_m.toFixed(1)} m` : 'Awaiting data'} />
-          <MetricCard title="Maximum elevation" value={maxElevation !== null ? `${maxElevation.toFixed(1)} m` : 'Awaiting data'} />
-          <MetricCard title="Minimum elevation" value={minElevation !== null ? `${minElevation.toFixed(1)} m` : 'Awaiting data'} />
+          <MetricCard title="Elevation Gain" value={analysis ? `${analysis.total_gain_m.toFixed(1)} m` : 'Awaiting data'} />
+          <MetricCard title="Elevation Loss" value={analysis ? `${analysis.total_loss_m.toFixed(1)} m` : 'Awaiting data'} />
+          <MetricCard title="Max Elevation" value={maxElevation !== null ? `${maxElevation.toFixed(1)} m` : 'Awaiting data'} />
+          <MetricCard title="Min Elevation" value={minElevation !== null ? `${minElevation.toFixed(1)} m` : 'Awaiting data'} />
         </div>
       </section>
-      <RouteComparison analysis={analysis} isLoading={isLoading} error={error} />
     </div>
   );
 }
 
 function RouteSummary({ analysis }: { analysis: RouteAnalysisResponse | null }) {
   const nearbyPois = analysis?.nearby_pois ?? [];
+  const limitations = analysis?.limitations ?? [];
 
   return (
     <section className="panel summary-panel" aria-labelledby="summary-title">
       <div className="panel-heading">
         <div>
           <span className="eyebrow">MISSION ANALYSIS</span>
-          <h2 id="summary-title">Route summary</h2>
+          <h2 id="summary-title">Route summary & science transparency</h2>
         </div>
       </div>
+
       <div className="summary-section">
         <h3>Route metrics</h3>
         {analysis ? (
           <div className="summary-metrics-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
             <MetricCard title="Total distance" value={`${(analysis.total_distance_m / 1000).toFixed(2)} km`} />
-            <MetricCard title="Coverage status" value={analysis.coverage_status.toUpperCase()} />
-            <MetricCard title="DTM source" value={analysis.dtm_source || 'HiRISE / MOLA'} />
-            <MetricCard title="Max slope" value={`${analysis.max_slope_deg.toFixed(1)}°`} />
+            <MetricCard
+              title="Coverage status"
+              value={
+                analysis.coverage_status === 'complete'
+                  ? 'Complete (100% Valid)'
+                  : analysis.coverage_status === 'partial_gap'
+                    ? 'Partial Gap (NoData crossing)'
+                    : 'Out of Bounds'
+              }
+            />
+            <MetricCard
+              title="DTM ground resolution"
+              value={analysis.dtm_posting_m ? `${analysis.dtm_posting_m.toFixed(2)} m/px` : 'N/A (Synthetic)'}
+            />
+            <MetricCard
+              title="Max slope (baseline)"
+              value={`${analysis.max_slope_deg.toFixed(1)}° (${analysis.slope_window_m ?? 50}m window)`}
+            />
           </div>
         ) : (
           <EmptyState
             title="No route metrics yet"
-            description="Metrics will be available when a validated route is loaded."
+            description="Draw a route on the Mars map or choose a preset corridor to calculate terrain metrics."
           />
         )}
       </div>
+
       <div className="summary-section">
-        <h3>Scientific points of interest</h3>
+        <h3>Perseverance Rover Waypoints (Sols 383–387)</h3>
         {nearbyPois.length > 0 ? (
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '6px' }}>
             {nearbyPois.map((poi: any, idx: number) => (
-              <li key={poi.id || idx} style={{ padding: '8px', background: 'rgba(15, 23, 42, 0.6)', borderRadius: '6px', fontSize: '11px' }}>
-                <strong>{poi.name || poi.id}</strong> (Offset: {poi.cross_track_m?.toFixed(1) ?? 0}m)
+              <li
+                key={poi.id || idx}
+                style={{
+                  padding: '8px 10px',
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '6px',
+                  fontSize: '11px',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <strong>{poi.name || poi.id}</strong>
+                  <span style={{ color: '#0369a1', fontSize: '10px' }}>
+                    Offset: {poi.cross_track_m?.toFixed(1) ?? 0}m
+                  </span>
+                </div>
+                {poi.significance && (
+                  <p style={{ margin: '3px 0 0', color: '#64748b', fontSize: '10px' }}>{poi.significance}</p>
+                )}
               </li>
             ))}
           </ul>
         ) : (
-          <EmptyState
-            title="No sites to display"
-            description="Verified site data will appear here when a study region is selected."
-          />
+          <div style={{ padding: '10px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
+            <p style={{ margin: 0, fontSize: '11px', color: '#475569', lineHeight: 1.5 }}>
+              {GEOLOGICAL_EMPTY_STATE_MESSAGE}
+            </p>
+          </div>
         )}
       </div>
+
+      {limitations.length > 0 && (
+        <div className="summary-section">
+          <h3>Scientific limitations & data provenance</h3>
+          <ul
+            style={{
+              listStyle: 'none',
+              padding: 0,
+              margin: 0,
+              display: 'grid',
+              gap: '6px',
+              fontSize: '10.5px',
+              color: '#475569',
+            }}
+          >
+            {limitations.map((lim, idx) => (
+              <li
+                key={idx}
+                style={{
+                  padding: '6px 8px',
+                  background: '#fefce8',
+                  border: '1px solid #fef08a',
+                  borderRadius: '4px',
+                  lineHeight: 1.4,
+                }}
+              >
+                {lim}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </section>
   );
 }
 
 function Dashboard() {
-  const [drawnRoute, setDrawnRoute] = useState<GeodeticCoordinate[] | null>(SAMPLE_ROUTE);
+  const [activePreset, setActivePreset] = useState<string>('jezeroFloor');
+  const [drawnRoute, setDrawnRoute] = useState<GeodeticCoordinate[] | null>(PRESET_CORRIDORS.jezeroFloor.coords);
+  const [routeB, setRouteB] = useState<GeodeticCoordinate[] | null>(null);
   const [analysis, setAnalysis] = useState<RouteAnalysisResponse | null>(null);
+  const [routeBAnalysis, setRouteBAnalysis] = useState<RouteAnalysisResponse | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(true);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [backendMode, setBackendMode] = useState<string | null>(null);
 
-  const runAnalysis = useCallback(async (coords: GeodeticCoordinate[]) => {
+  // Layer visibility state
+  const [activeBaseLayer, setActiveBaseLayer] = useState<BaseLayerId>('mola-colorhillshade');
+  const [showRegionalTiles, setShowRegionalTiles] = useState<boolean>(true);
+  const [showFootprint, setShowFootprint] = useState<boolean>(true);
+  const [showWaypoints, setShowWaypoints] = useState<boolean>(true);
+
+  // Fetch /api/health to confirm backend operational mode
+  useEffect(() => {
+    let isMounted = true;
+    const checkHealth = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/health`);
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted) {
+            setBackendMode(data.mode ?? 'development/mock');
+          }
+        }
+      } catch {
+        if (isMounted) {
+          setBackendMode('offline/mock');
+        }
+      }
+    };
+    void checkHealth();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const runAnalysis = useCallback(async (coords: GeodeticCoordinate[]): Promise<RouteAnalysisResponse | null> => {
     if (!coords || coords.length < 2) {
       setAnalysis(null);
       setIsAnalyzing(false);
-      return;
+      return null;
     }
 
     setIsAnalyzing(true);
@@ -454,25 +777,27 @@ function Dashboard() {
 
       const payload = (await response.json()) as RouteAnalysisResponse;
       setAnalysis(payload);
+      return payload;
     } catch (requestError) {
-      setAnalysisError(
-        requestError instanceof Error
-          ? requestError.message
-          : 'Unable to load elevation data from the terrain service.',
-      );
+      const errorMsg = requestError instanceof Error
+        ? requestError.message
+        : 'Unable to load elevation data from the terrain service.';
+      setAnalysisError(errorMsg);
+      return null;
     } finally {
       setIsAnalyzing(false);
     }
   }, []);
 
-  // Initial analysis on mount
+  // Initial analysis on mount with the default preset corridor
   useEffect(() => {
-    void runAnalysis(drawnRoute ?? SAMPLE_ROUTE);
+    void runAnalysis(PRESET_CORRIDORS.jezeroFloor.coords);
   }, [runAnalysis]);
 
   // Handle route drawn callback from MapCanvas
   const handleRouteDrawn = useCallback(
     (coords: GeodeticCoordinate[]) => {
+      setActivePreset('');
       setDrawnRoute(coords);
       void runAnalysis(coords);
     },
@@ -481,22 +806,57 @@ function Dashboard() {
 
   // Handle route clear callback from MapCanvas
   const handleRouteClear = useCallback(() => {
+    setActivePreset('');
     setDrawnRoute(null);
     setAnalysis(null);
     setAnalysisError(null);
   }, []);
 
+  // Preset selector
+  const handleSelectPreset = useCallback(
+    (presetKey: string) => {
+      const preset = PRESET_CORRIDORS[presetKey];
+      if (!preset) return;
+      setActivePreset(presetKey);
+      setDrawnRoute(preset.coords);
+      void runAnalysis(preset.coords);
+    },
+    [runAnalysis],
+  );
+
+  // Pin current route as Route B for comparison
+  const handleSetAsRouteB = useCallback(() => {
+    if (drawnRoute && analysis) {
+      setRouteB(drawnRoute);
+      setRouteBAnalysis(analysis);
+    }
+  }, [drawnRoute, analysis]);
+
   return (
     <div className="dashboard-layout" id="dashboard">
       <Sidebar />
       <main className="dashboard-main">
-        <TopToolbar />
+        <TopToolbar
+          backendMode={backendMode}
+          activePreset={activePreset}
+          onSelectPreset={handleSelectPreset}
+          onClearRoute={handleRouteClear}
+        />
         <div className="dashboard-content">
           <MapContainer
             drawnRoute={drawnRoute}
+            routeB={routeB}
             analysis={analysis}
             isAnalyzing={isAnalyzing}
             analysisError={analysisError}
+            activeBaseLayer={activeBaseLayer}
+            showRegionalTiles={showRegionalTiles}
+            showFootprint={showFootprint}
+            showWaypoints={showWaypoints}
+            onChangeBaseLayer={setActiveBaseLayer}
+            onToggleRegionalTiles={() => setShowRegionalTiles((prev) => !prev)}
+            onToggleFootprint={() => setShowFootprint((prev) => !prev)}
+            onToggleWaypoints={() => setShowWaypoints((prev) => !prev)}
             onRouteDrawn={handleRouteDrawn}
             onRouteClear={handleRouteClear}
           />
@@ -505,6 +865,13 @@ function Dashboard() {
               analysis={analysis}
               isLoading={isAnalyzing}
               error={analysisError}
+            />
+            <RouteComparison
+              analysis={analysis}
+              routeBAnalysis={routeBAnalysis}
+              isLoading={isAnalyzing}
+              error={analysisError}
+              onSetAsRouteB={handleSetAsRouteB}
             />
             <RouteSummary analysis={analysis} />
           </div>
