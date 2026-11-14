@@ -231,15 +231,37 @@ def run_full_validation() -> bool:
         for err in poi_errors:
             print(f"      [X] {err}")
     else:
-        print("    - Structural Schema: PASS (Valid planetary coordinates in [-180, 180], [-90, 90])")
-        print("    - Citation Metadata: PASS (Sourced MMGIS telemetry; terms_of_use not substituted)")
-        print("    - Policy Status:     PASS (Unverified licensing status strictly preserved as null)")
+        # Load catalogue points to report exact production and citation metrics
+        try:
+            raw_pts = json.loads(POINTS_FILE.read_text(encoding="utf-8"))
+            pts = _extract_points(raw_pts, POINTS_FILE)
+        except Exception:
+            pts = []
+        prod_count = len(pts)
+        prod_cit_count = sum(1 for pt in pts if resolve_citation(pt))
+
+        # Check synthetic fixtures
+        synth_fixture_path = REPO_ROOT / "tests" / "fixtures" / "synthetic_science_points.json"
+        synth_count = 0
+        if synth_fixture_path.is_file():
+            try:
+                synth_data = json.loads(synth_fixture_path.read_text(encoding="utf-8"))
+                synth_count = len(synth_data if isinstance(synth_data, list) else synth_data.get("points", []))
+            except Exception:
+                synth_count = 0
+
+        print("    - Structural Schema:     PASS (Valid planetary coordinates in [-180, 180], [-90, 90])")
+        print(f"    - Production Catalogue:  {prod_count} POIs (0 operational POIs; MMGIS operational telemetry quarantined)")
+        print(f"    - Production Citations:  {prod_cit_count} active citations")
+        print(f"    - Synthetic Fixtures:    {synth_count} benchmark POIs (tests/fixtures/synthetic_science_points.json)")
+        print("    - Quarantined Sources:   QUARANTINED (MMGIS operational telemetry excluded pending rights confirmation)")
+        print("    - Policy Status:         PRESERVED AS UNVERIFIED PENDING PRODUCT-LEVEL RIGHTS (null terms_of_use)")
 
     print("\n" + "=" * 65)
     total_errors = len(layer_errors) + len(poi_errors)
     if total_errors == 0:
-        print("  RESULT: 100% QUALITY PASS - Structural & Citation Verified")
-        print("  NOTICE: Licensing policies remain preserved as unverified.")
+        print("  RESULT: 100% QUALITY PASS - Structural Schema Verified")
+        print("  NOTICE: Licensing policies preserved as unverified pending product-level rights.")
         print("=" * 65)
         return True
     else:
