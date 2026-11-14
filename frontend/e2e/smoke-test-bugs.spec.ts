@@ -177,7 +177,7 @@ test.describe('Production Smoke Test Defect Verifications (BUG-008 to BUG-011)',
     // Locate the toolbar toggle buttons
     const hiRiseBtn = page.getByRole('button', { name: 'HiRISE DTM' });
     const footprintBtn = page.getByRole('button', { name: 'Footprint' });
-    const waypointsBtn = page.getByRole('button', { name: 'Waypoints' });
+    const _waypointsBtn = page.getByRole('button', { name: 'Waypoints' });
 
     // Locate the in-canvas checkboxes
     const footprintCheckbox = page.locator('label:has-text("HiRISE DTM Footprint") input[type="checkbox"]');
