@@ -6,6 +6,7 @@ import {
   type RouteAnalysisData,
   type BaseLayerId,
   type RoverWaypoint,
+  PERSEVERANCE_REFERENCE_WAYPOINTS,
   GEOLOGICAL_EMPTY_STATE_MESSAGE,
 } from '../map';
 import { EmptyState, MetricCard, StatusBadge } from '../../components';
@@ -120,7 +121,7 @@ const NAVIGATION_TARGETS: Record<string, string> = {
   'Explore Map': 'map-section',
   'Route Planner': 'map-section',
   'Mission Layers': 'map-section',
-  'Scientific Sites': 'summary-section',
+  'Scientific Sites': 'scientific-sites-section',
   'Terrain Profile': 'terrain-section',
   'Route Comparison': 'comparison-section',
   'Data Sources': 'provenance-section',
@@ -182,6 +183,7 @@ interface TopToolbarProps {
   activePreset: string;
   onSelectPreset: (presetKey: string) => void;
   onClearRoute: () => void;
+  onResetView?: () => void;
 }
 
 function TopToolbar({
@@ -189,6 +191,7 @@ function TopToolbar({
   activePreset,
   onSelectPreset,
   onClearRoute,
+  onResetView,
 }: TopToolbarProps) {
   const isLive = backendMode === 'production/live' || backendMode === 'live';
   const isOffline = backendMode === 'offline/mock' || backendMode === 'offline';
@@ -262,10 +265,15 @@ function TopToolbar({
             Clear / Draw Freehand
           </button>
         </div>
-        <div className="region-indicator">
-          <span className="region-label">STUDY REGION</span>
+        <button
+          type="button"
+          onClick={onResetView}
+          className="region-indicator"
+          title="Reset map view to Jezero Crater AOI"
+        >
+          <span className="region-label">STUDY REGION ↺</span>
           <strong>Jezero Crater AOI</strong>
-        </div>
+        </button>
       </div>
     </header>
   );
@@ -281,10 +289,12 @@ interface MapContainerProps {
   showRegionalTiles: boolean;
   showFootprint: boolean;
   showWaypoints: boolean;
+  focusWaypoint?: GeodeticCoordinate | null;
+  resetViewTrigger?: number;
   onChangeBaseLayer: (layer: BaseLayerId) => void;
-  onToggleRegionalTiles: () => void;
-  onToggleFootprint: () => void;
-  onToggleWaypoints: () => void;
+  onToggleRegionalTiles: (val?: boolean) => void;
+  onToggleFootprint: (val?: boolean) => void;
+  onToggleWaypoints: (val?: boolean) => void;
   onRouteDrawn: (coords: GeodeticCoordinate[]) => void;
   onRouteClear: () => void;
   onWaypointSelect?: (waypoint: RoverWaypoint) => void;
@@ -300,6 +310,8 @@ function MapContainer({
   showRegionalTiles,
   showFootprint,
   showWaypoints,
+  focusWaypoint,
+  resetViewTrigger,
   onChangeBaseLayer,
   onToggleRegionalTiles,
   onToggleFootprint,
@@ -358,7 +370,7 @@ function MapContainer({
           </label>
           <button
             type="button"
-            onClick={onToggleRegionalTiles}
+            onClick={() => onToggleRegionalTiles()}
             style={{
               fontSize: '10px',
               padding: '4px 7px',
@@ -373,7 +385,7 @@ function MapContainer({
           </button>
           <button
             type="button"
-            onClick={onToggleFootprint}
+            onClick={() => onToggleFootprint()}
             style={{
               fontSize: '10px',
               padding: '4px 7px',
@@ -388,7 +400,7 @@ function MapContainer({
           </button>
           <button
             type="button"
-            onClick={onToggleWaypoints}
+            onClick={() => onToggleWaypoints()}
             style={{
               fontSize: '10px',
               padding: '4px 7px',
@@ -420,6 +432,8 @@ function MapContainer({
           analysisResponse={analysis}
           isAnalyzing={isAnalyzing}
           analysisError={analysisError}
+          focusWaypoint={focusWaypoint}
+          resetViewTrigger={resetViewTrigger}
           onRouteDrawn={onRouteDrawn}
           onRouteClear={onRouteClear}
           onWaypointSelect={onWaypointSelect}
@@ -452,6 +466,7 @@ function RouteComparison({
   error,
   onSetAsRouteB,
   onClearRouteB,
+  onLoadPresetAsRouteB,
 }: {
   analysis: RouteAnalysisResponse | null;
   routeBAnalysis: RouteAnalysisResponse | null;
@@ -459,6 +474,7 @@ function RouteComparison({
   error: string | null;
   onSetAsRouteB: () => void;
   onClearRouteB?: () => void;
+  onLoadPresetAsRouteB?: (presetKey: string) => void;
 }) {
   const routeStatus = error
     ? `Route A analysis unavailable: ${error}`
@@ -537,6 +553,46 @@ function RouteComparison({
                 />
               ))}
             </div>
+            {label === 'Route B' && !route && (
+              <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {onLoadPresetAsRouteB && (
+                  <button
+                    type="button"
+                    onClick={() => onLoadPresetAsRouteB('jezeroDelta')}
+                    style={{
+                      padding: '5px 10px',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      borderRadius: '4px',
+                      border: '1px solid #d88a2d',
+                      background: '#fef3c7',
+                      color: '#92400e',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    ⚡ Compare with Delta Scarp
+                  </button>
+                )}
+                {analysis && (
+                  <button
+                    type="button"
+                    onClick={onSetAsRouteB}
+                    style={{
+                      padding: '5px 10px',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      borderRadius: '4px',
+                      border: '1px solid #cbd5e1',
+                      background: '#ffffff',
+                      color: '#475569',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    📌 Pin Route A as Route B
+                  </button>
+                )}
+              </div>
+            )}
           </article>
         ))}
       </div>
@@ -672,9 +728,11 @@ function TerrainProfile({ analysis, isLoading, error }: TerrainProfileProps) {
 function RouteSummary({
   analysis,
   onSelectPreset,
+  onFocusWaypoint,
 }: {
   analysis: RouteAnalysisResponse | null;
   onSelectPreset?: (presetKey: string) => void;
+  onFocusWaypoint?: (coords: GeodeticCoordinate) => void;
 }) {
   const nearbyPois = analysis?.nearby_pois ?? [];
   const limitations = analysis?.limitations ?? [];
@@ -737,8 +795,56 @@ function RouteSummary({
         )}
       </div>
 
-      <div className="summary-section">
-        <h3>Perseverance Rover Waypoints (Sols 383–387)</h3>
+      <div className="summary-section" id="scientific-sites-section">
+        <h3>Perseverance Rover Waypoints & Ground Anchors</h3>
+        {PERSEVERANCE_REFERENCE_WAYPOINTS.length > 0 && (
+          <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 10px 0', display: 'grid', gap: '8px' }}>
+            {PERSEVERANCE_REFERENCE_WAYPOINTS.map((wp) => (
+              <li
+                key={wp.name}
+                style={{
+                  padding: '8px 12px',
+                  background: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '6px',
+                  fontSize: '11px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: 600, color: '#0f172a' }}>{wp.name}</div>
+                  <div style={{ color: '#64748b', fontSize: '10px' }}>
+                    {wp.lon.toFixed(5)}° E, {wp.lat.toFixed(5)}° N · MOLA Datum: {wp.elev_geoid_m} m
+                  </div>
+                  {wp.note && (
+                    <div style={{ color: '#0369a1', fontSize: '9.5px', marginTop: '2px' }}>{wp.note}</div>
+                  )}
+                </div>
+                {onFocusWaypoint && (
+                  <button
+                    type="button"
+                    onClick={() => onFocusWaypoint({ lon: wp.lon, lat: wp.lat })}
+                    style={{
+                      padding: '4px 8px',
+                      fontSize: '10px',
+                      fontWeight: 600,
+                      borderRadius: '4px',
+                      border: '1px solid #0284c7',
+                      background: '#f0f9ff',
+                      color: '#0284c7',
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Focus on Map
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
         {nearbyPois.length > 0 ? (
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '6px' }}>
             {nearbyPois.map((poi: any, idx: number) => (
@@ -773,14 +879,14 @@ function RouteSummary({
         )}
       </div>
 
-      {limitations.length > 0 && (
-        <div className="summary-section" id="provenance-section">
-          <h3>Scientific limitations & data provenance</h3>
+      <div className="summary-section" id="provenance-section">
+        <h3>Scientific limitations & data provenance</h3>
+        {limitations.length > 0 ? (
           <ul
             style={{
               listStyle: 'none',
               padding: 0,
-              margin: 0,
+              margin: '0 0 10px 0',
               display: 'grid',
               gap: '6px',
               fontSize: '10.5px',
@@ -802,8 +908,21 @@ function RouteSummary({
               </li>
             ))}
           </ul>
+        ) : (
+          <p style={{ fontSize: '11px', color: '#64748b', margin: '0 0 10px 0' }}>
+            Standard analytical constraints apply. Elevation profiles depend on the active terrain data source and post spacing.
+          </p>
+        )}
+        <div style={{ padding: '8px 12px', background: '#f1f5f9', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '10.5px', color: '#334155' }}>
+          <div style={{ fontWeight: 600, marginBottom: '4px' }}>Primary Mission & Instrument Citations:</div>
+          <ul style={{ margin: 0, paddingLeft: '16px', lineHeight: 1.5 }}>
+            <li><strong>HiRISE Stereo DTM:</strong> NASA/JPL/University of Arizona Jezero Crater stereo elevation model (1.0 m/px post spacing).</li>
+            <li><strong>MOLA MEGDR:</strong> NASA Goddard Space Flight Center IAU Mars2000 Sphere (R=3,396,190m) geoid reference datum.</li>
+            <li><strong>Basemap WMTS:</strong> NASA Solar System Treks (MOLA Color Hillshade, CTX Visible Mosaic, Viking MDIM 2.1).</li>
+            <li><strong>Rover Reference:</strong> NASA/JPL-Caltech Mars 2020 Perseverance Rover ground-truth anchors.</li>
+          </ul>
         </div>
-      )}
+      </div>
     </section>
   );
 }
@@ -817,6 +936,10 @@ function Dashboard() {
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(true);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [backendMode, setBackendMode] = useState<string | null>(null);
+
+  // Focus & View Reset State
+  const [focusWaypoint, setFocusWaypoint] = useState<GeodeticCoordinate | null>(null);
+  const [resetViewTrigger, setResetViewTrigger] = useState<number>(0);
 
   // Layer visibility state
   const [activeBaseLayer, setActiveBaseLayer] = useState<BaseLayerId>('mola-colorhillshade');
@@ -948,6 +1071,53 @@ function Dashboard() {
     setRouteBAnalysis(null);
   }, []);
 
+  // Reset map camera view to Jezero Crater AOI
+  const handleResetView = useCallback(() => {
+    setResetViewTrigger((prev) => prev + 1);
+  }, []);
+
+  // Quick load preset as Route B for instant comparison
+  const handleLoadPresetAsRouteB = useCallback(
+    async (presetKey: string) => {
+      const preset = PRESET_CORRIDORS[presetKey];
+      if (!preset) return;
+      setRouteB(preset.coords);
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/routes/analyze`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            route_id: `route-b-${presetKey}`,
+            coordinates: preset.coords,
+            buffer_distance_m: 250,
+          }),
+        });
+        if (response.ok) {
+          const payload = (await response.json()) as RouteAnalysisResponse;
+          setRouteBAnalysis(payload);
+        }
+      } catch (err) {
+        console.error('Failed to analyze comparison Route B:', err);
+      }
+    },
+    [],
+  );
+
+  // Safe layer toggles ensuring synchronization across dual control surfaces
+  const handleToggleRegionalTiles = useCallback((val?: boolean) => {
+    setShowRegionalTiles((prev) => (typeof val === 'boolean' ? val : !prev));
+  }, []);
+
+  const handleToggleFootprint = useCallback((val?: boolean) => {
+    setShowFootprint((prev) => (typeof val === 'boolean' ? val : !prev));
+  }, []);
+
+  const handleToggleWaypoints = useCallback((val?: boolean) => {
+    setShowWaypoints((prev) => (typeof val === 'boolean' ? val : !prev));
+  }, []);
+
   // Active navigation tracking and smooth scrolling
   const [activeNav, setActiveNav] = useState<string>('Explore Map');
 
@@ -981,6 +1151,7 @@ function Dashboard() {
           activePreset={activePreset}
           onSelectPreset={handleSelectPreset}
           onClearRoute={handleRouteClear}
+          onResetView={handleResetView}
         />
         {/* Transparent Operational Mode Banner */}
         {isMockMode ? (
@@ -1060,10 +1231,12 @@ function Dashboard() {
             showRegionalTiles={showRegionalTiles}
             showFootprint={showFootprint}
             showWaypoints={showWaypoints}
+            focusWaypoint={focusWaypoint}
+            resetViewTrigger={resetViewTrigger}
             onChangeBaseLayer={setActiveBaseLayer}
-            onToggleRegionalTiles={() => setShowRegionalTiles((prev) => !prev)}
-            onToggleFootprint={() => setShowFootprint((prev) => !prev)}
-            onToggleWaypoints={() => setShowWaypoints((prev) => !prev)}
+            onToggleRegionalTiles={handleToggleRegionalTiles}
+            onToggleFootprint={handleToggleFootprint}
+            onToggleWaypoints={handleToggleWaypoints}
             onRouteDrawn={handleRouteDrawn}
             onRouteClear={handleRouteClear}
           />
@@ -1080,10 +1253,12 @@ function Dashboard() {
               error={analysisError}
               onSetAsRouteB={handleSetAsRouteB}
               onClearRouteB={handleClearRouteB}
+              onLoadPresetAsRouteB={handleLoadPresetAsRouteB}
             />
             <RouteSummary
               analysis={analysis}
               onSelectPreset={handleSelectPreset}
+              onFocusWaypoint={setFocusWaypoint}
             />
           </div>
         </div>
