@@ -19,7 +19,7 @@ import { get as getProjection, type Projection } from 'ol/proj';
 import type { Extent } from 'ol/extent';
 import type { GeodeticCoordinate } from './types';
 
-export const MARS_RADIUS = 3396190.0;
+export const MARS_RADIUS = 3396190;
 export const marsRadius = MARS_RADIUS;
 
 export const MARS_HALF_WIDTH = Math.PI * MARS_RADIUS; // 10,669,445.5540916 m

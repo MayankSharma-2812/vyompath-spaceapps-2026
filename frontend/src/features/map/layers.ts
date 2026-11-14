@@ -16,6 +16,7 @@ import VectorSource from 'ol/source/Vector';
 import Feature from 'ol/Feature';
 import Polygon from 'ol/geom/Polygon';
 import Point from 'ol/geom/Point';
+import ImageTile from 'ol/ImageTile';
 import { Style, Stroke, Fill, Circle as CircleStyle, Text } from 'ol/style';
 import type { TileCoord } from 'ol/tilecoord';
 
@@ -115,6 +116,15 @@ export function createRegionalTileLayer(): TileLayer<XYZ> {
 
       // Client request URL scheme from integration contract
       return `/tiles/jezero_aoi_v2/ortho/${z}/${x}/${y}.png`;
+    },
+    tileLoadFunction: (tile, src) => {
+      if (tile instanceof ImageTile) {
+        const image = tile.getImage() as HTMLImageElement;
+        image.onerror = () => {
+          image.src = EMPTY_TILE_DATA_URI;
+        };
+        image.src = src;
+      }
     },
   });
 

@@ -58,6 +58,18 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<Map | null>(null);
 
+  // Callback refs to prevent stale closures in mount-only useEffect listeners
+  const onCoordinateHoverRef = useRef(onCoordinateHover);
+  const onWaypointSelectRef = useRef(onWaypointSelect);
+
+  useEffect(() => {
+    onCoordinateHoverRef.current = onCoordinateHover;
+  }, [onCoordinateHover]);
+
+  useEffect(() => {
+    onWaypointSelectRef.current = onWaypointSelect;
+  }, [onWaypointSelect]);
+
   // Layer references
   const baseLayersRef = useRef<Record<BaseLayerId, BaseLayer | null>>({
     'mola-colorhillshade': null,
@@ -154,8 +166,8 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
       const coords = evt.coordinate as Coordinate;
       const geodetic = toGeodetic([coords[0], coords[1]]);
       setCursorCoords(geodetic);
-      if (onCoordinateHover) {
-        onCoordinateHover(geodetic);
+      if (onCoordinateHoverRef.current) {
+        onCoordinateHoverRef.current(geodetic);
       }
     });
 
@@ -173,8 +185,8 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
 
       if (clickedWp) {
         setSelectedWaypoint(clickedWp);
-        if (onWaypointSelect) {
-          onWaypointSelect(clickedWp);
+        if (onWaypointSelectRef.current) {
+          onWaypointSelectRef.current(clickedWp);
         }
       } else {
         setSelectedWaypoint(null);
@@ -214,12 +226,14 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
   }, [isWaypointsVisible]);
 
   return (
-    <div className={`relative w-full h-full min-h-[500px] bg-slate-950 overflow-hidden select-none font-sans text-slate-100 ${className}`}>
+    <div
+      className={`mars-map-canvas relative w-full h-full min-h-[365px] bg-slate-950 overflow-hidden select-none font-sans text-slate-100 ${className}`}
+      data-testid="mars-map-canvas"
+    >
       {/* Map Viewport Container */}
       <div
         ref={mapElementRef}
         className="w-full h-full cursor-crosshair"
-        data-testid="mars-map-canvas"
       />
 
       {/* Top Floating Controls: Basemap & Layer Switchers */}
