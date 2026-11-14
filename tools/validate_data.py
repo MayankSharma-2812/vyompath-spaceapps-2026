@@ -243,7 +243,9 @@ def run_full_validation() -> bool:
         # Check synthetic fixtures
         synth_fixture_path = REPO_ROOT / "tests" / "fixtures" / "synthetic_science_points.json"
         synth_count = 0
+        synth_errors = []
         if synth_fixture_path.is_file():
+            synth_errors = validate_science_points(synth_fixture_path, allow_empty=False)
             try:
                 synth_data = json.loads(synth_fixture_path.read_text(encoding="utf-8"))
                 synth_count = len(synth_data if isinstance(synth_data, list) else synth_data.get("points", []))
@@ -253,7 +255,10 @@ def run_full_validation() -> bool:
         print("    - Structural Schema:     PASS (Valid planetary coordinates in [-180, 180], [-90, 90])")
         print(f"    - Production Catalogue:  {prod_count} POIs (0 operational POIs; MMGIS operational telemetry quarantined)")
         print(f"    - Production Citations:  {prod_cit_count} active citations")
-        print(f"    - Synthetic Fixtures:    {synth_count} benchmark POIs (tests/fixtures/synthetic_science_points.json)")
+        if synth_count > 0 and not synth_errors:
+            print(f"    - Synthetic Fixtures:    PASS ({synth_count} benchmark POIs verified in tests/fixtures/synthetic_science_points.json)")
+        else:
+            print(f"    - Synthetic Fixtures:    {synth_count} benchmark POIs (tests/fixtures/synthetic_science_points.json)")
         print("    - Quarantined Sources:   QUARANTINED (MMGIS operational telemetry excluded pending rights confirmation)")
         print("    - Policy Status:         PRESERVED AS UNVERIFIED PENDING PRODUCT-LEVEL RIGHTS (null terms_of_use)")
 

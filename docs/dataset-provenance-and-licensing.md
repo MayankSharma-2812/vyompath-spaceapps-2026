@@ -149,9 +149,10 @@ Quarantined historical telemetry records evaluated against the canonical valid-d
 
 ### 4.6 Synthetic Test Architecture
 To preserve 100% automated regression coverage without redistributing unverified data:
-- `tests/fixtures/golden_pois.json` uses independently calculated synthetic coordinates (`SYNTH-POI-001`, `SYNTH-POI-002`).
-- `tests/fixtures/tile_indices.json` benchmark points are generalized to synthetic grid identifiers (`SYNTH-GRID-POINT-01` through `05`).
-- `tests/fixtures/validation/unit_test_anchors.json` uses synthetic geodetic anchors (`SYNTH-GEODETIC-ANCHOR-1` and `2`).
+- **`tests/fixtures/synthetic_science_points.json`:** Standalone synthetic test catalogue containing 2 benchmark POIs (`SYNTH-POI-001` at `[77.4635, 18.4600]` and `SYNTH-POI-002` at `[77.4620, 18.4650]`) with complete schema, planetary coordinates, and citation metadata for synthetic pipeline tests.
+- **`tests/fixtures/golden_pois.json`:** Analytical corridor benchmark definition specifying exact ground-truth cross-track and along-route distances for `SYNTH-POI-001` and `SYNTH-POI-002` across corridor test runs (100m, 250m, 350m buffer tests).
+- **`tests/fixtures/tile_indices.json`:** Benchmark points generalized to synthetic grid identifiers (`SYNTH-GRID-POINT-01` through `05`).
+- **`tests/fixtures/validation/unit_test_anchors.json`:** Synthetic geodetic anchors (`SYNTH-GEODETIC-ANCHOR-1` and `2`).
 
 ### 4.7 Mars 2020 SPICE Archive Transition Roadmap
 For future non-empty rover traverse integration, VyomPath adopts the official NASA PDS NAIF SPICE kernel archive:
