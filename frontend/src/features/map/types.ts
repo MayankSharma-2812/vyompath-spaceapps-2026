@@ -71,11 +71,12 @@ export interface RouteAnalysisData {
   total_loss_m: number;
   max_slope_deg: number;
   slope_window_m?: number;
-  coverage_status: 'complete' | 'partial_gap' | 'out_of_bounds';
+  coverage_status: 'complete' | 'partial_gap' | 'out_of_bounds' | 'not_applicable';
   dtm_source: string;
   dtm_posting_m?: number;
   nearby_pois?: any[];
   limitations?: string[];
+  analysis_mode?: 'real_dtm' | 'mock';
   is_mock?: boolean;
 }
 

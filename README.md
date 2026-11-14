@@ -168,13 +168,32 @@ VYOMPATH_DEM_PATH=/app/data/dtm/jezero_aoi_v2.tif docker compose up -d
 
 ## 6. Operational Modes: Real DTM vs Mock Fallback
 
-The application dynamically inspects its environment and truthfully reports its operational mode in the top toolbar:
+The application dynamically inspects its environment and truthfully reports its operational mode across API payloads, health probes, and the user interface:
 
-| Environment | Health Mode | Toolbar Badge | Behavior |
-|:---|:---|:---|:---|
-| `VYOMPATH_DEM_PATH` set to valid GeoTIFF | `production/live` | `LIVE TERRAIN ENGINE` (Green) | Real sub-pixel Float32 HiRISE elevation sampling, genuine slopes, and valid-data mask coverage. |
-| `VYOMPATH_DEM_PATH` unset or unreadable | `development/mock` | `DEVELOPMENT / MOCK BACKEND` (Neutral) | Deterministic synthetic elevation profile with explicit transparency caveat banners. |
-| Backend service unreachable | `offline/mock` | `BACKEND OFFLINE (MOCK)` (Neutral) | Offline client preview with clear notice that API analysis is unavailable. |
+| Environment | Health Mode | Analysis Mode | Coverage Status | UI Banners & Badges | Behavior |
+|:---|:---|:---|:---|:---|:---|
+| **Local Real-Data Deployment** (`VYOMPATH_DEM_PATH` set to verified GeoTIFF) | `production/live` | `real_dtm` (`is_mock: false`) | `complete`, `partial_gap`, or `out_of_bounds` | `LIVE TERRAIN ENGINE` · `REAL HiRISE DTM ANALYSIS` (Green) | Real sub-pixel Float32 HiRISE elevation sampling ($1.0097\text{ m/px}$ posting), genuine slopes, and valid-data mask coverage. |
+| **Live Public Cloud Demo** (Render Free Tier, no raster mounted) | `development/mock` | `mock` (`is_mock: true`) | `not_applicable` | `DEMONSTRATION MODE (SYNTHETIC)` (Amber) | Accessible web demo. Deterministic synthetic elevation profile with prominent disclosure banners stating data must not be used for mission planning. |
+| **Unreachable Backend** (Offline standalone client preview) | `offline/mock` | `mock` (`is_mock: true`) | `not_applicable` | `BACKEND OFFLINE (MOCK)` (Neutral) | Offline client preview with clear notice that API analysis is unavailable. |
+
+### Live Public Demo vs Local Workstation Demonstration
+
+- **Live Public Demo (Render Cloud):**
+  - **Public Frontend:** [https://vyompath.onrender.com/](https://vyompath.onrender.com/)
+  - **Public Backend API:** [https://vyompath-api.onrender.com/](https://vyompath-api.onrender.com/)
+  - **Health Probe:** [https://vyompath-api.onrender.com/api/health](https://vyompath-api.onrender.com/api/health)
+  - **Interactive OpenAPI Docs:** [https://vyompath-api.onrender.com/docs](https://vyompath-api.onrender.com/docs)
+  - *Operational Status:* Operates in transparent **Demonstration Mode (`analysis_mode: "mock"`)**. The 121 MB uncompressed HiRISE raster is not mounted in the free cloud container due to Render free tier memory and disk constraints. Elevation profiles and slope metrics are clearly labeled as synthetic examples, and coverage is explicitly reported as `NOT APPLICABLE`.
+- **Local Real-Data Demonstration (Lenovo / Workstation):**
+  - *Operational Status:* Backed by genuine Float32 HiRISE Stereo DTM `jezero_aoi_v2.tif` (121 MB, $1.0097\text{ m/px}$ posting) configured via `VYOMPATH_DEM_PATH`.
+  - Health reports `analysis_mode: "real_dtm"`, `mode: "production/live"`.
+  - Route analysis returns real Martian elevation samples, genuine multi-scale along-track slopes, and authoritative coverage classifications (`complete`, `partial_gap`, or `out_of_bounds`).
+
+### Map Imagery vs Numerical Elevation Sampling
+
+VyomPath enforces strict separation between visual map presentation and quantitative terrain science:
+- **Visual Map Imagery:** Base layers (MOLA Color Shaded Relief, CTX Visible Mosaic, Viking MDIM 2.1) stream 8-bit visual map tiles from NASA Solar System Treks WMTS. These services require external internet connectivity. Visual map tiles provide surface geomorphological context and **do not supply numerical elevation values** to the route analysis endpoint.
+- **Numerical Route Sampling:** Traverses are evaluated strictly on the backend by sampling native 32-bit floating-point rasters (or the deterministic synthetic model when running in demonstration mode). Selecting a different visual map layer never alters the scientific analysis backend.
 
 ### What Works Offline vs What Requires Internet Access
 

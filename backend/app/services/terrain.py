@@ -558,6 +558,34 @@ def multi_scale_along_track_grades(
 # Real DTM Raster Sampling & Analysis Pipeline (Issue #7)
 # ---------------------------------------------------------------------------
 
+def is_dtm_available(dem_path: Optional[str] = None) -> bool:
+    """Check whether a valid, readable DTM raster is configured and accessible.
+
+    Returns True only if:
+      1. Path exists and is a regular file.
+      2. rasterio and pyproj are installed and importable.
+      3. rasterio can open the file and verify at least 1 band and positive dimensions.
+    Returns False otherwise.
+    """
+    if dem_path is None:
+        dem_path = os.environ.get("VYOMPATH_DEM_PATH")
+
+    if not dem_path or not os.path.isfile(dem_path):
+        return False
+
+    try:
+        import rasterio
+        import pyproj  # noqa: F401
+    except ImportError:
+        return False
+
+    try:
+        with rasterio.open(dem_path) as src:
+            return bool(src.count >= 1 and src.width >= 1 and src.height >= 1)
+    except Exception:
+        return False
+
+
 def sample_route_dtm(
     coords: Sequence[Coordinate],
     dem_path: Optional[str] = None,

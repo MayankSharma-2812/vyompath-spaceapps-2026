@@ -27,26 +27,45 @@ def test_health_check_status_and_mode(client: TestClient) -> None:
     assert data["status"] == "ok"
     assert data["service"] == "vyompath-api"
     assert data["mode"] == "development/mock"
+    assert data["analysis_mode"] == "mock"
+    assert data["is_mock"] is True
     assert "timestamp_utc" in data
     assert "notes" in data
 
 
 def test_health_check_live_dtm_mode(monkeypatch, client: TestClient, tmp_path: Path) -> None:
+    from pathlib import Path
+    # 1. Unreadable/invalid DTM -> must report mock mode
     fake_dem = tmp_path / "jezero_test.tif"
-    fake_dem.write_bytes(b"mock-geotiff-header")
+    fake_dem.write_bytes(b"mock-geotiff-header-not-a-real-tiff")
 
     monkeypatch.setenv("VYOMPATH_DEM_PATH", str(fake_dem))
-    res_live = client.get("/api/health")
-    assert res_live.status_code == 200
-    data_live = res_live.json()
-    assert data_live["mode"] == "production/live"
-    assert "Real Jezero HiRISE stereo DTM is mounted" in data_live["notes"]
+    res_fake = client.get("/api/health")
+    assert res_fake.status_code == 200
+    data_fake = res_fake.json()
+    assert data_fake["mode"] == "development/mock"
+    assert data_fake["analysis_mode"] == "mock"
+    assert data_fake["is_mock"] is True
 
+    # 2. Unset DTM -> must report mock mode
     monkeypatch.delenv("VYOMPATH_DEM_PATH", raising=False)
     res_mock = client.get("/api/health")
     assert res_mock.status_code == 200
     data_mock = res_mock.json()
     assert data_mock["mode"] == "development/mock"
+    assert data_mock["analysis_mode"] == "mock"
+    assert data_mock["is_mock"] is True
+
+    # 3. Real DTM if present
+    real_dem = Path("/home/mayank-sharma/Hackathon/NASA/data/vyompath-demo-bundle-v1.4/jezero_aoi_v2.tif")
+    if real_dem.is_file():
+        monkeypatch.setenv("VYOMPATH_DEM_PATH", str(real_dem))
+        res_live = client.get("/api/health")
+        assert res_live.status_code == 200
+        data_live = res_live.json()
+        assert data_live["mode"] == "production/live"
+        assert data_live["analysis_mode"] == "real_dtm"
+        assert data_live["is_mock"] is False
 
 
 # ---------------------------------------------------------------------------
@@ -89,7 +108,9 @@ def test_route_analysis_valid_route(client: TestClient, monkeypatch: pytest.Monk
     assert data["route_id"] == "test-olympus-traverse"
     assert abs(data["total_distance_m"] - 12712.13) < 1.0
     assert len(data["elevation_profile"]) >= 2
-    assert data["coverage_status"] == "complete"
+    assert data["coverage_status"] == "not_applicable"
+    assert data["analysis_mode"] == "mock"
+    assert data["is_mock"] is True
     assert data["dtm_source"] == "synthetic/mock — no real DTM loaded"
     assert data["is_mock"] is True
     assert data["nearby_pois"] == []

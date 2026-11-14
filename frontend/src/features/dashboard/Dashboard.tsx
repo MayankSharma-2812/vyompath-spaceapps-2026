@@ -192,7 +192,7 @@ function TopToolbar({
 }: TopToolbarProps) {
   const isLive = backendMode === 'production/live' || backendMode === 'live';
   const isOffline = backendMode === 'offline/mock' || backendMode === 'offline';
-  const badgeVariant = isLive ? 'success' : isOffline ? 'neutral' : 'neutral';
+  const badgeVariant = isLive ? 'success' : isOffline ? 'neutral' : 'warning';
   const badgeText = isLive
     ? 'LIVE TERRAIN ENGINE'
     : isOffline
@@ -403,6 +403,12 @@ function MapContainer({
           </button>
         </div>
       </div>
+      <div style={{ fontSize: '11px', color: '#94a3b8', padding: '6px 16px', background: '#090d16', borderBottom: '1px solid #1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <span aria-hidden="true">ℹ️</span>
+        <span>
+          <strong>NASA Map Imagery Note:</strong> Base layers (MOLA, CTX, Viking) stream visual tiles from NASA Solar System Treks WMTS (internet access required). Visual tiles provide map context and do not supply numerical elevation values to the route analysis engine.
+        </span>
+      </div>
       <div className="map-stage" style={{ position: 'relative' }}>
         <MapCanvas
           activeBaseLayer={activeBaseLayer}
@@ -589,6 +595,8 @@ function TerrainProfile({ analysis, isLoading, error }: TerrainProfileProps) {
     : null;
 
   const isMock = Boolean(
+    !analysis ||
+    analysis?.analysis_mode === 'mock' ||
     analysis?.is_mock ||
     !analysis?.dtm_source ||
     analysis.dtm_source.toLowerCase().includes('mock') ||
@@ -596,7 +604,7 @@ function TerrainProfile({ analysis, isLoading, error }: TerrainProfileProps) {
     analysis.dtm_source.toLowerCase().includes('synthetic')
   );
 
-  const coverageStatus = analysis?.coverage_status ?? 'complete';
+  const coverageStatus = analysis?.coverage_status ?? 'not_applicable';
   const hasCoverageGap = coverageStatus === 'partial_gap';
   const isOutOfBounds = coverageStatus === 'out_of_bounds';
 
@@ -630,7 +638,9 @@ function TerrainProfile({ analysis, isLoading, error }: TerrainProfileProps) {
         <div className="panel-heading">
           <div>
             <span className="eyebrow">ELEVATION ANALYSIS</span>
-            <h2 id="terrain-title">Terrain Elevation Profile</h2>
+            <h2 id="terrain-title">
+              {isMock ? 'Terrain Elevation Profile (Synthetic / Illustrative)' : 'Terrain Elevation Profile'}
+            </h2>
           </div>
           <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
             {hasCoverageGap && (
@@ -649,10 +659,10 @@ function TerrainProfile({ analysis, isLoading, error }: TerrainProfileProps) {
           </div>
         </div>
         <div className="terrain-metrics" aria-label="Terrain metrics">
-          <MetricCard title="Elevation Gain" value={analysis ? `${analysis.total_gain_m.toFixed(1)} m` : 'Awaiting data'} />
-          <MetricCard title="Elevation Loss" value={analysis ? `${analysis.total_loss_m.toFixed(1)} m` : 'Awaiting data'} />
-          <MetricCard title="Max Elevation" value={maxElevation !== null ? `${maxElevation.toFixed(1)} m` : (analysis ? 'No valid samples' : 'Awaiting data')} />
-          <MetricCard title="Min Elevation" value={minElevation !== null ? `${minElevation.toFixed(1)} m` : (analysis ? 'No valid samples' : 'Awaiting data')} />
+          <MetricCard title={isMock ? 'Elevation Gain (Illustrative)' : 'Elevation Gain'} value={analysis ? `${analysis.total_gain_m.toFixed(1)} m` : 'Awaiting data'} />
+          <MetricCard title={isMock ? 'Elevation Loss (Illustrative)' : 'Elevation Loss'} value={analysis ? `${analysis.total_loss_m.toFixed(1)} m` : 'Awaiting data'} />
+          <MetricCard title={isMock ? 'Max Elevation (Illustrative)' : 'Max Elevation'} value={maxElevation !== null ? `${maxElevation.toFixed(1)} m` : (analysis ? 'No valid samples' : 'Awaiting data')} />
+          <MetricCard title={isMock ? 'Min Elevation (Illustrative)' : 'Min Elevation'} value={minElevation !== null ? `${minElevation.toFixed(1)} m` : (analysis ? 'No valid samples' : 'Awaiting data')} />
         </div>
       </section>
     </div>
@@ -693,19 +703,21 @@ function RouteSummary({
             <MetricCard
               title="Coverage status"
               value={
-                analysis.coverage_status === 'complete'
-                  ? 'Complete (100% Valid)'
-                  : analysis.coverage_status === 'partial_gap'
-                    ? 'Partial Gap (NoData crossing)'
-                    : 'Out of Bounds'
+                analysis.is_mock || analysis.coverage_status === 'not_applicable'
+                  ? 'NOT APPLICABLE (Synthetic Data)'
+                  : analysis.coverage_status === 'complete'
+                    ? 'Complete (100% Valid)'
+                    : analysis.coverage_status === 'partial_gap'
+                      ? 'Partial Gap (NoData crossing)'
+                      : 'Out of Bounds'
               }
             />
             <MetricCard
               title="DTM ground resolution"
-              value={analysis.dtm_posting_m ? `${analysis.dtm_posting_m.toFixed(2)} m/px` : 'N/A (Synthetic)'}
+              value={analysis.is_mock || !analysis.dtm_posting_m ? 'N/A (Synthetic / Illustrative)' : `${analysis.dtm_posting_m.toFixed(2)} m/px`}
             />
             <MetricCard
-              title="Max slope (baseline)"
+              title={analysis.is_mock ? 'Max slope (Illustrative)' : 'Max slope (baseline)'}
               value={`${analysis.max_slope_deg.toFixed(1)}° (${analysis.slope_window_m ?? 50}m window)`}
             />
           </div>
@@ -950,6 +962,16 @@ function Dashboard() {
     }
   }, []);
 
+  const isMockMode = Boolean(
+    backendMode !== 'production/live' ||
+    analysis?.analysis_mode === 'mock' ||
+    analysis?.is_mock ||
+    !analysis?.dtm_source ||
+    analysis.dtm_source.toLowerCase().includes('mock') ||
+    analysis.dtm_source.toLowerCase().includes('stub') ||
+    analysis.dtm_source.toLowerCase().includes('synthetic')
+  );
+
   return (
     <div className="dashboard-layout" id="dashboard">
       <Sidebar activeItem={activeNav} onNavigate={handleNavigate} />
@@ -960,6 +982,73 @@ function Dashboard() {
           onSelectPreset={handleSelectPreset}
           onClearRoute={handleRouteClear}
         />
+        {/* Transparent Operational Mode Banner */}
+        {isMockMode ? (
+          <aside
+            className="demo-mode-banner"
+            role="status"
+            aria-label="Demonstration mode notice"
+            style={{
+              margin: '0 24px 16px 24px',
+              padding: '12px 18px',
+              borderRadius: '8px',
+              background: 'rgba(245, 158, 11, 0.08)',
+              border: '1px solid rgba(245, 158, 11, 0.3)',
+              color: '#fbbf24',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '14px',
+            }}
+          >
+            <div style={{ flexShrink: 0, fontSize: '20px' }}>⚠️</div>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: '13px', letterSpacing: '0.04em', textTransform: 'uppercase', color: '#f59e0b' }}>
+                DEMONSTRATION MODE — SYNTHETIC TERRAIN DATA
+              </div>
+              <p style={{ margin: '3px 0 0 0', fontSize: '12px', lineHeight: '1.4', color: '#cbd5e1' }}>
+                Elevation and slope values shown are generated synthetic examples. They are not measurements from real Martian terrain and must not be used for mission planning.
+              </p>
+            </div>
+          </aside>
+        ) : (
+          <aside
+            className="real-dtm-banner"
+            role="status"
+            aria-label="Real DTM active notice"
+            style={{
+              margin: '0 24px 16px 24px',
+              padding: '10px 18px',
+              borderRadius: '8px',
+              background: 'rgba(16, 185, 129, 0.08)',
+              border: '1px solid rgba(16, 185, 129, 0.3)',
+              color: '#34d399',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '12px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ flexShrink: 0, fontSize: '16px' }}>🛰️</div>
+              <div>
+                <span style={{ fontWeight: 700, fontSize: '12px', letterSpacing: '0.04em', textTransform: 'uppercase', color: '#10b981' }}>
+                  REAL HiRISE DTM ANALYSIS
+                </span>
+                <span style={{ marginLeft: '8px', fontSize: '12px', color: '#94a3b8' }}>
+                  Jezero Crater 1.0 m/px Stereo Elevation Engine Active
+                </span>
+              </div>
+            </div>
+            {analysis && (
+              <div style={{ fontSize: '11px', color: '#cbd5e1', display: 'flex', gap: '12px', fontFamily: 'monospace' }}>
+                <span>DTM: {analysis.dtm_source}</span>
+                {analysis.dtm_posting_m && <span>Posting: {analysis.dtm_posting_m.toFixed(2)} m/px</span>}
+                <span>Coverage: {analysis.coverage_status.toUpperCase()}</span>
+              </div>
+            )}
+          </aside>
+        )}
         <div className="dashboard-content">
           <MapContainer
             drawnRoute={drawnRoute}

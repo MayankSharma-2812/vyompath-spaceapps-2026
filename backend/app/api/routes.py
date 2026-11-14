@@ -160,6 +160,7 @@ async def analyze_route(body: RouteAnalysisRequest) -> RouteAnalysisResponse:
             coverage_status=real_terrain["coverage_status"],
             nearby_pois=[],
             limitations=real_terrain["limitations"],
+            analysis_mode="real_dtm",
             is_mock=False,
         )
 
@@ -169,23 +170,30 @@ async def analyze_route(body: RouteAnalysisRequest) -> RouteAnalysisResponse:
 
     limitations: list[str] = [
         (
+            "DEMONSTRATION MODE: Elevation and slope values shown are generated synthetic examples. "
+            "They are not measurements from real Martian terrain and must not be used for mission planning."
+        ),
+        (
             "MOCK DATA: Elevation profile is a deterministic synthetic "
             "sine-wave, not sampled from real DTM rasters. No HiRISE "
             "or MOLA data was accessed."
         ),
         (
             "MOCK DATA: Gain, loss and slope metrics are derived from "
-            "the synthetic profile. They are internally consistent but "
+            "the synthetic profile. They are illustrative only and "
             "do not represent actual Martian terrain."
         ),
         (
-            "MOCK DATA: Nearby POIs are empty. The science-POI service "
-            "(owner: Dheer) is not yet integrated. No fabricated science "
-            "points are returned."
+            "COVERAGE: Not applicable in synthetic/mock mode. No geographic "
+            "coverage calculation can be performed without a real terrain raster."
         ),
         (
-            "MOCK DATA: Terrain service (owner: Pranav) is running in fallback mode "
-            "because VYOMPATH_DEM_PATH is not configured or unreadable."
+            "MOCK DATA: Nearby POIs are empty. The science-POI service "
+            "is not integrated in mock mode. No fabricated science points are returned."
+        ),
+        (
+            "MOCK DATA: Terrain service is running in fallback mode "
+            "because VYOMPATH_DEM_PATH is not configured, unreadable, or missing."
         ),
         (
             "This analysis is NOT scientifically validated and MUST NOT "
@@ -203,8 +211,9 @@ async def analyze_route(body: RouteAnalysisRequest) -> RouteAnalysisResponse:
         slope_window_m=slope_window_m,
         dtm_source="synthetic/mock — no real DTM loaded",
         dtm_posting_m=0.0,
-        coverage_status="complete",
+        coverage_status="not_applicable",
         nearby_pois=[],
         limitations=limitations,
+        analysis_mode="mock",
         is_mock=True,
     )

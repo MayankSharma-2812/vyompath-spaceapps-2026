@@ -557,15 +557,19 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                 <span className="font-bold text-slate-200 text-xs">{analysisResponse.route_id}</span>
                 <span
                   className={`text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider ${
-                    analysisResponse.coverage_status === 'complete'
+                    analysisResponse.coverage_status === 'not_applicable' || analysisResponse.is_mock
+                      ? 'bg-slate-800 text-slate-300 border border-slate-600'
+                      : analysisResponse.coverage_status === 'complete'
                       ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/50'
                       : analysisResponse.coverage_status === 'partial_gap'
                       ? 'bg-amber-950 text-amber-300 border border-amber-500/50'
                       : 'bg-rose-950 text-rose-300 border border-rose-500/50'
                   }`}
                 >
-                  {analysisResponse.coverage_status === 'complete'
-                    ? (isMockAnalysis(analysisResponse) ? 'Coverage: Synthetic Profile' : 'Coverage: 100% In-Footprint')
+                  {analysisResponse.coverage_status === 'not_applicable' || isMockAnalysis(analysisResponse)
+                    ? 'Coverage: Not Applicable (Synthetic)'
+                    : analysisResponse.coverage_status === 'complete'
+                    ? 'Coverage: 100% In-Footprint'
                     : analysisResponse.coverage_status === 'partial_gap'
                     ? 'Coverage: Partial HiRISE Gap'
                     : 'Coverage: Out of Stereo Bounds'}

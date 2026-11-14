@@ -173,8 +173,10 @@ class TestMockFallbackBehavior:
         data = res.json()
         assert data["dtm_source"] == "synthetic/mock — no real DTM loaded"
         assert data["dtm_posting_m"] == 0.0
-        assert data["coverage_status"] == "complete"
-        assert any("MOCK DATA" in lim for lim in data["limitations"])
+        assert data["coverage_status"] == "not_applicable"
+        assert data["analysis_mode"] == "mock"
+        assert data["is_mock"] is True
+        assert any("MOCK DATA" in lim or "DEMONSTRATION MODE" in lim for lim in data["limitations"])
 
     def test_fallback_when_dtm_nonexistent(self, client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
         """When $VYOMPATH_DEM_PATH points to non-existent file, safely falls back."""
@@ -191,6 +193,9 @@ class TestMockFallbackBehavior:
         assert res.status_code == 200
         data = res.json()
         assert data["dtm_source"] == "synthetic/mock — no real DTM loaded"
+        assert data["coverage_status"] == "not_applicable"
+        assert data["analysis_mode"] == "mock"
+        assert data["is_mock"] is True
 
     def test_fallback_when_dtm_corrupted(self, client: TestClient, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
         """When $VYOMPATH_DEM_PATH points to a corrupted non-raster file, safely falls back."""
@@ -210,6 +215,9 @@ class TestMockFallbackBehavior:
         assert res.status_code == 200
         data = res.json()
         assert data["dtm_source"] == "synthetic/mock — no real DTM loaded"
+        assert data["coverage_status"] == "not_applicable"
+        assert data["analysis_mode"] == "mock"
+        assert data["is_mock"] is True
 
 
 # ---------------------------------------------------------------------------
@@ -289,6 +297,8 @@ class TestRealDTMIntegration:
         assert res.status_code == 200
         data = res.json()
         assert data["coverage_status"] == "complete"
+        assert data["analysis_mode"] == "real_dtm"
+        assert data["is_mock"] is False
         assert "HiRISE" in data["dtm_source"]
         assert data["dtm_posting_m"] == pytest.approx(1.0097, abs=1e-3)
         assert data["total_gain_m"] > 0.0
@@ -310,6 +320,8 @@ class TestRealDTMIntegration:
         assert res.status_code == 200
         data = res.json()
         assert data["coverage_status"] == "partial_gap"
+        assert data["analysis_mode"] == "real_dtm"
+        assert data["is_mock"] is False
         # Has both valid and null elevations
         profile = data["elevation_profile"]
         valid_elevs = [p["elevation_m"] for p in profile if p["elevation_m"] is not None]
@@ -331,6 +343,8 @@ class TestRealDTMIntegration:
         assert res.status_code == 200
         data = res.json()
         assert data["coverage_status"] == "out_of_bounds"
+        assert data["analysis_mode"] == "real_dtm"
+        assert data["is_mock"] is False
         assert data["total_gain_m"] == 0.0
         assert data["total_loss_m"] == 0.0
         assert data["max_slope_deg"] == 0.0
