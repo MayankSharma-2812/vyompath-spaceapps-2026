@@ -148,7 +148,7 @@ docker run -d \
 
 ## 7. Offline Deployment (Single-Command Air-Gapped Runner)
 
-The project includes an automated, self-contained launcher: [`scripts/run_offline.sh`](file:///home/mayank-sharma/Hackathon/NASA/vyompath-spaceapps-2026/scripts/run_offline.sh).
+The project includes an automated, self-contained launcher: [`scripts/run_offline.sh`](../scripts/run_offline.sh).
 
 ```mermaid
 flowchart TD
@@ -381,7 +381,7 @@ curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:4173/tiles/99/0/0.jpg
 ## 14. Clean Shutdown Procedures
 
 ### 14.1 Offline Script Teardown
-When using [`scripts/run_offline.sh`](file:///home/mayank-sharma/Hackathon/NASA/vyompath-spaceapps-2026/scripts/run_offline.sh):
+When using [`scripts/run_offline.sh`](../scripts/run_offline.sh):
 - Press `Ctrl+C`.
 - The bash trap triggers `cleanup()`, sending `SIGTERM` to the process groups (`kill -TERM -- -${PGID}`).
 - Any temporary symlink created at `frontend/dist/tiles` is unlinked automatically.
