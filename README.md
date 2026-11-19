@@ -1,12 +1,32 @@
-# VyomPath — Interplanetary Survival Guide: Martian Map
+<div align="center">
 
-> **NASA Space Apps Challenge 2026** · Local Event: Jaipur, India  
-> **Challenge:** Interplanetary Survival Guide: Martian Map  
-> **Team:** NAKSHATRA X  
-> **Event Dates:** November 14–15, 2026 (Timezone: IST)  
-> **Repository:** `https://github.com/MayankSharma-2812/vyompath-spaceapps-2026`  
-> **License:** Apache License 2.0  
-> **Release Target:** Final Submission Release (Issue #18)  
+# 🪐 VyomPath — Interplanetary Survival Guide: Martian Map
+### *Sub-Meter HiRISE Stereo DTM Engine & Mission-Aware Traverse Intelligence*
+
+[![NASA Space Apps 2026](https://img.shields.io/badge/NASA%20Space%20Apps-2026-blue.svg?style=for-the-badge&logo=nasa&logoColor=white)](https://www.spaceappschallenge.org/)
+[![Python](https://img.shields.io/badge/Python-3.12%20%7C%203.14-3776AB.svg?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115%2B-009688.svg?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![React 18](https://img.shields.io/badge/React-18-61DAFB.svg?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![OpenLayers](https://img.shields.io/badge/OpenLayers-10.11-1F6B75.svg?style=for-the-badge&logo=openlayers&logoColor=white)](https://openlayers.org/)
+[![Tests Passing](https://img.shields.io/badge/Tests-293%20Passed-success.svg?style=for-the-badge&logo=pytest&logoColor=white)](tests/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-orange.svg?style=for-the-badge)](LICENSE)
+
+<br/>
+
+[🚀 **Launch Live Web App**](https://vyompath.onrender.com/) • [📡 **Live Backend API**](https://vyompath-api.onrender.com/) • [📖 **Interactive Swagger Docs**](https://vyompath-api.onrender.com/docs) • [📹 **30s Demo Script**](docs/mission-aware-traverse-intelligence.md#8-30-second-video-demonstration-script)
+
+---
+
+**NASA Space Apps Challenge 2026** · Local Event: Jaipur, India  
+**Challenge:** Interplanetary Survival Guide: Martian Map · **Team:** NAKSHATRA X  
+**Target Region:** Jezero Crater Landing Vicinity (NASA Mars 2020 *Perseverance* Exploration Corridor)  
+
+</div>
+
+<br/>
+
+> [!NOTE]
+> **Air-Gapped & 100% Local Capable:** VyomPath operates completely on local loopback (`127.0.0.1`) with zero external network dependencies, ensuring mission survivability in communication-delayed or air-gapped Martian surface outposts.
 
 ---
 
@@ -14,17 +34,15 @@
 
 **VyomPath** is an open-source, air-gapped Martian traverse exploration workspace designed for planetary scientists, rover mission planners, and future astronaut exploration crews. It combines regional multi-resolution map pyramids with native sub-meter Float32 Digital Terrain Models (HiRISE Stereo DTM `DTEEC_023524_1985_023379_1985_U01`, $1.01\text{ m/pixel}$ posting) to evaluate traverse feasibility directly on uncompressed scientific rasters.
 
-VyomPath operates **100% locally on local loopback (`127.0.0.1`)** with zero external network calls, ensuring reliable field execution in communication-delayed or air-gapped exploration environments.
-
 ---
 
-## 2. Visual Proof & Screenshots
+## 2. Visual Proof & Verification Screenshots
 
-The application includes automated visual proof captured during end-to-end regression runs:
+Automated proof captured during Playwright regression runs on Chromium:
 
 | Live DTM Analysis & Elevation Profile | Route A vs Route B Comparison Deltas | Mobile Responsive View (375px) |
 |:---:|:---:|:---:|
-| ![Live DTM Overview](frontend/src/features/dashboard/__screenshots__/01_dashboard_live_dtm_overview.png) | ![Route Comparison Deltas](frontend/src/features/dashboard/__screenshots__/02_route_comparison_deltas.png) | ![Mobile View](frontend/src/features/dashboard/__screenshots__/03_dashboard_mobile_view.png) |
+| <img src="frontend/src/features/dashboard/__screenshots__/01_dashboard_live_dtm_overview.png" width="320"/> | <img src="frontend/src/features/dashboard/__screenshots__/02_route_comparison_deltas.png" width="320"/> | <img src="frontend/src/features/dashboard/__screenshots__/03_dashboard_mobile_view.png" width="220"/> |
 | *Real HiRISE Float32 profile, multi-scale slopes, and valid-data coverage.* | *Head-to-head route comparison with real-time delta calculations.* | *Responsive research workspace on tablet and mobile viewports.* |
 
 ---
@@ -49,16 +67,17 @@ VyomPath enforces a strict physical separation between visual map presentation a
 
 ```mermaid
 flowchart TD
-    subgraph Frontend["Frontend Client (OpenLayers 10 + React 18/19 + Vite)"]
+    subgraph Frontend["Frontend Client (OpenLayers 10 + React 18 + Vite)"]
         Canvas["MapCanvas<br/>(MARS:2000 Equirectangular Metres)"]
         Draw["Traverse Drawing Controller<br/>(Freehand Waypoints, Max 25 km Cap)"]
-        Dash["Dashboard & KPIs<br/>(Elevation Chart, Route A/B Deltas, Badges)"]
+        Dash["Dashboard & KPIs<br/>(Elevation Chart, Route A/B Deltas, Traverse Intel)"]
     end
 
     subgraph Backend["Backend API (FastAPI + Python 3.12/3.14)"]
         Health["/api/health<br/>(Dynamic Mode: production/live vs mock)"]
         Layers["/api/layers<br/>(Orbital Basemaps & DTM Catalog)"]
         RouteAPI["/api/routes/analyze<br/>(Bilinear Elevation & Multi-Scale Slopes)"]
+        IntelAPI["/api/routes/evaluate-intelligence<br/>(Multi-Objective Scoring)"]
     end
 
     subgraph DataStore["Offline Data Stores & Scientific Rasters"]
@@ -75,6 +94,7 @@ flowchart TD
     RouteAPI --> Footprint
     Tiles --> Canvas
     RouteAPI -->|Elevation Profile & Slopes| Dash
+    Dash -->|POST /api/routes/evaluate-intelligence| IntelAPI
 ```
 
 ---
@@ -325,5 +345,4 @@ Detailed technical specifications and audit reports are available in the [`docs/
 In accordance with NASA Space Apps Challenge 2026 rules:
 - **AI Assistants Used:** Google DeepMind / Antigravity Agent and Anthropic Claude.
 - **Specific Tasks Assisted:** Code scaffolding, unit and regression test authoring, Playwright journey script generation, documentation cross-referencing, and multi-perspective peer review simulation.
-- **Human Governance:** All physical equations (3D distance integration, bilinear interpolation, multi-scale slope baselines, geodetic radius constants), data rights determinations, and architectural decisions were established, reviewed, verified, and approved by human team leads.
 - **Human Governance:** All physical equations (3D distance integration, bilinear interpolation, multi-scale slope baselines, geodetic radius constants), data rights determinations, and architectural decisions were established, reviewed, verified, and approved by human team leads.
